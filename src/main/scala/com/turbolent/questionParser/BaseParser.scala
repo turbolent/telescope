@@ -19,9 +19,10 @@ trait BaseParser extends PackratParsers {
       _.word equalsIgnoreCase word
     })
 
-  def pos(pos: String) = elem(s"POS $pos*", {
-    _.pennTag.startsWith(pos)
-  })
+  def pos(pos: String, strict: Boolean = false) =
+    elem(s"POS $pos*",
+      if (strict) { _.pennTag.equals(pos) }
+      else { _.pennTag.startsWith(pos) })
 
   def lemma(lemma: String) = {
     val lowered = lemma.toLowerCase

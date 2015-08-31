@@ -160,17 +160,33 @@ object ListParser extends BaseParser {
       case _ => true
     }
 
+  lazy val InversePropertySuffix =
+    (VerbsExceptBe ~ opt(pos("RP"))) ^^ { suffix =>
+      (verbs: List[Token], filter: ast.Filter) => {
+        suffix match {
+          case moreVerbs ~ Some(particle) =>
+            ast.InversePropertyWithFilter(verbs ++ moreVerbs :+ particle, filter)
+          case moreVerbs ~ None =>
+            ast.InversePropertyWithFilter(verbs ++ moreVerbs, filter)
+        }
+      }
+    }
+
+  lazy val PropertyAdjectiveSuffix =
+    pos("JJ", strict = true) ^^ { adjective =>
+      (verbs: List[Token], filter: ast.Filter) =>
+        ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
+    }
+
   lazy val Property =
     opt(pos("WDT")) ~> opt(Verbs) >> {
       case Some(verbs) =>
-        opt(Filters ~ opt(VerbsExceptBe ~ opt(pos("RP")))) ^^ {
-          case Some(filters ~ more) => more match {
+        opt(Filters ~ opt(InversePropertySuffix | PropertyAdjectiveSuffix)) ^^ {
+          case Some(filter ~ more) => more match {
+            case Some(suffixConstructor) =>
+              suffixConstructor(verbs, filter)
             case None =>
-              ast.PropertyWithFilter(verbs, filters)
-            case Some(moreVerbs ~ Some(particle)) =>
-              ast.InversePropertyWithFilter(verbs ++ moreVerbs :+ particle, filters)
-            case Some(moreVerbs ~ None) =>
-              ast.InversePropertyWithFilter(verbs ++ moreVerbs, filters)
+              ast.PropertyWithFilter(verbs, filter)
           }
           case None =>
             ast.NamedProperty(verbs)

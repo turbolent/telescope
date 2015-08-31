@@ -1090,5 +1090,30 @@ class Test extends TestCase {
               NamedValue(List(Token("Berlin", "NNP")))))))
       assertEquals(expected, result.get)
     }
+    {
+      val tokens =
+        tokenize("which/WDT mountains/NNS are/VBP 1000/CD meters/NNS high/JJ")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected =
+        ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
+          AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
+            PlainFilter(NumberWithUnit(List(Token("1000", "CD")),List(Token("meters", "NNS")))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens =
+        tokenize("which/WDT mountains/NNS are/VBP more/JJR than/IN 1000/CD meters/NNS high/JJ")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected =
+        ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
+          AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
+            FilterWithComparativeModifier(List(Token("more", "JJR"), Token("than", "IN")),
+              NumberWithUnit(List(Token("1000", "CD")),List(Token("meters", "NNS")))))))
+      assertEquals(expected, result.get)
+    }
   }
 }
