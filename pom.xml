@@ -4,6 +4,13 @@
     <artifactId>question-parser</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://raw.githubusercontent.com/turbolent/mvn-repo/master/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
