@@ -1099,7 +1099,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
           AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
-            PlainFilter(NumberWithUnit(List(Token("1000", "CD")),List(Token("meters", "NNS")))))))
+            PlainFilter(NumberWithUnit(List(Token("1000", "CD")), List(Token("meters", "NNS")))))))
       assertEquals(expected, result.get)
     }
     {
@@ -1112,7 +1112,24 @@ class Test extends TestCase {
         ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
           AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
             FilterWithComparativeModifier(List(Token("more", "JJR"), Token("than", "IN")),
-              NumberWithUnit(List(Token("1000", "CD")),List(Token("meters", "NNS")))))))
+              NumberWithUnit(List(Token("1000", "CD")), List(Token("meters", "NNS")))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens =
+        tokenize("who/WP starred/VBD in/IN movies/NNS directed/VBN by/IN Christopher/NN Nolan/NN")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      // NOTE: AndProperty is correct, next stage should realize second property
+      //       is relative to first one, not subject
+      val expected =
+        PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("starred", "VBD")),
+           FilterWithModifier(List(Token("in", "IN")),
+             NamedValue(List(Token("movies", "NNS"))))),
+          PropertyWithFilter(List(Token("directed", "VBN")),
+            FilterWithModifier(List(Token("by", "IN")),
+              NamedValue(List(Token("Christopher", "NN"), Token("Nolan", "NN"))))))))
       assertEquals(expected, result.get)
     }
   }
