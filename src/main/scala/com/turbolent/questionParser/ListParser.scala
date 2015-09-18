@@ -156,14 +156,13 @@ object ListParser extends BaseParser {
 
   lazy val InversePropertySuffix =
     (Verbs ~ opt(pos("RP"))) ^^ { suffix =>
-      (verbs: List[Token], filter: ast.Filter) => {
+      (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
           case moreVerbs ~ Some(particle) =>
             ast.InversePropertyWithFilter(verbs ++ moreVerbs :+ particle, filter)
           case moreVerbs ~ None =>
             ast.InversePropertyWithFilter(verbs ++ moreVerbs, filter)
         }
-      }
     }
 
   lazy val PropertyAdjectiveSuffix =
@@ -173,25 +172,21 @@ object ListParser extends BaseParser {
     }
 
   def auxiliaryVerbLemmas =
-    List("have", "be", "do")
+    Set("have", "be", "do")
 
-  def isAuxiliaryVerb(verbs: List[Token]): Boolean = {
-    verbs match {
-      case List(token) =>
-        token.lemmas.exists({ auxiliaryVerbLemmas.contains(_) })
-      case _ => false
-    }
-  }
+  def isAuxiliaryVerb(token: Token): Boolean =
+    token.lemmas.exists(auxiliaryVerbLemmas.contains)
 
   lazy val Property =
     opt(pos("WDT")) ~> opt(Verbs) >> {
       // TODO: more after filters only when verb is auxiliary do/does/did
       case Some(verbs) =>
-        val moreParser =
-          if (isAuxiliaryVerb(verbs))
+        val moreParser = verbs match {
+          case List(token) if isAuxiliaryVerb(token) =>
             opt(InversePropertySuffix | PropertyAdjectiveSuffix)
-          else
+          case _ =>
             opt(PropertyAdjectiveSuffix)
+        }
         opt(Filters ~ moreParser) ^^ {
           case Some(filter ~ more) => more match {
             case Some(suffixConstructor) =>

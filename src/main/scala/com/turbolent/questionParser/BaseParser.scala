@@ -8,25 +8,27 @@ import scala.util.parsing.combinator.PackratParsers
 trait BaseParser extends PackratParsers {
   override type Elem = Token
 
-  def parse[T](tokens: Seq[Token], production: Parser[T])(implicit lemmatizer: Lemmatizer) = {
+  def parse[T](tokens: Seq[Token], production: Parser[T])
+              (implicit lemmatizer: Lemmatizer) =
+  {
     val tokenReader = new TokensReader(tokens)
     val packratReader = new PackratReader(tokenReader)
     production(packratReader)
   }
 
   implicit def word(word: String): Parser[Token] =
-    elem(s"word '${word.toLowerCase}'", {
-      _.word equalsIgnoreCase word
-    })
+    elem(s"word '${word.toLowerCase}'",
+      _.word equalsIgnoreCase word)
 
   def pos(pos: String, strict: Boolean = false) =
     elem(s"POS $pos*",
-      if (strict) { _.pennTag.equals(pos) }
-      else { _.pennTag.startsWith(pos) })
+      if (strict) _.pennTag.equals(pos)
+      else _.pennTag.startsWith(pos))
 
   def lemma(lemma: String) = {
     val lowered = lemma.toLowerCase
-    elem(s"lemma '$lowered'", { _.lemmas.contains(lowered) })
+    elem(s"lemma '$lowered'",
+      _.lemmas.contains(lowered))
   }
 
   lazy val Noun = pos("N")
