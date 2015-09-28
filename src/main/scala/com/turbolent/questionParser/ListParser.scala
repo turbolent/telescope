@@ -40,11 +40,10 @@ object ListParser extends BaseParser {
   lazy val NamedValue =
     (opt(pos("DT")) ~ rep(pos("JJ")) ~ Nouns) ^^ {
       case optDeterminer ~ adjectives ~ nouns =>
-        optDeterminer match {
-          case Some(determiner) =>
-            ast.NamedValue(determiner :: adjectives ++ nouns)
-          case None =>
-            ast.NamedValue(adjectives ++ nouns)
+        optDeterminer map { determiner =>
+          ast.NamedValue(determiner :: adjectives ++ nouns)
+        } getOrElse {
+          ast.NamedValue(adjectives ++ nouns)
         }
     }
 
@@ -58,10 +57,9 @@ object ListParser extends BaseParser {
   lazy val NumericValue =
     (Numbers ~ opt(Nouns)) ^^ {
       case numbers ~ optNouns =>
-        optNouns match {
-          case Some(unit) =>
-            ast.NumberWithUnit(numbers, unit)
-          case None =>
+        optNouns map {
+          ast.NumberWithUnit(numbers, _)
+        } getOrElse {
             ast.Number(numbers)
         }
     }
@@ -126,12 +124,12 @@ object ListParser extends BaseParser {
   lazy val Filter =
     (opt(opt(pos("JJR")) ~ PrepositionExceptOf) ~ Values) ^^ {
       case optional ~ values =>
-        optional match {
-          case Some(None ~ preposition) =>
+        optional map {
+          case None ~ preposition =>
             ast.FilterWithModifier(Seq(preposition), values)
-          case Some(Some(comparative) ~ preposition) =>
+          case Some(comparative) ~ preposition =>
             ast.FilterWithComparativeModifier(Seq(comparative, preposition), values)
-          case None =>
+        } getOrElse {
             ast.PlainFilter(values)
         }
     }
@@ -293,14 +291,12 @@ object ListParser extends BaseParser {
 
   lazy val FullQuery: Parser[ast.Query] =
     ((QueryRelationships <~ opt(pos("WDT") | "who")) ~ opt(Properties ||| Relationship)) ^^ {
-      case query ~ rest => rest match {
-        case Some(property: ast.Property) =>
+      case query ~ rest => rest map {
+        case property: ast.Property =>
           ast.QueryWithProperty(query, property)
-        case Some(nested: ast.Query) =>
-          ast.RelationshipQuery(query, nested)
-        case _ =>
-          query
-      }
+        case ~(sep: Token, nested: ast.Query) =>
+          ast.RelationshipQuery(query, nested, sep)
+      } getOrElse query
     }
 
 
