@@ -259,7 +259,7 @@ object ListParser extends BaseParser {
     ("," ~ opt(pos("CC"))) |
     (opt(",") ~ pos("CC"))
 
-  lazy val Queries =
+  lazy val Queries: Parser[ast.Query] =
     rep1sep(Query, QueriesSeparator) ^^ {
       case Seq(x) => x
       case xs => ast.AndQuery(xs)
@@ -346,6 +346,6 @@ object ListParser extends BaseParser {
     ("what" ~> Properties) ^^ ast.ThingListQuestion
 
 
-  lazy val Question =
+  lazy val Question: Parser[ast.Question] =
     (ListQuestion | PersonQuestion | ThingQuestion) <~ opt(pos("."))
 }
