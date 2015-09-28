@@ -95,7 +95,7 @@ class Test extends TestCase {
       assertSuccess(result)
 
       val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("presidents", "NNS"))),
-        NamedQuery(List(Token("Argentina", "NNP")))))
+        NamedQuery(List(Token("Argentina", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -156,7 +156,7 @@ class Test extends TestCase {
       assertSuccess(result)
 
       val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("albums", "NNS"))),
-        NamedQuery(List(Token("Pink", "NNP"), Token("Floyd", "NNP")))))
+        NamedQuery(List(Token("Pink", "NNP"), Token("Floyd", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -167,7 +167,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("actors", "NNS"))),
-          NamedQuery(List(Token("Titanic", "NNP")))))
+          NamedQuery(List(Token("Titanic", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -178,7 +178,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("actors", "NNS"))),
-          NamedQuery(List(Token("Titanic", "NNP")))))
+          NamedQuery(List(Token("Titanic", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -222,7 +222,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("director", "NN"))),
-          NamedQuery(List(Token("Big", "NN"), Token("Fish", "NN")))))
+          NamedQuery(List(Token("Big", "NN"), Token("Fish", "NN"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -254,7 +254,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("members", "NNS"))),
-          NamedQuery(List(Token("Metallica", "NNP")))))
+          NamedQuery(List(Token("Metallica", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -263,7 +263,7 @@ class Test extends TestCase {
       assertSuccess(result)
 
       val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("members", "NNS"))),
-        NamedQuery(List(Token("Metallica", "NNP")))))
+        NamedQuery(List(Token("Metallica", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -274,7 +274,7 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("music", "NN"), Token("genre", "NN"))),
-          NamedQuery(List(Token("Gorillaz", "NNP")))))
+          NamedQuery(List(Token("Gorillaz", "NNP"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -301,7 +301,7 @@ class Test extends TestCase {
 
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("cast", "NN"))),
-          NamedQuery(List(Token("Friends", "NNS")))))
+          NamedQuery(List(Token("Friends", "NNS"))), Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -411,7 +411,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("children", "NNS"))),
-          NamedQuery(List(Token("the", "DT"), Token("presidents", "NNS")))))
+          NamedQuery(List(Token("the", "DT"), Token("presidents", "NNS"))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -441,7 +442,8 @@ class Test extends TestCase {
           QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
             PropertyWithFilter(List(Token("located", "VBN")),
               FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("california", "NN"))))))))
+                NamedValue(List(Token("california", "NN")))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -458,7 +460,8 @@ class Test extends TestCase {
           QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
             PropertyWithFilter(List(Token("are", "VBP"), Token("located", "VBN")),
               FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("california", "NN"))))))))
+                NamedValue(List(Token("california", "NN")))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -473,7 +476,9 @@ class Test extends TestCase {
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("children", "NNS"))),
           RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("children", "NNS"))),
-            NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))))))
+            NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
+            Token("of", "IN")),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -484,7 +489,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(
           NamedQuery(List(Token("the", "DT"), Token("largest", "JJS"), Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP")))))
+          NamedQuery(List(Token("California", "NNP"))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -495,7 +501,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("biggest", "JJS"), Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP")))))
+          NamedQuery(List(Token("California", "NNP"))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -515,7 +522,8 @@ class Test extends TestCase {
       assertSuccess(result)
 
       val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughters", "NN"))),
-        NamedQuery(List(Token("Clinton", "NNP")))))
+        NamedQuery(List(Token("Clinton", "NNP"))),
+        Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -526,7 +534,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("biggest", "JJS"),
           Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP")))))
+          NamedQuery(List(Token("California", "NNP"))),
+          Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -535,7 +544,8 @@ class Test extends TestCase {
       assertSuccess(result)
 
       val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
-        NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP")))))
+        NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
+        Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -549,7 +559,11 @@ class Test extends TestCase {
           RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
             RelationshipQuery(NamedQuery(List(Token("husband", "NN"))),
               RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
-                NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))))))))
+                NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
+                Token("'s", "POS")),
+              Token("'s", "POS")),
+            Token("'s", "POS")),
+          Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -603,7 +617,8 @@ class Test extends TestCase {
           QueryWithProperty(NamedQuery(List(Token("Japan", "NNP"))),
             PropertyWithFilter(List(),
               FilterWithModifier(List(Token("before", "IN")),
-                Number(List(Token("1900", "CD"))))))))
+                Number(List(Token("1900", "CD")))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -616,7 +631,8 @@ class Test extends TestCase {
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("population", "NN"))),
           AndQuery(List(NamedQuery(List(Token("China", "NNP"))),
-            NamedQuery(List(Token("the", "DT"), Token("USA", "NNP")))))))
+            NamedQuery(List(Token("the", "DT"), Token("USA", "NNP"))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -629,7 +645,8 @@ class Test extends TestCase {
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("population", "NNP"))),
           AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP")))))))
+            NamedQuery(List(Token("China", "NNP"))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -645,7 +662,8 @@ class Test extends TestCase {
             NamedQuery(List(Token("China", "NNP"))))),
             PropertyWithFilter(List(),
               FilterWithModifier(List(Token("before", "IN")),
-                Number(List(Token("1900", "CD"))))))))
+                Number(List(Token("1900", "CD")))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -659,7 +677,8 @@ class Test extends TestCase {
           Token("population", "NNP"))),
           NamedQuery(List(Token("area", "NNP"))))),
           AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP")))))))
+            NamedQuery(List(Token("China", "NNP"))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -676,7 +695,8 @@ class Test extends TestCase {
           NamedQuery(List(Token("capitals", "NNP"))))),
           AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
             NamedQuery(List(Token("India", "NNP"))),
-            NamedQuery(List(Token("China", "NNP")))))))
+            NamedQuery(List(Token("China", "NNP"))))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -687,7 +707,9 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("children", "NNS"))),
           RelationshipQuery(NamedQuery(List(Token("all", "DT"), Token("presidents", "NNS"))),
-            NamedQuery(List(Token("the", "DT"), Token("US", "NNP"))))))
+            NamedQuery(List(Token("the", "DT"), Token("US", "NNP"))),
+            Token("of", "IN")),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -698,7 +720,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS"))),
           NamedQuery(List(Token("grandchildren", "NNS"))))),
-          NamedQuery(List(Token("Clinton", "NNP")))))
+          NamedQuery(List(Token("Clinton", "NNP"))),
+          Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -711,7 +734,8 @@ class Test extends TestCase {
         ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("population", "NNP"))),
           NamedQuery(List(Token("area", "NNP"))))),
           AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP")))))))
+            NamedQuery(List(Token("China", "NNP"))))),
+          Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
     {
@@ -740,7 +764,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
           Token("president", "NN"))),
-          NamedQuery(List(Token("France", "NNP")))))
+          NamedQuery(List(Token("France", "NNP"))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -756,7 +781,10 @@ class Test extends TestCase {
           RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("wife", "NN"))),
             RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("president", "NN"))),
               NamedQuery(List(Token("the", "DT"),
-                Token("United", "NNP"), Token("States", "NNPS")))))))
+                Token("United", "NNP"), Token("States", "NNPS"))),
+              Token("of", "IN")),
+            Token("of", "IN")),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -837,7 +865,9 @@ class Test extends TestCase {
         ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("son", "NN"))),
           RelationshipQuery(NamedQuery(List(Token("the", "DT"),
             Token("main", "JJ"), Token("actor", "NN"))),
-            NamedQuery(List(Token("I", "PRP"), Token(",", ","), Token("Robot", "NNP"))))))
+            NamedQuery(List(Token("I", "PRP"), Token(",", ","), Token("Robot", "NNP"))),
+            Token("of", "IN")),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -886,7 +916,8 @@ class Test extends TestCase {
       val expected =
         ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS"))),
           NamedQuery(List(Token("grand", "JJ"), Token("children", "NNS"))))),
-          NamedQuery(List(Token("Clinton", "NNP")))))
+          NamedQuery(List(Token("Clinton", "NNP"))),
+          Token("of", "IN")))
       assertEquals(expected, result.get)
     }
     {
@@ -991,7 +1022,7 @@ class Test extends TestCase {
       //       (empty property is shortened from ~"which is")
       val expected =
         ListQuestion(QueryWithProperty(RelationshipQuery(NamedQuery(List(Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP")))),
+          NamedQuery(List(Token("California", "NNP"))), Token("'s", "POS")),
           AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
             PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
             PropertyWithFilter(List(),

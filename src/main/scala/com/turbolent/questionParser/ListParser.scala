@@ -220,7 +220,7 @@ object ListParser extends BaseParser {
   //   - "of China"
 
   lazy val Relationship =
-    "of" ~> FullQuery
+    "of" ~ FullQuery
 
 
   // Examples:
@@ -272,12 +272,11 @@ object ListParser extends BaseParser {
   //   - "California's cities' population sizes"
   //   - "Clinton's children and grandchildren"
 
-  lazy val QueryRelationships =
-    rep1sep(Queries, pos("POS")) ^^ {
-      _ reduceLeft { (result, x) =>
-        ast.RelationshipQuery(x, result)
-      }
-    }
+  lazy val QueryRelationships: Parser[ast.Query] =
+    chainl1(Queries, pos("POS") ^^ { sep =>
+      (a: ast.Query, b: ast.Query) =>
+        ast.RelationshipQuery(b, a, sep)
+    })
 
 
   // Examples
