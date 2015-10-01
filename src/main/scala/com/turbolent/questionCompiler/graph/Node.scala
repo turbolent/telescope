@@ -11,24 +11,19 @@ case class Node[N, E](label: N,
   type FilterT = Filter[N, E]
 
   def filter(filter: FilterT): NodeT =
-    copy(filter = filter.combine(this.filter))
+    copy(filter = this.filter map { _.and(filter) } orElse Some(filter))
 
   def out(label: E, target: NodeT) =
-    connect(OutEdge(label, target))
+    and(OutEdge(label, target))
 
   def in(source: NodeT, label: E) =
-    connect(InEdge(source, label))
+    and(InEdge(source, label))
 
-  def connect(edge: EdgeT) =
-    copy(edge = edge.combine(this.edge))
+  def and(edge: EdgeT) =
+    copy(edge = this.edge map { _.and(edge) } orElse Some(edge))
 
-  def or(edges: EdgeT*) =
-    if (edges.isEmpty) this
-    else connect(DisjunctionEdge(edges))
-
-  def and(edges: EdgeT*) =
-    if (edges.isEmpty) this
-    else connect(ConjunctionEdge(edges))
+  def or(edge: EdgeT) =
+    copy(edge = this.edge map { _.or(edge) } orElse Some(edge))
 
   def aggregate(aggregate: AggregateFunction): NodeT =
     copy(aggregate = Some(aggregate))

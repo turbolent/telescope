@@ -20,13 +20,13 @@ class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
     question match {
       case ast.PersonListQuestion(properties) =>
         val node = env.newNode()
-            .connect(ontology.makePersonEdge(env))
-            .connect(compileProperty(properties, PersonSubject))
+            .and(ontology.makePersonEdge(env))
+            .and(compileProperty(properties, PersonSubject))
         Seq(node)
 
       case ast.ThingListQuestion(properties) =>
         val node = env.newNode()
-            .connect(compileProperty(properties, ThingSubject))
+            .and(compileProperty(properties, ThingSubject))
         Seq(node)
 
       case ast.ListQuestion(query) =>
@@ -37,7 +37,7 @@ class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
     query match {
       case ast.QueryWithProperty(nestedQuery, property) =>
         val nodeFactory: NodeFactory = (node, name) =>
-          node.connect(compileProperty(property, NamedSubject(name)))
+          node.and(compileProperty(property, NamedSubject(name)))
         compileQuery(nestedQuery, nodeFactory)
 
       case ast.NamedQuery(name) =>
@@ -57,7 +57,7 @@ class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
       case ast.NamedQuery(name) =>
         nodes.map { node =>
           val edge = ontology.makeRelationshipEdge(name, node, env)
-          env.newNode().connect(edge)
+          env.newNode().and(edge)
         }
       case ast.AndQuery(queries) =>
         queries.flatMap(compileRelationshipSubquery(_, nodes))
@@ -137,7 +137,7 @@ class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
           (node, contextFactory) =>
             ontology.makeRelationshipEdge(name, node, env)
         val edge = compileValue(second, filter, secondEdgeFactory)
-        val node = env.newNode().connect(edge)
+        val node = env.newNode().and(edge)
         edgeFactory(node, (subject) =>
           EdgeContext(subject, filter, name, Nil,
             valueIsNumber = false))

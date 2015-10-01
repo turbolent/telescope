@@ -6,17 +6,21 @@ trait Edge[E, N] {
   type NodeT = Node[N, E]
   type EdgeT = Edge[E, N]
 
-  def combine(edge: Option[EdgeT]): Some[EdgeT] =
-    Some(edge map {
-      case ConjunctionEdge(current) =>
-        ConjunctionEdge(current :+ this)
-      case current =>
-        ConjunctionEdge(Seq(current, this))
-    } getOrElse this)
+  def and(edge: EdgeT) =
+    edge match {
+      case ConjunctionEdge(edges) =>
+        ConjunctionEdge(this +: edges)
+      case _ =>
+        ConjunctionEdge(Seq(this, edge))
+    }
 
-  def and(edges: EdgeT*) =
-    if (edges.isEmpty) this
-    else ConjunctionEdge(edges).combine(Some(this)).get
+  def or(edge: EdgeT) =
+    edge match {
+      case DisjunctionEdge(edges) =>
+        DisjunctionEdge(this +: edges)
+      case _ =>
+        DisjunctionEdge(Seq(this, edge))
+    }
 }
 
 case class InEdge[E, N](source: Node[N, E], label: E) extends Edge[E, N]
@@ -25,14 +29,22 @@ case class OutEdge[E, N](label: E, target: Node[N, E]) extends Edge[E, N]
 
 
 case class ConjunctionEdge[E, N](edges: Seq[Edge[E, N]]) extends Edge[E, N] {
-  override def combine(edge: Option[EdgeT]): Some[EdgeT] =
-    Some(edge map {
-      case ConjunctionEdge(current) =>
-        ConjunctionEdge(current ++ this.edges)
-      case current =>
-        ConjunctionEdge(current +: this.edges)
-    } getOrElse this)
+  override def and(edge: EdgeT) =
+    edge match {
+      case ConjunctionEdge(otherEdges) =>
+        ConjunctionEdge(this.edges ++ otherEdges)
+      case _ =>
+        ConjunctionEdge(this.edges :+ edge)
+    }
 }
 
-case class DisjunctionEdge[E, N](edges: Seq[Edge[E, N]]) extends Edge[E, N]
+case class DisjunctionEdge[E, N](edges: Seq[Edge[E, N]]) extends Edge[E, N] {
+  override def or(edge: EdgeT) =
+    edge match {
+      case DisjunctionEdge(otherEdges) =>
+        DisjunctionEdge(this.edges ++ otherEdges)
+      case _ =>
+        DisjunctionEdge(this.edges :+ edge)
+    }
+}
 
