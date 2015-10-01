@@ -5,7 +5,9 @@ import graph.{Node, Edge, ConjunctionEdge, DisjunctionEdge}
 import com.turbolent.questionParser.{ast, Token}
 
 
-class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
+class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
+    (ontology: Ontology[N, E, EnvT], env: EnvT)
+{
 
   type NodeT = Node[N, E]
   type EdgeT = Edge[E, N]
