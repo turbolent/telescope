@@ -1,5 +1,3 @@
-import java.nio.file.Paths
-
 import com.turbolent.questionServer.QuestionServer
 import com.twitter.finagle.httpx._
 import org.json4s.DefaultFormats
@@ -19,10 +17,7 @@ class QuestionServerSuite extends FunSuite
     with OptionValues
 {
 
-  val taggerModelPath = Paths.get("tagger-model")
-  val lemmatizerModelPath = Paths.get("lemmatizer-model")
-
-  val service = QuestionServer.getService(taggerModelPath, lemmatizerModelPath)
+  val service = QuestionServer.getService()
 
   implicit val formats = DefaultFormats
 

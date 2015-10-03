@@ -1,6 +1,6 @@
 package com.turbolent.questionServer
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Paths, Path}
 
 import com.twitter.app.Flaggable
 import com.twitter.finagle.Httpx
@@ -19,10 +19,15 @@ object QuestionServer extends App with Logging {
 
   val portFlag =
     flag("port", 8080, "HTTP port")
+
+  val defaultTaggerModelPath = Paths.get("tagger-model")
   val taggerModelPathFlag =
-    flag("tagger-model", Paths.get("tagger-model"), "POS tagger model")
+    flag("tagger-model", defaultTaggerModelPath, "POS tagger model")
+
+  val defaultLemmatizerModelPath = Paths.get("lemmatizer-model")
   val lemmatizerModelPathFlag =
-    flag("lemmatizer-model", Paths.get("lemmatizer-model"), "lemmatizer model")
+    flag("lemmatizer-model", defaultLemmatizerModelPath, "lemmatizer model")
+
   val defaultLog = "/dev/stderr"
   val parseLogFlag =
     flag("parse-log", defaultLog, "parsing log")
@@ -36,7 +41,10 @@ object QuestionServer extends App with Logging {
     })
   }
 
-  def getService(taggerModelPath: Path, lemmatizerModelPath: Path) = {
+  def getService(taggerModelPath: Path = defaultTaggerModelPath,
+                 lemmatizerModelPath: Path = defaultLemmatizerModelPath,
+                 parseLog: String = defaultLog, accessLog: String = defaultLog) =
+  {
     val parseService = new QuestionService(taggerModelPath, lemmatizerModelPath)
 
     val routingService =
@@ -44,8 +52,8 @@ object QuestionServer extends App with Logging {
         case (Method.Get, Root / "parse") => parseService
       }
 
-    addLogHandler(parseService.log, parseLogFlag())
-    addLogHandler(LoggingFilter.log, accessLogFlag())
+    addLogHandler(parseService.log, parseLog)
+    addLogHandler(LoggingFilter.log, accessLog)
 
     LoggingFilter
         .andThen(ExceptionFilter)
@@ -54,7 +62,10 @@ object QuestionServer extends App with Logging {
 
   def main() {
     val server = Httpx.serve(":" + portFlag(),
-      getService(taggerModelPathFlag(), lemmatizerModelPathFlag()))
+      getService(taggerModelPath = taggerModelPathFlag(),
+        lemmatizerModelPath = lemmatizerModelPathFlag(),
+        parseLog = parseLogFlag(),
+        accessLog = accessLogFlag()))
     onExit {
       server.close()
     }
