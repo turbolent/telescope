@@ -7,16 +7,16 @@ import com.twitter.finagle.httpx.{Request, Status}
 import com.twitter.util.Future
 
 
-object compileQuestion extends ParseStep[Question, Seq[WikidataNode]] {
+object CompileQuestionStep extends QuestionStep[Question, Seq[WikidataNode]] {
 
-  def apply(req: Request, question: Question, response: ParseResponse) = {
+  def apply(req: Request, question: Question, response: QuestionResponse) = {
     try {
       val nodes = new QuestionCompiler(WikidataOntology, new WikidataEnvironment)
           .compileQuestion(question)
       Future.value((nodes, response + ("nodes" -> nodes)))
     } catch {
       case e: RuntimeException =>
-        Future.exception(ParseError(Status.Ok,
+        Future.exception(QuestionError(Status.Ok,
           response + ("error" -> e.getMessage)))
     }
   }

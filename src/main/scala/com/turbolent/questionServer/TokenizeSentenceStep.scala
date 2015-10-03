@@ -7,11 +7,11 @@ import com.twitter.finagle.httpx.Request
 import com.twitter.util.Future
 
 
-class TokenizeSentence(implicit tagger: Tagger, lemmatizer: Lemmatizer)
-    extends ParseStep[String, Seq[Token]]
+class TokenizeSentenceStep(implicit tagger: Tagger, lemmatizer: Lemmatizer)
+    extends QuestionStep[String, Seq[Token]]
 {
 
-  def apply(req: Request, sentence: String, response: ParseResponse) = {
+  def apply(req: Request, sentence: String, response: QuestionResponse) = {
     val tokens = Token.tokensFromSentence(sentence)
     Future.value((tokens, response + ("tokens" -> tokens)))
   }

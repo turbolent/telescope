@@ -4,15 +4,18 @@ import com.twitter.finagle.httpx.{Request, Status}
 import com.twitter.util.Future
 
 
-object getSentence extends ParseStep[Unit, String] {
+object GetSentenceStep extends QuestionStep[Unit, String] {
 
   val sentenceParameter = "sentence"
 
-  def apply(req: Request, input: Unit, response: ParseResponse) =
-    req.params.get(sentenceParameter) map { sentence =>
+  def getSentence(req: Request) =
+    req.params.get(sentenceParameter)
+
+  def apply(req: Request, input: Unit, response: QuestionResponse) =
+    getSentence(req) map { sentence =>
       Future.value((sentence, response))
     } getOrElse {
-      Future.exception(ParseError(Status.BadRequest,
+      Future.exception(QuestionError(Status.BadRequest,
         response + ("error" -> s"Missing query parameter: $sentenceParameter")))
     }
 }

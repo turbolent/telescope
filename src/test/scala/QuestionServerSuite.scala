@@ -1,12 +1,12 @@
 import java.nio.file.Paths
 
-import com.turbolent.questionServer.{Configuration, QuestionServer}
+import com.turbolent.questionServer.QuestionServer
 import com.twitter.finagle.httpx._
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{FunSuite, Matchers, OptionValues, TryValues}
+import org.scalatest.{OptionValues, Matchers, FunSuite, TryValues}
 
 import scala.util.Try
 
@@ -19,10 +19,10 @@ class QuestionServerSuite extends FunSuite
     with OptionValues
 {
 
-  val configuration = Configuration(taggerModelPath = Paths.get("tagger-model"),
-    lemmatizerModelPath = Paths.get("lemmatizer-model"))
+  val taggerModelPath = Paths.get("tagger-model")
+  val lemmatizerModelPath = Paths.get("lemmatizer-model")
 
-  val service = QuestionServer.getService(configuration)
+  val service = QuestionServer.getService(taggerModelPath, lemmatizerModelPath)
 
   implicit val formats = DefaultFormats
 

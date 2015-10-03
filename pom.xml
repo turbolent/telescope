@@ -13,6 +13,12 @@
             <id>github</id>
             <url>https://raw.githubusercontent.com/turbolent/mvn-repo/master/</url>
         </repository>
+
+        <repository>
+            <id>twttr</id>
+            <name>twttr</name>
+            <url>https://maven.twttr.com/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -59,15 +65,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-native_2.11</artifactId>
-            <version>3.3.0.RC6</version>
+            <groupId>com.twitter</groupId>
+            <artifactId>twitter-server_2.11</artifactId>
+            <version>1.14.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.github.scopt</groupId>
-            <artifactId>scopt_2.11</artifactId>
-            <version>3.3.0</version>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-native_2.11</artifactId>
+            <version>3.3.0.RC6</version>
         </dependency>
 
         <dependency>

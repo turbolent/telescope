@@ -6,7 +6,7 @@ import scala.collection.immutable.HashMap
 
 
 package object questionServer {
-  type ParseResponse = HashMap[String, AnyRef]
+  type QuestionResponse = HashMap[String, AnyRef]
 
   type WikidataNode = Node[NodeLabel, EdgeLabel]
 }

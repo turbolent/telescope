@@ -7,11 +7,11 @@ import com.twitter.finagle.httpx.{Request, Status}
 import com.twitter.util.Future
 
 
-class ParseQuestion(implicit lemmatizer: Lemmatizer)
-    extends ParseStep[Seq[Token], Question]
+class ParseQuestionStep(implicit lemmatizer: Lemmatizer)
+    extends QuestionStep[Seq[Token], Question]
 {
 
-  def apply(req: Request, tokens: Seq[Token], response: ParseResponse) = {
+  def apply(req: Request, tokens: Seq[Token], response: QuestionResponse) = {
     val isStrict = req.getBooleanParam("strict")
     val questionParser = ListParser.Question
     val result = ListParser.parse(tokens,
@@ -22,7 +22,7 @@ class ParseQuestion(implicit lemmatizer: Lemmatizer)
     result map { question =>
       Future.value((question, response + ("question" -> question)))
     } getOrElse {
-      Future.exception(ParseError(Status.Ok,
+      Future.exception(QuestionError(Status.Ok,
         response + ("error" -> s"Couldn't parse sentence: $result")))
     }
   }
