@@ -61,8 +61,13 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
           val edge = ontology.makeRelationshipEdge(name, node, env)
           env.newNode().and(edge)
         }
+
       case ast.AndQuery(queries) =>
         queries.flatMap(compileRelationshipSubquery(_, nodes))
+
+      case ast.RelationshipQuery(first, second, _) =>
+        val secondNodes = compileRelationshipSubquery(second, nodes)
+        compileRelationshipSubquery(first, secondNodes)
     }
 
   def compileProperty(property: ast.Property, subject: Subject): EdgeT =
