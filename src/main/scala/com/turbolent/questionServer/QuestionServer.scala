@@ -1,12 +1,11 @@
 package com.turbolent.questionServer
 
-import java.nio.file.{Paths, Path}
+import java.nio.file.{Path, Paths}
 
-import com.twitter.app.Flaggable
 import com.twitter.finagle.Httpx
 import com.twitter.finagle.httpx.filter.{LoggingFilter, ExceptionFilter}
-import com.twitter.logging.{ConsoleHandler, FileHandler, Logger, Logging}
-import com.twitter.app.App
+import com.twitter.logging.{ConsoleHandler, FileHandler, Logging, Logger}
+import com.twitter.app.{Flaggable, App}
 import com.twitter.util.Await
 import com.twitter.finagle.httpx.path.{Root, /}
 import com.twitter.finagle.httpx.{Request, Method}
@@ -43,7 +42,8 @@ object QuestionServer extends App with Logging {
 
   def getService(taggerModelPath: Path = defaultTaggerModelPath,
                  lemmatizerModelPath: Path = defaultLemmatizerModelPath,
-                 parseLog: String = defaultLog, accessLog: String = defaultLog) =
+                 parseLog: String = defaultLog,
+                 accessLog: String = defaultLog) =
   {
     val parseService = new QuestionService(taggerModelPath, lemmatizerModelPath)
 
@@ -61,11 +61,11 @@ object QuestionServer extends App with Logging {
   }
 
   def main() {
-    val server = Httpx.serve(":" + portFlag(),
-      getService(taggerModelPath = taggerModelPathFlag(),
-        lemmatizerModelPath = lemmatizerModelPathFlag(),
-        parseLog = parseLogFlag(),
-        accessLog = accessLogFlag()))
+    val service = getService(taggerModelPath = taggerModelPathFlag(),
+      lemmatizerModelPath = lemmatizerModelPathFlag(),
+      parseLog = parseLogFlag(),
+      accessLog = accessLogFlag())
+    val server = Httpx.serve(":" + portFlag(), service)
     onExit {
       server.close()
     }
