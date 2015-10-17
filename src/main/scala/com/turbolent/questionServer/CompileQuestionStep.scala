@@ -1,5 +1,7 @@
 package com.turbolent.questionServer
 
+import java.io.{PrintWriter, StringWriter}
+
 import com.turbolent.questionCompiler.QuestionCompiler
 import com.turbolent.questionParser.ast.Question
 import com.turbolent.wikidataOntology.{WikidataEnvironment, WikidataOntology}
@@ -16,8 +18,10 @@ object CompileQuestionStep extends QuestionStep[Question, Seq[WikidataNode]] {
       Future.value((nodes, response + ("nodes" -> nodes)))
     } catch {
       case e: RuntimeException =>
+        val writer = new StringWriter()
+        e.printStackTrace(new PrintWriter(writer))
         Future.exception(QuestionError(Status.Ok,
-          response + ("error" -> e.getMessage)))
+          response + ("error" -> writer.toString)))
     }
   }
 }
