@@ -153,7 +153,7 @@ object ListParser extends BaseParser {
   //       "did Orwell write" ~= "were written by" Orwell => "did write Orwell"
 
   lazy val InversePropertySuffix =
-    (Verbs ~ opt(pos("RP"))) ^^ { suffix =>
+    (Verbs ~ opt(pos("RP") | (pos("IN") <~ not(NamedValue)))) ^^ { suffix =>
       (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
           case moreVerbs ~ Some(particle) =>

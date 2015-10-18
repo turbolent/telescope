@@ -1163,5 +1163,31 @@ class Test extends TestCase {
               NamedValue(List(Token("Christopher", "NN"), Token("Nolan", "NN"))))))))
       assertEquals(expected, result.get)
     }
+    {
+      val tokens = tokenize("Which/WDT country/NN was/VBD Obama/NNP born/VBN in/IN")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected =
+        ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN"))),
+          InversePropertyWithFilter(List(Token("was", "VBD"), Token("born", "VBN"),
+            Token("in", "IN")),
+            PlainFilter(NamedValue(List(Token("Obama", "NNP")))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens = tokenize("Which/WDT country/NN was/VBD Obama/NNP born/VBN in/IN in/IN 1961/CD")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected =
+        ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN"))),
+          AndProperty(List(InversePropertyWithFilter(List(Token("was", "VBD"),
+            Token("born", "VBN"), Token("in", "IN")),
+            PlainFilter(NamedValue(List(Token("Obama", "NNP"))))),
+            PropertyWithFilter(List(),FilterWithModifier(List(Token("in", "IN")),
+              Number(List(Token("1961", "CD")))))))))
+      assertEquals(expected, result.get)
+    }
   }
 }
