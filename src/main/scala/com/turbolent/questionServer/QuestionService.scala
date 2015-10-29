@@ -6,12 +6,12 @@ import com.turbolent.aptagger.Tagger
 import com.turbolent.lemmatizer.Lemmatizer
 import com.turbolent.questionParser.Token
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{Request, Response, Status}
+import com.twitter.finagle.httpx.{Status, Request, Response}
 import com.twitter.logging.Level.INFO
 import com.twitter.logging.Logger
 import com.twitter.util.Future
 import org.json4s.native.Serialization
-import org.json4s.{FieldSerializer, FullTypeHints}
+import org.json4s.{FullTypeHints, FieldSerializer}
 
 
 class QuestionService(taggerModelPath: Path, lemmatizerModelPath: Path)
@@ -29,7 +29,7 @@ class QuestionService(taggerModelPath: Path, lemmatizerModelPath: Path)
       FieldSerializer[Token](FieldSerializer.ignore("lemmatizer") orElse
                              FieldSerializer.ignore("pos"))
 
-    typeHints + tokenSerializer
+    typeHints + tokenSerializer + new QuerySerializer
   }
 
   def respond(req: Request, status: Status, content: AnyRef) = {
@@ -55,6 +55,7 @@ class QuestionService(taggerModelPath: Path, lemmatizerModelPath: Path)
         .compose(tokenizeSentence)
         .compose(parseQuestion)
         .compose(CompileQuestionStep)
+        .compose(CompileQueriesStep)
     val sentence = GetSentenceStep.getSentence(req).getOrElse("")
     steps(req, (), new QuestionResponse).flatMap {
       case (_, response) =>

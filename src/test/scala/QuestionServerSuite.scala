@@ -85,6 +85,15 @@ class QuestionServerSuite extends FunSuite
     nodes should not be empty
   }
 
+  def checkQueries(content: Map[String, _]) {
+    content should contain key "queries"
+    val maybeQueries = content("queries")
+    maybeQueries shouldBe an[List[_]]
+    val queries = maybeQueries.asInstanceOf[List[_]]
+    queries should not be empty
+  }
+
+
   test("incomplete sentence") {
     get("/parse?sentence=who") { response =>
       response.status shouldEqual Status.Ok
@@ -115,6 +124,7 @@ class QuestionServerSuite extends FunSuite
       checkTokens(content)
       checkQuestion(content)
       checkNodes(content)
+      checkQueries(content)
     }
   }
 }
