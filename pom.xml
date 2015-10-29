@@ -8,6 +8,12 @@
         <repository>
             <id>github</id>
             <url>https://raw.githubusercontent.com/turbolent/mvn-repo/master/</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <releases>
+                <updatePolicy>always</updatePolicy>
+            </releases>
         </repository>
     </repositories>
 
