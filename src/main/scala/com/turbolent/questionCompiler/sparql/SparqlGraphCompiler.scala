@@ -4,12 +4,18 @@ import com.turbolent.questionCompiler.graph._
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs
 import org.apache.jena.sparql.algebra.{Op, OpAsQuery, Transformer}
 import org.apache.jena.sparql.algebra.op._
-import org.apache.jena.sparql.core.{Var, BasicPattern}
-import org.apache.jena.graph.{Triple, Node => JenaNode}
+import org.apache.jena.sparql.core.{TriplePath, Var, BasicPattern}
+import org.apache.jena.graph.{Node => JenaNode, Triple => JenaTriple}
 import org.apache.jena.query.Query
 import org.apache.jena.sparql.expr._
+import org.apache.jena.sparql.path.P_Inverse
 
 import scala.collection.JavaConversions._
+
+
+sealed trait EdgeDirection
+case object Forward extends EdgeDirection
+case object Backward extends EdgeDirection
 
 
 class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
@@ -17,18 +23,19 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
   type NodeT = Node[N, E]
   type EdgeT = Edge[E, N]
   type FilterT = Filter[N, E]
-  type TripleFactory = (JenaNode, JenaNode) => Triple
   type OpMerger = (Op, Op) => Op
   type Function2ExprFactory = (Expr, Expr) => Expr
   type OpFactory = (Option[Op]) => Op
 
+  def compileNodeJoining(node: NodeT, op: Op) =
+    compileNode(node, _ map {
+      OpJoin.create(op, _)
+    } getOrElse op)
+
   def compileFunction2Filter(compiledNode: JenaNode, otherNode: NodeT,
                              op: Op, exprFactory: Function2ExprFactory): Op =
   {
-    val (compiledOtherNode, filteredOp) = compileNode(otherNode,
-      _ map {
-        OpJoin.create(op, _)
-      } getOrElse op)
+    val (compiledOtherNode, filteredOp) = compileNodeJoining(otherNode, op)
 
     val otherExpr =
       if (compiledOtherNode.isVariable)
@@ -74,14 +81,10 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
   def compileEdge(node: JenaNode)(edge: EdgeT): Op = {
     edge match {
       case OutEdge(label, target) =>
-        compileEdgeLabel(label, target,
-          (property, compiledTarget) =>
-            new Triple(node, property, compiledTarget))
+        compileEdgeLabel(label, node, target, Forward)
 
       case InEdge(source, label) =>
-        compileEdgeLabel(label, source,
-          (property, compiledSource) =>
-            new Triple(compiledSource, property, node))
+        compileEdgeLabel(label, node, source, Backward)
 
       case ConjunctionEdge(edges) =>
         compileEdges(edges, node, OpJoin.create)
@@ -91,21 +94,55 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
     }
   }
 
-  def compileEdgeLabel(label: E, node: NodeT, factory: TripleFactory): Op = {
-    val pattern = new BasicPattern()
-    val patternOp = new OpBGP(pattern)
+  def compileEdgeLabel(label: E, compiledNode: JenaNode,
+                       otherNode: NodeT, direction: EdgeDirection): Op =
+  {
+    backend.compileEdgeLabel(label) match {
+      case Left(property) =>
+        val pattern = new BasicPattern()
+        val patternOp = new OpBGP(pattern)
+        val (compiledOtherNode, op) = compileNodeJoining(otherNode, patternOp)
+        val triple = direction match {
+          case Forward =>
+            new JenaTriple(compiledNode, property, compiledOtherNode)
 
-    val (compiledNode, op) = compileNode(node,
-      _ map {
-        OpJoin.create(patternOp, _)
-      } getOrElse patternOp)
+          case Backward =>
+            new JenaTriple(compiledOtherNode, property, compiledNode)
+        }
+        pattern.add(triple)
+        op
 
-    val property = backend.compileEdgeLabel(label)
-    val triple = factory(property, compiledNode)
-    pattern.add(triple)
+      case Right(path) =>
+        // reference to op needed, so temp. initialize with null and fix up afterwards
+        val pathOp = new OpPath(null)
+        val (compiledOtherNode, op) = compileNodeJoining(otherNode, pathOp)
+        val triplePath = direction match {
+          case Forward =>
+            new TriplePath(compiledNode, path, compiledOtherNode)
 
-    op
+          case Backward =>
+            val inversePath = new P_Inverse(path)
+            new TriplePath(compiledOtherNode, inversePath, compiledNode)
+        }
+        // use reflection as OpPath has no setter
+        val triplePathField = pathOp.getClass.getDeclaredField("triplePath")
+        triplePathField.setAccessible(true)
+        triplePathField.set(pathOp, triplePath)
+
+        op
+    }
   }
+
+  // TODO: unable to use TransformPathFlattern, as these won't be
+  //       comparable to parsed compiled algerba of expected queries
+  //       (due to PathCompiler allocating variables with a P prefixe)
+
+  def transformations =
+    List(new TransformMergeBGPs)
+
+  def optimize(op: Op): Op =
+    transformations.foldLeft(op)((op, transform) =>
+      Transformer.transform(transform, op))
 
   def compileQuery(node: Node[N, E]): Query = {
     require(node.edge.isDefined,
@@ -116,8 +153,7 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
       "root node needs to be compiled to a variable")
 
     val projection = new OpProject(op, List(compiledNode.asInstanceOf[Var]))
-
-    val optimized = Transformer.transform(new TransformMergeBGPs, projection)
+    val optimized = optimize(projection)
 
     val query = OpAsQuery.asQuery(optimized)
     query.setQuerySelectType()
