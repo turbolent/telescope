@@ -153,7 +153,8 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
       "root node needs to be compiled to a variable")
 
     val projection = new OpProject(op, List(compiledNode.asInstanceOf[Var]))
-    val optimized = optimize(projection)
+    val distinct = new OpDistinct(projection)
+    val optimized = optimize(distinct)
 
     val query = OpAsQuery.asQuery(optimized)
     query.setQuerySelectType()
