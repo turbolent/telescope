@@ -6,7 +6,7 @@ import org.apache.jena.sparql.algebra.{Op, OpAsQuery, Transformer}
 import org.apache.jena.sparql.algebra.op._
 import org.apache.jena.sparql.core.{TriplePath, Var, BasicPattern}
 import org.apache.jena.graph.{Node => JenaNode, Triple => JenaTriple}
-import org.apache.jena.query.Query
+import org.apache.jena.query.{Query => JenaQuery}
 import org.apache.jena.sparql.expr._
 import org.apache.jena.sparql.path.P_Inverse
 
@@ -144,7 +144,7 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
     transformations.foldLeft(op)((op, transform) =>
       Transformer.transform(transform, op))
 
-  def compileQuery(node: Node[N, E]): Query = {
+  def compileQuery(node: Node[N, E]): JenaQuery = {
     require(node.edge.isDefined,
       "root node needs to have edges")
 
@@ -152,7 +152,11 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
     assert(compiledNode.isInstanceOf[Var],
       "root node needs to be compiled to a variable")
 
-    val projection = new OpProject(op, List(compiledNode.asInstanceOf[Var]))
+    val preparedOp = backend.prepareOp(op)
+    val variable = compiledNode.asInstanceOf[Var]
+    val variables = List(variable) ++
+                    backend.additionalResultVariables(variable)
+    val projection = new OpProject(preparedOp, variables)
     val distinct = new OpDistinct(projection)
     val optimized = optimize(distinct)
 
