@@ -8,7 +8,6 @@ import org.apache.jena.sparql.core.{TriplePath, Var, BasicPattern}
 import org.apache.jena.graph.{Node => JenaNode, Triple => JenaTriple}
 import org.apache.jena.query.{Query => JenaQuery}
 import org.apache.jena.sparql.expr._
-import org.apache.jena.sparql.path.P_Inverse
 
 import scala.collection.JavaConversions._
 
@@ -121,8 +120,7 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
             new TriplePath(compiledNode, path, compiledOtherNode)
 
           case Backward =>
-            val inversePath = new P_Inverse(path)
-            new TriplePath(compiledOtherNode, inversePath, compiledNode)
+            new TriplePath(compiledOtherNode, path, compiledNode)
         }
         // use reflection as OpPath has no setter
         val triplePathField = pathOp.getClass.getDeclaredField("triplePath")
