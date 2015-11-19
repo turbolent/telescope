@@ -1189,5 +1189,19 @@ class Test extends TestCase {
               Number(List(Token("1961", "CD")))))))))
       assertEquals(expected, result.get)
     }
+    {
+      val tokens = tokenize("What/WP are/VBP some/DT of/IN Seth/NNP Gabel/NNP 's/POS "
+                            + "father-in-law/NN 's/POS movies/NNS")
+
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+      val expected =
+        ListQuestion(RelationshipQuery(NamedQuery(List(Token("movies", "NNS"))),
+          RelationshipQuery(NamedQuery(List(Token("father-in-law", "NN"))),
+            NamedQuery(List(Token("Seth", "NNP"), Token("Gabel", "NNP"))),
+            Token("'s", "POS")),
+          Token("'s", "POS")))
+      assertEquals(expected, result.get)
+    }
   }
 }

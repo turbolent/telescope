@@ -20,15 +20,25 @@ object ListParser extends BaseParser {
 
 
   // Examples:
-  //   - "find some"
-  //   - "list all"
-  //   - "show me only"
+  //   - "find"
+  //   - "list"
+  //   - "show me"
   // NOTE: might be empty
 
   lazy val findListGiveShow =
-    ignore(opt(("find" | "list" | "give" | "show") ~ opt("me"))
-           ~ opt("some" | "all" | "any" | "only" | "many" | "both"
-                 | (opt("a") ~ ("few" | "couple"))))
+    ignore(("find" | "list" | "give" | "show") ~ opt("me"))
+
+
+  // Quantity at start of a generic type question
+  // Examples:
+  //   - "all"
+  //   - "some of"
+  //   - "a couple"
+  lazy val someAllAny =
+    ignore(("some" | "all" | "any" | "only" | "many" | "both"
+            | (opt("a") ~ ("few" | "couple" | "number" | "lot")))
+           ~ opt("of"))
+
 
   // Examples:
   //   - "Europe"
@@ -303,12 +313,13 @@ object ListParser extends BaseParser {
   // Start of a generic type question
   // Examples:
   //   - "which"
-  //   - "what are the"
+  //   - "what are"
   //   - "find all"
+  //   - "give me a few"
   // NOTE: ||| to match as much as possible
 
   lazy val ListQuestionStart =
-    opt(whichWhat ||| ignore(whoWhatBe ||| findListGiveShow))
+    opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny)))
 
 
   // Generic type question
