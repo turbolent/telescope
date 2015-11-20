@@ -56,6 +56,10 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
         compileFunction2Filter(node, otherNode, op,
           new E_GreaterThan(_, _))
 
+      case EqualsFilter(otherNode) =>
+        compileFunction2Filter(node, otherNode, op,
+          new E_Equals(_, _))
+
       case ConjunctionFilter(filters) =>
         filters.foldLeft(op)(compileFilter(node, _)(_))
     }
