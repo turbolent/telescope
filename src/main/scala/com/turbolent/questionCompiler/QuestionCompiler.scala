@@ -96,10 +96,10 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
             contextFactory(subject), env))
 
       case ast.AndProperty(properties) =>
-        ConjunctionEdge(properties.map(compileProperty(_, subject)))
+        ConjunctionEdge(properties.map(compileProperty(_, subject)).toSet)
 
       case ast.OrProperty(properties) =>
-        DisjunctionEdge(properties.map(compileProperty(_, subject)))
+        DisjunctionEdge(properties.map(compileProperty(_, subject)).toSet)
     }
 
 
@@ -134,10 +134,10 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
             valueIsNumber = true))
 
       case ast.OrValue(values) =>
-        DisjunctionEdge(values.map(compileValue(_, filter, edgeFactory)))
+        DisjunctionEdge(values.map(compileValue(_, filter, edgeFactory)).toSet)
 
       case ast.AndValue(values) =>
-        ConjunctionEdge(values.map(compileValue(_, filter, edgeFactory)))
+        ConjunctionEdge(values.map(compileValue(_, filter, edgeFactory)).toSet)
 
       case ast.ValueRelationship(ast.NamedValue(name), second) =>
         val secondEdgeFactory: EdgeFactory =

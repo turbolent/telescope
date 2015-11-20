@@ -73,7 +73,7 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
     (compiledNode, op)
   }
 
-  def compileEdges(edges: Seq[EdgeT], node: JenaNode, merge: OpMerger): Op =
+  def compileEdges(edges: Set[EdgeT], node: JenaNode, merge: OpMerger): Op =
     edges.map(compileEdge(node))
         .reduce(merge)
 
