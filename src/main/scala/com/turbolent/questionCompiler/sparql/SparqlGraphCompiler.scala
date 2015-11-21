@@ -42,13 +42,17 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
       compileNodeJoining(otherNode, op,
         FilterNodeCompilationContext)
 
-    val otherExpr =
+    val leftExpr =
+      backend.prepareLeftFunctionExpression(new ExprVar(compiledNode), otherNode)
+
+    val rightExpr =
       if (compiledOtherNode.isVariable)
         new ExprVar(compiledOtherNode)
       else
         NodeValue.makeNode(compiledOtherNode)
 
-    val expr = exprFactory(new ExprVar(compiledNode), otherExpr)
+
+    val expr = exprFactory(leftExpr, rightExpr)
     OpFilter.filter(expr, filteredOp)
   }
 
