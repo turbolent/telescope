@@ -29,15 +29,18 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
   type Function2ExprFactory = (Expr, Expr) => Expr
   type OpFactory = (Option[Op]) => Op
 
-  def compileNodeJoining(node: NodeT, op: Op) =
+  def compileNodeJoining(node: NodeT, op: Op, context: NodeCompilationContext) =
     compileNode(node, _ map {
       OpJoin.create(op, _)
-    } getOrElse op)
+    } getOrElse op,
+    context)
 
   def compileFunction2Filter(compiledNode: JenaNode, otherNode: NodeT,
                              op: Op, exprFactory: Function2ExprFactory): Op =
   {
-    val (compiledOtherNode, filteredOp) = compileNodeJoining(otherNode, op)
+    val (compiledOtherNode, filteredOp) =
+      compileNodeJoining(otherNode, op,
+        FilterNodeCompilationContext)
 
     val otherExpr =
       if (compiledOtherNode.isVariable)
@@ -68,12 +71,15 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
     }
   }
 
-  def compileNode(node: NodeT, opFactory: OpFactory): (JenaNode, Op) = {
-    val optEdgeOp = node.edge.map(compileEdge(compiledNode))
+  def compileNode(node: NodeT, opFactory: OpFactory,
+                  context: NodeCompilationContext): (JenaNode, Op) =
+  {
+    val expandedNode = backend.expandNode(node, context, env)
     val compiledNode = backend.compileNodeLabel(expandedNode.label, env)
+    val optEdgeOp = expandedNode.edge.map(compileEdge(compiledNode))
     val filteredOp = opFactory(optEdgeOp)
 
-    val op = node.filter map {
+    val op = expandedNode.filter map {
       compileFilter(compiledNode, filteredOp)
     } getOrElse filteredOp
 
@@ -107,7 +113,9 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
       case Left(property) =>
         val pattern = new BasicPattern()
         val patternOp = new OpBGP(pattern)
-        val (compiledOtherNode, op) = compileNodeJoining(otherNode, patternOp)
+        val (compiledOtherNode, op) =
+          compileNodeJoining(otherNode, patternOp,
+            TripleNodeCompilationContext)
         val triple = direction match {
           case Forward =>
             new JenaTriple(compiledNode, property, compiledOtherNode)
@@ -121,7 +129,9 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
       case Right(path) =>
         // reference to op needed, so temp. initialize with null and fix up afterwards
         val pathOp = new OpPath(null)
-        val (compiledOtherNode, op) = compileNodeJoining(otherNode, pathOp)
+        val (compiledOtherNode, op) =
+          compileNodeJoining(otherNode, pathOp,
+            TripleNodeCompilationContext)
         val triplePath = direction match {
           case Forward =>
             new TriplePath(compiledNode, path, compiledOtherNode)
@@ -153,7 +163,9 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
     require(node.edge.isDefined,
       "root node needs to have edges")
 
-    val (compiledNode, op) = compileNode(node, _.get)
+    val (compiledNode, op) =
+      compileNode(node, _.get,
+        TripleNodeCompilationContext)
     assert(compiledNode.isInstanceOf[Var],
       "root node needs to be compiled to a variable")
 

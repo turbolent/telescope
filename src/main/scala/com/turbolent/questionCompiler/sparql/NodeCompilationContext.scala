@@ -1,0 +1,7 @@
+package com.turbolent.questionCompiler.sparql
+
+trait NodeCompilationContext
+
+case object TripleNodeCompilationContext extends NodeCompilationContext
+
+case object FilterNodeCompilationContext extends NodeCompilationContext
