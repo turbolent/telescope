@@ -106,6 +106,12 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
     }
   }
 
+  val triplePathField = {
+    val field = classOf[OpPath].getDeclaredField("triplePath")
+    field.setAccessible(true)
+    field
+  }
+
   def compileEdgeLabel(label: E, compiledNode: JenaNode,
                        otherNode: NodeT, direction: EdgeDirection): Op =
   {
@@ -139,9 +145,8 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
           case Backward =>
             new TriplePath(compiledOtherNode, path, compiledNode)
         }
+
         // use reflection as OpPath has no setter
-        val triplePathField = pathOp.getClass.getDeclaredField("triplePath")
-        triplePathField.setAccessible(true)
         triplePathField.set(pathOp, triplePath)
 
         op
