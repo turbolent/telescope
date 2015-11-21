@@ -9,13 +9,17 @@ import com.twitter.finagle.httpx.{Request, Status}
 import com.twitter.util.Future
 
 
-object CompileQuestionStep extends QuestionStep[Question, Seq[WikidataNode]] {
+object CompileQuestionStep
+    extends QuestionStep[Question, (Seq[WikidataNode], WikidataEnvironment)]
+{
 
   def apply(req: Request, question: Question, response: QuestionResponse) = {
     try {
-      val nodes = new QuestionCompiler(WikidataOntology, new WikidataEnvironment)
+      val env = new WikidataEnvironment
+      val nodes = new QuestionCompiler(WikidataOntology, env)
           .compileQuestion(question)
-      Future.value((nodes, response + ("nodes" -> nodes)))
+      val result = (nodes, env)
+      Future.value((result, response + ("nodes" -> nodes)))
     } catch {
       case e: RuntimeException =>
         val writer = new StringWriter()
