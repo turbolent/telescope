@@ -1,5 +1,6 @@
 package com.turbolent.questionCompiler.sparql
 
+import com.turbolent.questionCompiler.Environment
 import com.turbolent.questionCompiler.graph._
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs
 import org.apache.jena.sparql.algebra.{Op, OpAsQuery, Transformer}
@@ -17,7 +18,9 @@ case object Forward extends EdgeDirection
 case object Backward extends EdgeDirection
 
 
-class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
+class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBackend[N, E, EnvT],
+                                                           env: EnvT)
+{
 
   type NodeT = Node[N, E]
   type EdgeT = Edge[E, N]
@@ -66,8 +69,8 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
   }
 
   def compileNode(node: NodeT, opFactory: OpFactory): (JenaNode, Op) = {
-    val compiledNode = backend.compileNodeLabel(node.label)
     val optEdgeOp = node.edge.map(compileEdge(compiledNode))
+    val compiledNode = backend.compileNodeLabel(expandedNode.label, env)
     val filteredOp = opFactory(optEdgeOp)
 
     val op = node.filter map {
@@ -100,7 +103,7 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
   def compileEdgeLabel(label: E, compiledNode: JenaNode,
                        otherNode: NodeT, direction: EdgeDirection): Op =
   {
-    backend.compileEdgeLabel(label) match {
+    backend.compileEdgeLabel(label, env) match {
       case Left(property) =>
         val pattern = new BasicPattern()
         val patternOp = new OpBGP(pattern)
@@ -154,17 +157,17 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
     assert(compiledNode.isInstanceOf[Var],
       "root node needs to be compiled to a variable")
 
-    val preparedOp = backend.prepareOp(op)
+    val preparedOp = backend.prepareOp(op, env)
     val variable = compiledNode.asInstanceOf[Var]
     val variables = List(variable) ++
-                    backend.additionalResultVariables(variable)
+                    backend.additionalResultVariables(variable, env)
     val projection = new OpProject(preparedOp, variables)
     val distinct = new OpDistinct(projection)
     val optimized = optimize(distinct)
 
     val query = OpAsQuery.asQuery(optimized)
     query.setQuerySelectType()
-    backend.prepareQuery(query)
+    backend.prepareQuery(query, env)
 
     query
   }
