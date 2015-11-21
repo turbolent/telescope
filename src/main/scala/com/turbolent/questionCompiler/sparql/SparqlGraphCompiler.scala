@@ -47,14 +47,18 @@ class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E]) {
   }
 
   def compileFilter(node: JenaNode, op: Op)(filter: FilterT): Op = {
+    def compileComparison(otherNode: NodeT, exprFactory: Function2ExprFactory) =
+      compileFunction2Filter(node, otherNode, op, exprFactory)
+
     filter match {
+      case EqualsFilter(otherNode) =>
+        compileComparison(otherNode, new E_Equals(_, _))
+
       case LessThanFilter(otherNode) =>
-        compileFunction2Filter(node, otherNode, op,
-          new E_LessThan(_, _))
+        compileComparison(otherNode, new E_LessThan(_, _))
 
       case GreaterThanFilter(otherNode) =>
-        compileFunction2Filter(node, otherNode, op,
-          new E_GreaterThan(_, _))
+        compileComparison(otherNode, new E_GreaterThan(_, _))
 
       case ConjunctionFilter(filters) =>
         filters.foldLeft(op)(compileFilter(node, _)(_))

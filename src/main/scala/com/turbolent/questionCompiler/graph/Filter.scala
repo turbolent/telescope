@@ -24,6 +24,8 @@ case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N,
     }
 }
 
+case class EqualsFilter[N, E](node: Node[N, E]) extends Filter[N, E]
+
 case class LessThanFilter[N, E](node: Node[N, E]) extends Filter[N, E]
 
 case class GreaterThanFilter[N, E](node: Node[N, E]) extends Filter[N, E]
