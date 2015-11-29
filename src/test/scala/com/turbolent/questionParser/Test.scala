@@ -1204,4 +1204,49 @@ class Test extends TestCase {
       assertEquals(expected, result.get)
     }
   }
+
+  def testNew() {
+    {
+      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP ,/, Copenhagen/NNP ,/, "
+                            + "or/CC New/NNP York/NNP City/NNP")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
+        FilterWithModifier(List(Token("in", "IN")),
+          OrValue(List(NamedValue(List(Token("Berlin", "NNP"))),
+            NamedValue(List(Token("Copenhagen", "NNP"))),
+            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP ,/, Copenhagen/NNP ,/, "
+                            + "and/CC New/NNP York/NNP City/NNP")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
+        FilterWithModifier(List(Token("in", "IN")),
+          AndValue(List(NamedValue(List(Token("Berlin", "NNP"))),
+            NamedValue(List(Token("Copenhagen", "NNP"))),
+            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP and/CC Paris/NNP ,/, "
+                            + "Copenhagen/NNP or/CC Toronto/NNP ,/, "
+                            + "and/CC New/NNP York/NNP City/NNP")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
+        FilterWithModifier(List(Token("in", "IN")),
+          AndValue(List(AndValue(List(NamedValue(List(Token("Berlin", "NNP"))),
+            NamedValue(List(Token("Paris", "NNP"))))),
+            OrValue(List(NamedValue(List(Token("Copenhagen", "NNP"))),
+              NamedValue(List(Token("Toronto", "NNP"))))),
+            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
+      assertEquals(expected, result.get)
+    }
+  }
 }

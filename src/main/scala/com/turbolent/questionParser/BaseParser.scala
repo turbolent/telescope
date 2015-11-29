@@ -43,21 +43,29 @@ trait BaseParser extends PackratParsers {
 
   lazy val Numbers = rep1(Number)
 
-  def orAndList[T](parser: Parser[T],
-                   innerWrapper: Seq[T] => T,
-                   outerWrapper: Seq[T] => T,
-                   andOptional: Boolean = false): Parser[T] =
-  {
+  def commaOrAndList[T](parser: Parser[T],
+                        andReducer: Seq[T] => T,
+                        orReducer: Seq[T] => T,
+                        andOptional: Boolean = false): Parser[T] = {
     val and = word("and")
+    val or = word("or")
     val andParser = rep1sep(parser, if (andOptional) opt(and) else and)
-    rep1sep(andParser, word("or")) ^^ {
+    val orParser = rep1sep(andParser, or) ^^ {
       _ map {
         case Seq(inner) => inner
-        case inner => innerWrapper(inner)
+        case inner => andReducer(inner)
       } match {
         case Seq(outer) => outer
-        case outer => outerWrapper(outer)
+        case outer => orReducer(outer)
       }
+    }
+
+    (opt((rep1sep(orParser, ",") <~ ",") ~ (and | or)) ~ orParser) ^^ {
+      case Some(more ~ orAnd) ~ last =>
+        val reducer = if (orAnd.word == "and") andReducer else orReducer
+        reducer(more :+ last)
+      case None ~ last =>
+        last
     }
   }
 

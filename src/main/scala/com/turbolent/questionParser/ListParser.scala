@@ -119,7 +119,7 @@ object ListParser extends BaseParser {
   //   - "Copenhagen and Berlin"
 
   lazy val Values =
-    orAndList(Value, ast.AndValue, ast.OrValue)
+    commaOrAndList(Value, ast.AndValue, ast.OrValue)
 
 
   // Examples:
@@ -150,7 +150,7 @@ object ListParser extends BaseParser {
   //   - "before 1900 or after 1910"
 
   lazy val Filters =
-    orAndList(Filter, ast.AndFilter, ast.OrFilter)
+    commaOrAndList(Filter, ast.AndFilter, ast.OrFilter)
 
 
   // Examples:
@@ -217,10 +217,9 @@ object ListParser extends BaseParser {
   //   - "written by Orwell were longer than 200 pages"
   //     (NOTE: 2 properties, "and" is optional,
   //            valid when starting with "which books")
-  // TODO: handle commas
 
   lazy val Properties =
-    orAndList(Property, ast.AndProperty, ast.OrProperty, andOptional = true)
+    commaOrAndList(Property, ast.AndProperty, ast.OrProperty, andOptional = true)
 
 
   // Examples:
