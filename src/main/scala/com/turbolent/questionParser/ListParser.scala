@@ -7,7 +7,7 @@ object ListParser extends BaseParser {
   //   - "what"
 
   lazy val whichWhat =
-    opt(pos("IN")) <~ ("which" | "what")
+    opt(Preposition) <~ ("which" | "what")
 
 
   // Examples:
@@ -129,7 +129,7 @@ object ListParser extends BaseParser {
   //   - "smaller than Europe and the US"
 
   lazy val PrepositionExceptOf =
-    pos("IN") filter { _.word != "of" }
+    Preposition filter { _.word != "of" }
 
   lazy val Filter =
     (opt(opt(pos("JJR")) ~ PrepositionExceptOf) ~ Values) ^^ {
@@ -163,7 +163,7 @@ object ListParser extends BaseParser {
   //       "did Orwell write" ~= "were written by" Orwell => "did write Orwell"
 
   lazy val InversePropertySuffix =
-    (Verbs ~ opt(pos("RP") | (pos("IN") <~ not(NamedValue)))) ^^ { suffix =>
+    (Verbs ~ opt(pos("RP") | (Preposition <~ not(NamedValue)))) ^^ { suffix =>
       (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
           case moreVerbs ~ Some(particle) =>

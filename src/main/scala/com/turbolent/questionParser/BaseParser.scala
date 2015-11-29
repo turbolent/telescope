@@ -43,6 +43,8 @@ trait BaseParser extends PackratParsers {
 
   lazy val Numbers = rep1(Number)
 
+  lazy val Preposition = pos("IN") | pos("TO")
+
   def commaOrAndList[T](parser: Parser[T],
                         andReducer: Seq[T] => T,
                         orReducer: Seq[T] => T,

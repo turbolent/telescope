@@ -1156,8 +1156,8 @@ class Test extends TestCase {
       //       is relative to first one, not subject
       val expected =
         PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("starred", "VBD")),
-           FilterWithModifier(List(Token("in", "IN")),
-             NamedValue(List(Token("movies", "NNS"))))),
+          FilterWithModifier(List(Token("in", "IN")),
+            NamedValue(List(Token("movies", "NNS"))))),
           PropertyWithFilter(List(Token("directed", "VBN")),
             FilterWithModifier(List(Token("by", "IN")),
               NamedValue(List(Token("Christopher", "NN"), Token("Nolan", "NN"))))))))
@@ -1185,7 +1185,7 @@ class Test extends TestCase {
           AndProperty(List(InversePropertyWithFilter(List(Token("was", "VBD"),
             Token("born", "VBN"), Token("in", "IN")),
             PlainFilter(NamedValue(List(Token("Obama", "NNP"))))),
-            PropertyWithFilter(List(),FilterWithModifier(List(Token("in", "IN")),
+            PropertyWithFilter(List(), FilterWithModifier(List(Token("in", "IN")),
               Number(List(Token("1961", "CD")))))))))
       assertEquals(expected, result.get)
     }
@@ -1203,9 +1203,6 @@ class Test extends TestCase {
           Token("'s", "POS")))
       assertEquals(expected, result.get)
     }
-  }
-
-  def testNew() {
     {
       val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP ,/, Copenhagen/NNP ,/, "
                             + "or/CC New/NNP York/NNP City/NNP")
@@ -1246,6 +1243,25 @@ class Test extends TestCase {
             OrValue(List(NamedValue(List(Token("Copenhagen", "NNP"))),
               NamedValue(List(Token("Toronto", "NNP"))))),
             NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens = tokenize("Which/WP universities/NNS did/VBD Obama/NNP go/VBD to/TO")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("universities", "NNS"))),
+        InversePropertyWithFilter(List(Token("did", "VBD"), Token("go", "VBD"), Token("to", "TO")),
+          PlainFilter(NamedValue(List(Token("Obama", "NNP")))))))
+      assertEquals(expected, result.get)
+    }
+    {
+      val tokens = tokenize("Who/WP went/VBD to/TO Stanford/NNP")
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+
+      val expected = PersonListQuestion(PropertyWithFilter(List(Token("went", "VBD")),
+        FilterWithModifier(List(Token("to", "TO")), NamedValue(List(Token("Stanford", "NNP"))))))
       assertEquals(expected, result.get)
     }
   }
