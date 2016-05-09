@@ -1,16 +1,13 @@
 package com.turbolent.questionParser
 
-import com.turbolent.lemmatizer.Lemmatizer
-
 import scala.util.parsing.combinator.PackratParsers
+import scala.language.implicitConversions
 
 
 trait BaseParser extends PackratParsers {
   override type Elem = Token
 
-  def parse[T](tokens: Seq[Token], production: Parser[T])
-              (implicit lemmatizer: Lemmatizer) =
-  {
+  def parse[T](tokens: Seq[Token], production: Parser[T]) = {
     val tokenReader = new TokensReader(tokens)
     val packratReader = new PackratReader(tokenReader)
     production(packratReader)
@@ -28,7 +25,7 @@ trait BaseParser extends PackratParsers {
   def lemma(lemma: String) = {
     val lowered = lemma.toLowerCase
     elem(s"lemma '$lowered'",
-      _.lemmas.contains(lowered))
+      _.lemma == lowered)
   }
 
   lazy val Noun = pos("N")

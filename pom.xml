@@ -25,27 +25,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.turbolent</groupId>
-            <artifactId>tokenizer</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.turbolent</groupId>
-            <artifactId>aptagger</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.turbolent</groupId>
-            <artifactId>lemmatizer</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.11</artifactId>
+            <version>2.2.6</version>
             <scope>test</scope>
         </dependency>
 

@@ -1,1268 +1,909 @@
 package com.turbolent.questionParser
 
-import java.nio.file.Paths
-
 import com.turbolent.questionParser.ast._
-import com.turbolent.lemmatizer.Lemmatizer
-import junit.framework.TestCase
-import org.hamcrest.Matcher
-import org.hamcrest.core.IsInstanceOf.instanceOf
-import org.junit.Assert._
+
+import org.scalatest.{FunSuite, Matchers}
 
 
-class Test extends TestCase {
-
-  implicit lazy val lemmatizer =
-    Lemmatizer.loadFrom(Paths.get("lemmatizer-model"))
+class Test extends FunSuite with Matchers {
 
   def parseListQuestion(tokens: Seq[Token]) =
     ListParser.parse(tokens, ListParser.phrase(ListParser.Question))
 
   def tokenize(taggedSentence: String) =
-    taggedSentence.split(' ').toSeq map { taggedWord =>
-      val Array(word, tag) = taggedWord.split('/')
-      Token(word, tag)
+    taggedSentence.split(" ").map(_.split("/")).map {
+      case Array(word, tag, lemma) => Token(word, tag, lemma)
     }
 
-  def assertSuccess(x: Any) = {
-    val matcher: Matcher[Any] = instanceOf(classOf[BaseParser#Success[Any]])
-    assertThat(x, matcher)
+  def assertSuccess(result: ListParser.ParseResult[_]) =
+    result shouldBe a [ListParser.Success[_]]
+
+  def test(sentence: String, expected: Question) {
+    val tokens = tokenize(sentence)
+    val testName = tokens.map(_.word).mkString(" ")
+
+    test(testName) {
+      val result = parseListQuestion(tokens)
+      assertSuccess(result)
+      result.get shouldEqual expected
+    }
   }
 
-  def testListQuestions() {
-    {
-      val tokens = tokenize("Give/VB me/PRP all/DT musicians/NNS that/WDT "
-                            + "were/VBD born/VBN in/IN Vienna/NNP "
-                            + "and/CC died/VBN in/IN Berlin/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("musicians", "NNS"))),
-        AndProperty(List(PropertyWithFilter(List(Token("were", "VBD"), Token("born", "VBN")),
-          FilterWithModifier(List(Token("in", "IN")),
-            NamedValue(List(Token("Vienna", "NNP"))))),
-          PropertyWithFilter(List(Token("died", "VBN")),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("Berlin", "NNP")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT presidents/NNS were/VBD born/VBN before/IN 1900/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Give/VB/give me/PRP/me all/DT/all musicians/NNS/musician that/WDT/that "
+    + "were/VBD/be born/VBN/bear in/IN/in Vienna/NNP/vienna "
+    + "and/CC/and died/VBN/die in/IN/in Berlin/NNP/berlin",
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("presidents", "NNS"))),
-        PropertyWithFilter(List(Token("were", "VBD"), Token("born", "VBN")),
-          FilterWithModifier(List(Token("before", "IN")), Number(List(Token("1900", "CD")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Give/VB me/PRP all/DT actors/NNS born/VBN in/IN "
-                            + "Berlin/NNP or/CC San/NNP Francisco/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("musicians", "NNS", "musician"))),
+      AndProperty(List(PropertyWithFilter(List(Token("were", "VBD", "be"), Token("born", "VBN", "bear")),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("Vienna", "NNP", "vienna"))))),
+        PropertyWithFilter(List(Token("died", "VBN", "die")),
+          FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("Berlin", "NNP", "berlin"))))))))))
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("actors", "NNS"))),
-        PropertyWithFilter(List(Token("born", "VBN")), FilterWithModifier(List(Token("in", "IN")),
-          OrValue(List(NamedValue(List(Token("Berlin", "NNP"))),
-            NamedValue(List(Token("San", "NNP"), Token("Francisco", "NNP")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("List/VB books/NNS by/IN George/NNP Orwell/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS"))),
+  test("Which/WDT/which presidents/NNS/president were/VBD/be born/VBN/bear before/IN/before 1900/CD/1900",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("presidents", "NNS", "president"))),
+      PropertyWithFilter(List(Token("were", "VBD", "be"), Token("born", "VBN", "bear")),
+        FilterWithModifier(List(Token("before", "IN", "before")), Number(List(Token("1900", "CD", "1900"))))))))
+
+
+  test("Give/VB/give me/PRP/me all/DT/all actors/NNS/actor born/VBN/bear in/IN/in "
+    + "Berlin/NNP/berlin or/CC/or San/NNP/san Francisco/NNP/francisco",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("actors", "NNS", "actor"))),
+      PropertyWithFilter(List(Token("born", "VBN", "bear")), FilterWithModifier(List(Token("in", "IN", "in")),
+        OrValue(List(NamedValue(List(Token("Berlin", "NNP", "berlin"))),
+          NamedValue(List(Token("San", "NNP", "san"), Token("Francisco", "NNP", "francisco"))))))))))
+
+
+  test("List/VB/list books/NNS/book by/IN/by George/NNP/george Orwell/NNP/orwell",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS", "book"))),
+      PropertyWithFilter(List(),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell"))))))))
+
+
+  test("Which/WDT/which books/NN/book did/VBD/do George/NNP/george Orwell/NNP/orwell write/VB/write",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN", "book"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("write", "VB", "write")),
+        PlainFilter(NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell"))))))))
+
+
+  test("list/VB/list presidents/NNS/president of/IN/of Argentina/NNP/argentina",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("presidents", "NNS", "president"))),
+        NamedQuery(List(Token("Argentina", "NNP", "argentina"))), Token("of", "IN", "of"))))
+
+
+  test("List/VB/list movies/NNS/movie directed/VBN/direct by/IN/by Quentin/NNP/quentin Tarantino/NNP/tarantino",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NNS", "movie"))),
+      PropertyWithFilter(List(Token("directed", "VBN", "direct")),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("Quentin", "NNP", "quentin"), Token("Tarantino", "NNP", "tarantino"))))))))
+
+
+  test("Which/WDT/which movies/NN/movie did/VBD/do Mel/NNP/mel Gibson/NNP/gibson direct/VB/direct",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN", "movie"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("direct", "VB", "direct")),
+        PlainFilter(NamedValue(List(Token("Mel", "NNP", "mel"), Token("Gibson", "NNP", "gibson"))))))))
+
+
+  test("Which/WDT/which movies/NN/movie did/VBD/do Obama/NNP/obama star/VB/star in/RP/in",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN", "movie"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"),
+        Token("star", "VB", "star"), Token("in", "RP", "in")),
+        PlainFilter(NamedValue(List(Token("Obama", "NNP", "obama"))))))))
+
+
+  test("In/IN/in what/WDT/what movies/NN/movie did/VBD/do "
+    + "Jennifer/NNP/jennifer Aniston/NNP/aniston appear/VB/appear",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN", "movie"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("appear", "VB", "appear")),
+        PlainFilter(NamedValue(List(Token("Jennifer", "NNP", "jennifer"), Token("Aniston", "NNP", "aniston"))))))))
+
+
+  test("Movies/NNP/movie starring/VB/star Winona/NNP/winona Ryder/NNP/ryder",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("Movies", "NNP", "movie"))),
+      PropertyWithFilter(List(Token("starring", "VB", "star")),
+        PlainFilter(NamedValue(List(Token("Winona", "NNP", "winona"), Token("Ryder", "NNP", "ryder"))))))))
+
+
+  test("List/VB/list albums/NNS/album of/IN/of Pink/NNP/pink Floyd/NNP/floyd",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("albums", "NNS", "album"))),
+      NamedQuery(List(Token("Pink", "NNP", "pink"), Token("Floyd", "NNP", "floyd"))), Token("of", "IN", "of"))))
+
+
+  test("List/VB/list the/DT/the actors/NNS/actor of/IN/of Titanic/NNP/titanic",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("actors", "NNS", "actor"))),
+      NamedQuery(List(Token("Titanic", "NNP", "titanic"))), Token("of", "IN", "of"))))
+
+
+  test("who/WP/who are/VBP/be the/DT/the actors/NNS/actor of/IN/of Titanic/NNP/titanic",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("actors", "NNS", "actor"))),
+      NamedQuery(List(Token("Titanic", "NNP", "titanic"))), Token("of", "IN", "of"))))
+
+
+  test("who/WP/who acted/VBD/act in/IN/in Alien/NNP/alien",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("acted", "VBD", "act")),
+      FilterWithModifier(List(Token("in", "IN", "in")), NamedValue(List(Token("Alien", "NNP", "alien")))))))
+
+
+  test("who/WP/who starred/VBD/star in/IN/in Inception/NNP/inception",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("starred", "VBD", "star")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        NamedValue(List(Token("Inception", "NNP", "inception")))))))
+
+
+  test("who/WP/who are/VBP/be the/DT/the actors/NNS/actor "
+    + "which/WDT/which starred/VBD/star in/IN/in Inception/NNP/inception",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("the", "DT", "the"),
+      Token("actors", "NNS", "actor"))),
+        PropertyWithFilter(List(Token("starred", "VBD", "star")),
+          FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("Inception", "NNP", "inception"))))))))
+
+
+  test("Who/WP/who is/VBZ/be the/DT/the director/NN/director of/IN/of Big/NN/big Fish/NN/fish",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("director", "NN", "director"))),
+      NamedQuery(List(Token("Big", "NN", "big"), Token("Fish", "NN", "fish"))), Token("of", "IN", "of"))))
+
+
+  test("who/WP/who directed/VBD/direct Pocahontas/NNP/pocahontas",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("directed", "VBD", "direct")),
+      PlainFilter(NamedValue(List(Token("Pocahontas", "NNP", "pocahontas")))))))
+
+
+  test("Which/WDT/which city/NN/city is/VBZ/be bigger/JJR/big than/IN/than New/NNP/new York/NNP/york City/NNP/city",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("city", "NN", "city"))),
+      PropertyWithFilter(List(Token("is", "VBZ", "be")),
+        FilterWithComparativeModifier(List(Token("bigger", "JJR", "big"), Token("than", "IN", "than")),
+          NamedValue(List(Token("New", "NNP", "new"), Token("York", "NNP", "york"),
+            Token("City", "NNP", "city"))))))))
+
+
+  test("What/WP/what are/VBP/be the/DT/the members/NNS/member of/IN/of Metallica/NNP/metallica",
+
+      ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("members", "NNS", "member"))),
+      NamedQuery(List(Token("Metallica", "NNP", "metallica"))), Token("of", "IN", "of"))))
+
+
+  test("members/NNS/member of/IN/of Metallica/NNP/metallica",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("members", "NNS", "member"))),
+      NamedQuery(List(Token("Metallica", "NNP", "metallica"))), Token("of", "IN", "of"))))
+
+
+  test("What/WP/what is/VBZ/be the/DT/the music/NN/music genre/NN/genre of/IN/of Gorillaz/NNP/gorillaz",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("music", "NN", "music"), Token("genre", "NN", "genre"))),
+      NamedQuery(List(Token("Gorillaz", "NNP", "gorillaz"))), Token("of", "IN", "of"))))
+
+
+  test("actors/NNP/actor",
+
+    ListQuestion(NamedQuery(List(Token("actors", "NNP", "actor")))))
+
+
+  test("Radiohead/NNS/radiohead members/NNP/member",
+
+    ListQuestion(NamedQuery(List(Token("Radiohead", "NNS", "radiohead"),
+      Token("members", "NNP", "member")))))
+
+
+  test("What/WP/what is/VBZ/be the/DT/the cast/NN/cast of/IN/of Friends/NNS/friend",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"), Token("cast", "NN", "cast"))),
+      NamedQuery(List(Token("Friends", "NNS", "friend"))), Token("of", "IN", "of"))))
+
+
+  test("Who/WP/who works/VBZ/work in/IN/in Breaking/NNS/break Bad/NNS/bad",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("works", "VBZ", "work")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        NamedValue(List(Token("Breaking", "NNS", "break"), Token("Bad", "NNS", "bad")))))))
+
+
+  test("what/WDT/what languages/NNS/language are/VBP/be spoken/VBN/speak in/IN/in Switzerland/NNP/switzerland",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("languages", "NNS", "language"))),
+      PropertyWithFilter(List(Token("are", "VBP", "be"), Token("spoken", "VBN", "speak")),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("Switzerland", "NNP", "switzerland"))))))))
+
+
+  test("Which/WDT/which cities/NNS/city have/VBP/have more/JJR/more than/IN/than "
+    + "two/CD/two million/CD/million inhabitants/NNS/inhabitant",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      PropertyWithFilter(List(Token("have", "VBP", "have")),
+        FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+          NumberWithUnit(List(Token("two", "CD", "two"), Token("million", "CD", "million")),
+            List(Token("inhabitants", "NNS", "inhabitant"))))))))
+
+
+  test("What/WP/what films/NNS/film featured/VBD/feature "
+    + "the/DT/the character/NN/character Popeye/NNP/popeye Doyle/NNP/doyle",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("films", "NNS", "film"))),
+      PropertyWithFilter(List(Token("featured", "VBD", "feature")),
+        PlainFilter(NamedValue(List(Token("the", "DT", "the"), Token("character", "NN", "character"),
+          Token("Popeye", "NNP", "popeye"), Token("Doyle", "NNP", "doyle"))))))))
+
+
+  test("Who/WP/who is/VBZ/be taller/JJR/tall than/IN/than Obama/NNP/obama",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("is", "VBZ", "be")),
+      FilterWithComparativeModifier(List(Token("taller", "JJR", "tall"), Token("than", "IN", "than")),
+        NamedValue(List(Token("Obama", "NNP", "obama")))))))
+
+
+  test("Who/WP/who lived/VBD/live in/IN/in Berlin/NNP/berlin and/CC/and Copenhagen/NNP/copenhagen "
+    + "or/CC/or New/NNP/new York/NNP/york City/NNP/city",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD", "live")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        OrValue(List(AndValue(List(NamedValue(List(Token("Berlin", "NNP", "berlin"))),
+          NamedValue(List(Token("Copenhagen", "NNP", "copenhagen"))))),
+          NamedValue(List(Token("New", "NNP", "new"), Token("York", "NNP", "york"),
+            Token("City", "NNP", "city")))))))))
+
+
+  test("which/WDT/which books/NNS/book written/VBN/write by/IN/by Orwell/NNP/orwell are/VBP/be about/IN/about "
+    + "dystopian/JJ/dystopian societies/NNS/society",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS", "book"))),
+      AndProperty(List(PropertyWithFilter(List(Token("written", "VBN", "write")),
+        FilterWithModifier(List(Token("by", "IN", "by")), NamedValue(List(Token("Orwell", "NNP", "orwell"))))),
+        PropertyWithFilter(List(Token("are", "VBP", "be")),
+          FilterWithModifier(List(Token("about", "IN", "about")),
+            NamedValue(List(Token("dystopian", "JJ", "dystopian"), Token("societies", "NNS", "society"))))))))))
+
+
+  test("Which/WDT/which books/NN/book did/VBD/do"
+    + " Orwell/NNP/orwell or/CC/or Shakespeare/NNP/shakespeare write/VB/write",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN", "book"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("write", "VB", "write")),
+        PlainFilter(OrValue(List(NamedValue(List(Token("Orwell", "NNP", "orwell"))),
+          NamedValue(List(Token("Shakespeare", "NNP", "shakespeare"))))))))))
+
+
+  test("who/WP/who are/VBP/be the/DT/the children/NNS/child of/IN/of the/DT/the presidents/NNS/president",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("children", "NNS", "child"))),
+      NamedQuery(List(Token("the", "DT", "the"), Token("presidents", "NNS", "president"))),
+      Token("of", "IN", "of"))))
+
+
+  test("what/WP/what are/VBP/be the/DT/the largest/JJS/large cities/NNS/city in/IN/in europe/NN/europe",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("the", "DT", "the"),
+        Token("largest", "JJS", "large"), Token("cities", "NNS", "city"))),
+      PropertyWithFilter(List(),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("europe", "NN", "europe"))))))))
+
+
+  test("what/WP/what are/VBP/be the/DT/the population/NN/population sizes/NNS/size of/IN/of cities/NNS/city "
+    + "located/VBN/locate in/IN/in california/NN/california",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("population", "NN", "population"),
+      Token("sizes", "NNS", "size"))),
+      QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+        PropertyWithFilter(List(Token("located", "VBN", "locate")),
+          FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("california", "NN", "california")))))),
+      Token("of", "IN", "of"))))
+
+
+  test("what/WP/what are/VBP/be the/DT/the population/NN/population sizes/NNS/size of/IN/of cities/NNS/city "
+    + "that/WDT/that are/VBP/be located/VBN/locate in/IN/in california/NN/california",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("population", "NN", "population"),
+      Token("sizes", "NNS", "size"))),
+      QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+        PropertyWithFilter(List(Token("are", "VBP", "be"), Token("located", "VBN", "locate")),
+          FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("california", "NN", "california")))))),
+      Token("of", "IN", "of"))))
+
+
+  test("Who/WP/who are/VBP/be the/DT/the children/NNS/child "
+     + "of/IN/of the/DT/the children/NNS/child "
+     + "of/IN/of Bill/NNP/bill Clinton/NNP/clinton",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("children", "NNS", "child"))),
+      RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"), Token("children", "NNS", "child"))),
+        NamedQuery(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))),
+        Token("of", "IN", "of")),
+      Token("of", "IN", "of"))))
+
+
+  test("What/WP/what are/VBP/be the/DT/the largest/JJS/large cities/NNS/city of/IN/of California/NNP/california",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+        Token("largest", "JJS", "large"), Token("cities", "NNS", "city"))),
+      NamedQuery(List(Token("California", "NNP", "california"))),
+      Token("of", "IN", "of"))))
+
+
+  test("What/WP/what are/VBP/be the/DT/the biggest/JJS/big cities/NNS/city of/IN/of California/NNP/california",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("biggest", "JJS", "big"), Token("cities", "NNS", "city"))),
+      NamedQuery(List(Token("California", "NNP", "california"))),
+      Token("of", "IN", "of"))))
+
+
+  test("Who/WP/who did/VBD/do Bill/NNP/bill Clinton/NNP/clinton marry/VB/marry",
+
+    PersonListQuestion(InversePropertyWithFilter(List(Token("did", "VBD", "do"),
+      Token("marry", "VB", "marry")),
+      PlainFilter(NamedValue(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton")))))))
+
+
+  test("Clinton/NNP/clinton 's/POS/'s daughters/NN/daughter",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughters", "NN", "daughter"))),
+      NamedQuery(List(Token("Clinton", "NNP", "clinton"))),
+      Token("'s", "POS", "'s"))))
+
+
+  test("What/WP/what are/VBP/be California/NNP/california 's/POS/'s biggest/JJS/big cities/NNS/city",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("biggest", "JJS", "big"),
+      Token("cities", "NNS", "city"))),
+      NamedQuery(List(Token("California", "NNP", "california"))),
+      Token("'s", "POS", "'s"))))
+
+
+  test("Who/WP/who is/VBZ/be Bill/NNP/bill Clinton/NNP/clinton 's/POS/'s daughter/NN/daughter",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughter", "NN", "daughter"))),
+      NamedQuery(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))),
+      Token("'s", "POS", "'s"))))
+
+
+  test("Who/WP/who is/VBZ/be Bill/NNP/bill Clinton/NNP/clinton 's/POS/'s daughter/NN/daughter 's/POS/'s "
+    + "husband/NN/husband 's/POS/'s daughter/NN/daughter 's/POS/'s grandfather/NN/grandfather",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("grandfather", "NN", "grandfather"))),
+      RelationshipQuery(NamedQuery(List(Token("daughter", "NN", "daughter"))),
+        RelationshipQuery(NamedQuery(List(Token("husband", "NN", "husband"))),
+          RelationshipQuery(NamedQuery(List(Token("daughter", "NN", "daughter"))),
+            NamedQuery(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))),
+            Token("'s", "POS", "'s")),
+          Token("'s", "POS", "'s")),
+        Token("'s", "POS", "'s")),
+      Token("'s", "POS", "'s"))))
+
+
+  test("presidents/NNS/president that/WDT/that have/VBP/have children/NNS/child",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("presidents", "NNS", "president"))),
+      PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("children", "NNS", "child"))))))))
+
+
+  test("Who/WP/who did/VBD/do Bill/NNP/bill Clinton/NNP/clinton 's/POS/'s daughter/NN/daughter marry/VB/marry",
+
+    PersonListQuestion(InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("marry", "VB", "marry")),
+      PlainFilter(ValueRelationship(NamedValue(List(Token("daughter", "NN", "daughter"))),
+        NamedValue(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))))))))
+
+
+  test("In/IN/in which/WDT/which californian/NN/californian cities/NNS/city "
+    + "live/VBP/live more/JJR/more than/IN/than 2/CD/2 million/CD/million people/NNS/people",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "NN", "californian"),
+      Token("cities", "NNS", "city"))),
+      PropertyWithFilter(List(Token("live", "VBP", "live")),
+        FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+          NumberWithUnit(List(Token("2", "CD", "2"), Token("million", "CD", "million")),
+            List(Token("people", "NNS", "people"))))))))
+
+
+  test("the/DT/the population/NNP/population of/IN/of Japan/NNP/japan before/IN/before 1900/CD/1900",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("population", "NNP", "population"))),
+      QueryWithProperty(NamedQuery(List(Token("Japan", "NNP", "japan"))),
         PropertyWithFilter(List(),
-          FilterWithModifier(List(Token("by", "IN")),
-            NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT books/NN did/VBD George/NNP Orwell/NNP write/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+          FilterWithModifier(List(Token("before", "IN", "before")),
+            Number(List(Token("1900", "CD", "1900")))))),
+      Token("of", "IN", "of"))))
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"), Token("write", "VB")),
-          PlainFilter(NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("list/VB presidents/NNS of/IN Argentina/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("presidents", "NNS"))),
-        NamedQuery(List(Token("Argentina", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("List/VB movies/NNS directed/VBN by/IN Quentin/NNP Tarantino/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("What/WP/what are/VBP/be the/DT/the population/NN/population "
+    + "of/IN/of China/NNP/china and/CC/and the/DT/the USA/NNP/usa",
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NNS"))),
-        PropertyWithFilter(List(Token("directed", "VBN")),
-          FilterWithModifier(List(Token("by", "IN")),
-            NamedValue(List(Token("Quentin", "NNP"), Token("Tarantino", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT movies/NN did/VBD Mel/NNP Gibson/NNP direct/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("population", "NN", "population"))),
+      AndQuery(List(NamedQuery(List(Token("China", "NNP", "china"))),
+        NamedQuery(List(Token("the", "DT", "the"), Token("USA", "NNP", "usa"))))),
+      Token("of", "IN", "of"))))
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"), Token("direct", "VB")),
-          PlainFilter(NamedValue(List(Token("Mel", "NNP"), Token("Gibson", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT movies/NN did/VBD Obama/NNP star/VB in/RP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"),
-          Token("star", "VB"), Token("in", "RP")),
-          PlainFilter(NamedValue(List(Token("Obama", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("In/IN what/WDT movies/NN did/VBD Jennifer/NNP Aniston/NNP appear/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("the/DT/the population/NNP/population of/IN/of Japan/NNP/japan and/CC/and China/NNP/china",
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("movies", "NN"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"), Token("appear", "VB")),
-          PlainFilter(NamedValue(List(Token("Jennifer", "NNP"), Token("Aniston", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Movies/NNP starring/VB Winona/NNP Ryder/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("population", "NNP", "population"))),
+      AndQuery(List(NamedQuery(List(Token("Japan", "NNP", "japan"))),
+        NamedQuery(List(Token("China", "NNP", "china"))))),
+      Token("of", "IN", "of"))))
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("Movies", "NNP"))),
-        PropertyWithFilter(List(Token("starring", "VB")),
-          PlainFilter(NamedValue(List(Token("Winona", "NNP"), Token("Ryder", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("List/VB albums/NNS of/IN Pink/NNP Floyd/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("albums", "NNS"))),
-        NamedQuery(List(Token("Pink", "NNP"), Token("Floyd", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("List/VB the/DT actors/NNS of/IN Titanic/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("the/DT/the population/NNP/population of/IN/of Japan/NNP/japan "
+    + "and/CC/and China/NNP/china before/IN/before 1900/CD/1900",
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("actors", "NNS"))),
-          NamedQuery(List(Token("Titanic", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("who/WP are/VBP the/DT actors/NNS of/IN Titanic/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("actors", "NNS"))),
-          NamedQuery(List(Token("Titanic", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("who/WP acted/VBD in/IN Alien/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("acted", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")), NamedValue(List(Token("Alien", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("who/WP starred/VBD in/IN Inception/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("starred", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")),
-          NamedValue(List(Token("Inception", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("who/WP are/VBP the/DT actors/NNS which/WDT starred/VBD in/IN Inception/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("the", "DT"),
-          Token("actors", "NNS"))),
-          PropertyWithFilter(List(Token("starred", "VBD")),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("Inception", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP is/VBZ the/DT director/NN of/IN Big/NN Fish/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("director", "NN"))),
-          NamedQuery(List(Token("Big", "NN"), Token("Fish", "NN"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("who/WP directed/VBD Pocahontas/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("directed", "VBD")),
-        PlainFilter(NamedValue(List(Token("Pocahontas", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT city/NN is/VBZ bigger/JJR than/IN New/NNP York/NNP City/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("city", "NN"))),
-        PropertyWithFilter(List(Token("is", "VBZ")),
-          FilterWithComparativeModifier(List(Token("bigger", "JJR"), Token("than", "IN")),
-            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP are/VBP the/DT members/NNS of/IN Metallica/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("members", "NNS"))),
-          NamedQuery(List(Token("Metallica", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("members/NNS of/IN Metallica/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("members", "NNS"))),
-        NamedQuery(List(Token("Metallica", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP is/VBZ the/DT music/NN genre/NN of/IN Gorillaz/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("music", "NN"), Token("genre", "NN"))),
-          NamedQuery(List(Token("Gorillaz", "NNP"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("actors/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(NamedQuery(List(Token("actors", "NNP"))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Radiohead/NNS members/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(NamedQuery(List(Token("Radiohead", "NNS"),
-        Token("members", "NNP"))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP is/VBZ the/DT cast/NN of/IN Friends/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("cast", "NN"))),
-          NamedQuery(List(Token("Friends", "NNS"))), Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP works/VBZ in/IN Breaking/NNS Bad/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("works", "VBZ")),
-        FilterWithModifier(List(Token("in", "IN")),
-          NamedValue(List(Token("Breaking", "NNS"), Token("Bad", "NNS"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("what/WDT languages/NNS are/VBP spoken/VBN in/IN Switzerland/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("languages", "NNS"))),
-        PropertyWithFilter(List(Token("are", "VBP"), Token("spoken", "VBN")),
-          FilterWithModifier(List(Token("in", "IN")),
-            NamedValue(List(Token("Switzerland", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT cities/NNS have/VBP more/JJR than/IN "
-                 + "two/CD million/CD inhabitants/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-        PropertyWithFilter(List(Token("have", "VBP")),
-          FilterWithComparativeModifier(List(Token("more", "JJR"), Token("than", "IN")),
-            NumberWithUnit(List(Token("two", "CD"), Token("million", "CD")),
-              List(Token("inhabitants", "NNS")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP films/NNS featured/VBD the/DT character/NN Popeye/NNP Doyle/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("films", "NNS"))),
-        PropertyWithFilter(List(Token("featured", "VBD")),
-          PlainFilter(NamedValue(List(Token("the", "DT"), Token("character", "NN"),
-            Token("Popeye", "NNP"), Token("Doyle", "NNP")))))))
-      assertEquals(expected, result.get)
-
-    }
-    {
-      val tokens = tokenize("Who/WP is/VBZ taller/JJR than/IN Obama/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("is", "VBZ")),
-        FilterWithComparativeModifier(List(Token("taller", "JJR"), Token("than", "IN")),
-          NamedValue(List(Token("Obama", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP and/CC Copenhagen/NNP "
-                            + "or/CC New/NNP York/NNP City/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")),
-          OrValue(List(AndValue(List(NamedValue(List(Token("Berlin", "NNP"))),
-            NamedValue(List(Token("Copenhagen", "NNP"))))),
-            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("which/WDT books/NNS written/VBN by/IN Orwell/NNP are/VBP about/IN "
-                 + "dystopian/JJ societies/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS"))),
-        AndProperty(List(PropertyWithFilter(List(Token("written", "VBN")),
-          FilterWithModifier(List(Token("by", "IN")), NamedValue(List(Token("Orwell", "NNP"))))),
-          PropertyWithFilter(List(Token("are", "VBP")),
-            FilterWithModifier(List(Token("about", "IN")),
-              NamedValue(List(Token("dystopian", "JJ"), Token("societies", "NNS")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT books/NN did/VBD Orwell/NNP or/CC Shakespeare/NNP write/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"), Token("write", "VB")),
-          PlainFilter(OrValue(List(NamedValue(List(Token("Orwell", "NNP"))),
-            NamedValue(List(Token("Shakespeare", "NNP")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("who/WP are/VBP the/DT children/NNS of/IN the/DT presidents/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("children", "NNS"))),
-          NamedQuery(List(Token("the", "DT"), Token("presidents", "NNS"))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("what/WP are/VBP the/DT largest/JJS cities/NNS in/IN europe/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-
-      val expected = ListQuestion(QueryWithProperty(
-        NamedQuery(List(Token("the", "DT"), Token("largest", "JJS"), Token("cities", "NNS"))),
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+        Token("population", "NNP", "population"))),
+      QueryWithProperty(AndQuery(List(NamedQuery(List(Token("Japan", "NNP", "japan"))),
+        NamedQuery(List(Token("China", "NNP", "china"))))),
         PropertyWithFilter(List(),
-          FilterWithModifier(List(Token("in", "IN")),
-            NamedValue(List(Token("europe", "NN")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("what/WP are/VBP the/DT population/NN sizes/NNS of/IN cities/NNS "
-                 + "located/VBN in/IN california/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+          FilterWithModifier(List(Token("before", "IN", "before")),
+            Number(List(Token("1900", "CD", "1900")))))),
+      Token("of", "IN", "of"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NN"),
-          Token("sizes", "NNS"))),
-          QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-            PropertyWithFilter(List(Token("located", "VBN")),
-              FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("california", "NN")))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("what/WP are/VBP the/DT population/NN sizes/NNS of/IN cities/NNS "
-                 + "that/WDT are/VBP located/VBN in/IN california/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NN"),
-          Token("sizes", "NNS"))),
-          QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-            PropertyWithFilter(List(Token("are", "VBP"), Token("located", "VBN")),
-              FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("california", "NN")))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP are/VBP the/DT children/NNS "
-                 + "of/IN the/DT children/NNS "
-                 + "of/IN Bill/NNP Clinton/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("the/DT/the population/NNP/population and/CC/and area/NNP/area"
+    + " of/IN/of Japan/NNP/japan and/CC/and China/NNP/china",
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("children", "NNS"))),
-          RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("children", "NNS"))),
-            NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
-            Token("of", "IN")),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP are/VBP the/DT largest/JJS cities/NNS of/IN California/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("the", "DT", "the"),
+        Token("population", "NNP", "population"))),
+      NamedQuery(List(Token("area", "NNP", "area"))))),
+      AndQuery(List(NamedQuery(List(Token("Japan", "NNP", "japan"))),
+        NamedQuery(List(Token("China", "NNP", "china"))))),
+      Token("of", "IN", "of"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(
-          NamedQuery(List(Token("the", "DT"), Token("largest", "JJS"), Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP"))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP are/VBP the/DT biggest/JJS cities/NNS of/IN California/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("biggest", "JJS"), Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP"))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP did/VBD Bill/NNP Clinton/NNP marry/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("the/DT/the population/NN/population ,/,/, land/NN/land area/NN/area and/CC/and capitals/NNP/capital "
+    + "of/IN/of Japan/NNP/japan ,/,/, India/NNP/india and/CC/and China/NNP/china",
 
-      val expected =
-        PersonListQuestion(InversePropertyWithFilter(List(Token("did", "VBD"),
-          Token("marry", "VB")),
-          PlainFilter(NamedValue(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Clinton/NNP 's/POS daughters/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("the", "DT", "the"),
+        Token("population", "NN", "population"))),
+      NamedQuery(List(Token("land", "NN", "land"), Token("area", "NN", "area"))),
+      NamedQuery(List(Token("capitals", "NNP", "capital"))))),
+      AndQuery(List(NamedQuery(List(Token("Japan", "NNP", "japan"))),
+        NamedQuery(List(Token("India", "NNP", "india"))),
+        NamedQuery(List(Token("China", "NNP", "china"))))),
+      Token("of", "IN", "of"))))
 
-      val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughters", "NN"))),
-        NamedQuery(List(Token("Clinton", "NNP"))),
-        Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP are/VBP California/NNP 's/POS biggest/JJS cities/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("biggest", "JJS"),
-          Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP"))),
-          Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP is/VBZ Bill/NNP Clinton/NNP 's/POS daughter/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("children/NNS/child of/IN/of all/DT/all presidents/NNS/president of/IN/of the/DT/the US/NNP/us",
 
-      val expected = ListQuestion(RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
-        NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
-        Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP is/VBZ Bill/NNP Clinton/NNP 's/POS daughter/NN 's/POS "
-                            + "husband/NN 's/POS daughter/NN 's/POS grandfather/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("children", "NNS", "child"))),
+      RelationshipQuery(NamedQuery(List(Token("all", "DT", "all"), Token("presidents", "NNS", "president"))),
+        NamedQuery(List(Token("the", "DT", "the"), Token("US", "NNP", "us"))),
+        Token("of", "IN", "of")),
+      Token("of", "IN", "of"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("grandfather", "NN"))),
-          RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
-            RelationshipQuery(NamedQuery(List(Token("husband", "NN"))),
-              RelationshipQuery(NamedQuery(List(Token("daughter", "NN"))),
-                NamedQuery(List(Token("Bill", "NNP"), Token("Clinton", "NNP"))),
-                Token("'s", "POS")),
-              Token("'s", "POS")),
-            Token("'s", "POS")),
-          Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("presidents/NNS that/WDT have/VBP children/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("presidents", "NNS"))),
-          PropertyWithFilter(List(Token("have", "VBP")),
-            PlainFilter(NamedValue(List(Token("children", "NNS")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP did/VBD Bill/NNP Clinton/NNP 's/POS daughter/NN marry/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Clinton/NNP/clinton 's/POS/'s children/NNS/child and/CC/and grandchildren/NNS/grandchild",
 
-      val expected =
-        PersonListQuestion(InversePropertyWithFilter(List(Token("did", "VBD"),
-          Token("marry", "VB")),
-          PlainFilter(ValueRelationship(NamedValue(List(Token("daughter", "NN"))),
-            NamedValue(List(Token("Bill", "NNP"), Token("Clinton", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("In/IN which/WDT californian/NN cities/NNS "
-                            + "live/VBP more/JJR than/IN 2/CD million/CD people/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS", "child"))),
+      NamedQuery(List(Token("grandchildren", "NNS", "grandchild"))))),
+      NamedQuery(List(Token("Clinton", "NNP", "clinton"))),
+      Token("'s", "POS", "'s"))))
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "NN"),
-          Token("cities", "NNS"))),
-          PropertyWithFilter(List(Token("live", "VBP")),
-            FilterWithComparativeModifier(List(Token("more", "JJR"), Token("than", "IN")),
-              NumberWithUnit(List(Token("2", "CD"), Token("million", "CD")),
-                List(Token("people", "NNS")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("the/DT population/NNP of/IN Japan/NNP before/IN 1900/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NNP"))),
-          QueryWithProperty(NamedQuery(List(Token("Japan", "NNP"))),
-            PropertyWithFilter(List(),
-              FilterWithModifier(List(Token("before", "IN")),
-                Number(List(Token("1900", "CD")))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP are/VBP the/DT population/NN of/IN China/NNP and/CC the/DT USA/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Japan/NNP/japan and/CC/and China/NNP/china 's/POS/'s population/NNP/population and/CC/and area/NNP/area",
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NN"))),
-          AndQuery(List(NamedQuery(List(Token("China", "NNP"))),
-            NamedQuery(List(Token("the", "DT"), Token("USA", "NNP"))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("the/DT population/NNP of/IN Japan/NNP and/CC China/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("population", "NNP", "population"))),
+      NamedQuery(List(Token("area", "NNP", "area"))))),
+      AndQuery(List(NamedQuery(List(Token("Japan", "NNP", "japan"))),
+        NamedQuery(List(Token("China", "NNP", "china"))))),
+      Token("'s", "POS", "'s"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NNP"))),
-          AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP"))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("the/DT population/NNP of/IN Japan/NNP and/CC China/NNP before/IN 1900/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NNP"))),
-          QueryWithProperty(AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP"))))),
-            PropertyWithFilter(List(),
-              FilterWithModifier(List(Token("before", "IN")),
-                Number(List(Token("1900", "CD")))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("the/DT population/NNP and/CC area/NNP of/IN Japan/NNP and/CC China/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("which/WDT/which books/NNS/book were/VBD/be written/VBN/write by/IN/by Orwell/NNP/orwell "
+    + "and/CC/and are/VBP/be about/IN/about dystopian/JJ/dystopian societies/NNS/society",
 
-      val expected =
-        ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NNP"))),
-          NamedQuery(List(Token("area", "NNP"))))),
-          AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP"))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("the/DT population/NN ,/, land/NN area/NN and/CC capitals/NNP "
-                 + "of/IN Japan/NNP ,/, India/NNP and/CC China/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS", "book"))),
+      AndProperty(List(PropertyWithFilter(List(Token("were", "VBD", "be"), Token("written", "VBN", "write")),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("Orwell", "NNP", "orwell"))))),
+        PropertyWithFilter(List(Token("are", "VBP", "be")),
+          FilterWithModifier(List(Token("about", "IN", "about")),
+            NamedValue(List(Token("dystopian", "JJ", "dystopian"), Token("societies", "NNS", "society"))))))))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("the", "DT"),
-          Token("population", "NN"))),
-          NamedQuery(List(Token("land", "NN"), Token("area", "NN"))),
-          NamedQuery(List(Token("capitals", "NNP"))))),
-          AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("India", "NNP"))),
-            NamedQuery(List(Token("China", "NNP"))))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("children/NNS of/IN all/DT presidents/NNS of/IN the/DT US/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("children", "NNS"))),
-          RelationshipQuery(NamedQuery(List(Token("all", "DT"), Token("presidents", "NNS"))),
-            NamedQuery(List(Token("the", "DT"), Token("US", "NNP"))),
-            Token("of", "IN")),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Clinton/NNP 's/POS children/NNS and/CC grandchildren/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Who/WP/who is/VBZ/be the/DT/the president/NN/president of/IN/of France/NNP/france",
 
-      val expected =
-        ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS"))),
-          NamedQuery(List(Token("grandchildren", "NNS"))))),
-          NamedQuery(List(Token("Clinton", "NNP"))),
-          Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Japan/NNP and/CC China/NNP 's/POS population/NNP and/CC area/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+      Token("president", "NN", "president"))),
+      NamedQuery(List(Token("France", "NNP", "france"))),
+      Token("of", "IN", "of"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("population", "NNP"))),
-          NamedQuery(List(Token("area", "NNP"))))),
-          AndQuery(List(NamedQuery(List(Token("Japan", "NNP"))),
-            NamedQuery(List(Token("China", "NNP"))))),
-          Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("which/WDT books/NNS were/VBD written/VBN by/IN Orwell/NNP "
-                 + "and/CC are/VBP about/IN dystopian/NN societies/NNS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(Token("were", "VBD"), Token("written", "VBN")),
-            FilterWithModifier(List(Token("by", "IN")),
-              NamedValue(List(Token("Orwell", "NNP"))))),
-            PropertyWithFilter(List(Token("are", "VBP")),
-              FilterWithModifier(List(Token("about", "IN")),
-                NamedValue(List(Token("dystopian", "NN"), Token("societies", "NNS")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP is/VBZ the/DT president/NN of/IN France/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Who/WP/who are/VBP/be the/DT/the daughters/NNS/daughter of/IN/of the/DT/the wife/NN/wife of/IN/of "
+     + "the/DT/the president/NN/president of/IN/of the/DT/the United/NNP/united States/NNPS/state",
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("president", "NN"))),
-          NamedQuery(List(Token("France", "NNP"))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP are/VBP the/DT daughters/NNS of/IN the/DT wife/NN of/IN "
-                 + "the/DT president/NN of/IN the/DT United/NNP States/NNPS")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+      ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+        Token("daughters", "NNS", "daughter"))),
+        RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"), Token("wife", "NN", "wife"))),
+          RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"), Token("president", "NN", "president"))),
+            NamedQuery(List(Token("the", "DT", "the"),
+              Token("United", "NNP", "united"), Token("States", "NNPS", "state"))),
+            Token("of", "IN", "of")),
+          Token("of", "IN", "of")),
+        Token("of", "IN", "of"))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-          Token("daughters", "NNS"))),
-          RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("wife", "NN"))),
-            RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("president", "NN"))),
-              NamedQuery(List(Token("the", "DT"),
-                Token("United", "NNP"), Token("States", "NNPS"))),
-              Token("of", "IN")),
-            Token("of", "IN")),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT books/NN were/VBD authored/VBN by/IN George/NNP Orwell/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN"))),
-          PropertyWithFilter(List(Token("were", "VBD"), Token("authored", "VBN")),
-            FilterWithModifier(List(Token("by", "IN")),
-              NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WDT actor/NN married/VBD John/NNP F./NNP Kennedy/NNP 's/POS sister/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("which/WDT/which books/NN/book were/VBD/be authored/VBN/author by/IN/by George/NNP/george Orwell/NNP/orwell",
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("actor", "NN"))),
-          PropertyWithFilter(List(Token("married", "VBD")),
-            PlainFilter(ValueRelationship(NamedValue(List(Token("sister", "NN"))),
-              NamedValue(List(Token("John", "NNP"), Token("F.", "NNP"),
-                Token("Kennedy", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT instrument/NN did/VBD John/NNP Lennon/NNP play/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN", "book"))),
+      PropertyWithFilter(List(Token("were", "VBD", "be"), Token("authored", "VBN", "author")),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell"))))))))
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("instrument", "NN"))),
-          InversePropertyWithFilter(List(Token("did", "VBD"), Token("play", "VB")),
-            PlainFilter(NamedValue(List(Token("John", "NNP"), Token("Lennon", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT poets/NNS lived/VBD in/IN the/DT 19th/JJ century/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("poets", "NNS"))),
-          PropertyWithFilter(List(Token("lived", "VBD")),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("the", "DT"), Token("19th", "JJ"),
-                Token("century", "NN")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP wrote/VBD ``/`` Le/NNP Petit/NNP Prince/NNP ''/'' "
-                 + "and/CC ``/`` Vol/NNP de/IN Nuit/NNP ''/''")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("What/WDT/what actor/NN/actor married/VBD/marry"
+    + " John/NNP/john F./NNP/f. Kennedy/NNP/kennedy 's/POS/'s sister/NN/sister",
 
-      val expected =
-        PersonListQuestion(PropertyWithFilter(List(Token("wrote", "VBD")),
-          PlainFilter(AndValue(List(NamedValue(List(Token("Le", "NNP"),
-            Token("Petit", "NNP"), Token("Prince", "NNP"))),
-            NamedValue(List(Token("Vol", "NNP"), Token("de", "IN"), Token("Nuit", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP is/VBZ the/DT son/NN of/IN the/DT main/JJ actor/NN "
-                 + "of/IN ``/`` I/PRP ,/, Robot/NNP ''/''")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("actor", "NN", "actor"))),
+      PropertyWithFilter(List(Token("married", "VBD", "marry")),
+        PlainFilter(ValueRelationship(NamedValue(List(Token("sister", "NN", "sister"))),
+          NamedValue(List(Token("John", "NNP", "john"), Token("F.", "NNP", "f."),
+            Token("Kennedy", "NNP", "kennedy")))))))))
 
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT"), Token("son", "NN"))),
-          RelationshipQuery(NamedQuery(List(Token("the", "DT"),
-            Token("main", "JJ"), Token("actor", "NN"))),
-            NamedQuery(List(Token("I", "PRP"), Token(",", ","), Token("Robot", "NNP"))),
-            Token("of", "IN")),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP did/VBD George/NNP Orwell/NNP write/VB")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ThingListQuestion(InversePropertyWithFilter(List(Token("did", "VBD"),
-          Token("write", "VB")),
-          PlainFilter(NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP was/VBD authored/VBN by/IN George/NNP Orwell/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("which/WDT/which instrument/NN/instrument did/VBD/do John/NNP/john Lennon/NNP/lennon play/VB/play",
 
-      val expected =
-        ThingListQuestion(PropertyWithFilter(List(Token("was", "VBD"), Token("authored", "VBN")),
-          FilterWithModifier(List(Token("by", "IN")),
-            NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP books/NNP were/VBD authored/VBN by/IN George/NNP Orwell/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("instrument", "NN", "instrument"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("play", "VB", "play")),
+        PlainFilter(NamedValue(List(Token("John", "NNP", "john"), Token("Lennon", "NNP", "lennon"))))))))
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNP"))),
-          PropertyWithFilter(List(Token("were", "VBD"), Token("authored", "VBN")),
-            FilterWithModifier(List(Token("by", "IN")),
-              NamedValue(List(Token("George", "NNP"), Token("Orwell", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("children/NNS and/CC grand/JJ children/NNS of/IN Clinton/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS"))),
-          NamedQuery(List(Token("grand", "JJ"), Token("children", "NNS"))))),
-          NamedQuery(List(Token("Clinton", "NNP"))),
-          Token("of", "IN")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT books/NN did/VBD Orwell/NNP write/VB "
-                 + "before/IN the/DT world/NN war/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("which/WDT/which poets/NNS/poet lived/VBD/live in/IN/in the/DT/the 19th/JJ/19th century/NN/century",
 
-      // TODO: handle in second stage:
-      //       empty property with modifying filter is constraining preceding property
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN"))),
-        AndProperty(List(InversePropertyWithFilter(List(Token("did", "VBD"),
-          Token("write", "VB")),
-          PlainFilter(NamedValue(List(Token("Orwell", "NNP"))))),
-          PropertyWithFilter(List(),
-            FilterWithModifier(List(Token("before", "IN")),
-              NamedValue(List(Token("the", "DT"), Token("world", "NN"), Token("war", "NN")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP are/VBP cities/NNS which/WDT have/VBP a/DT population/NN "
-                 + "larger/JJR than/IN 1/CD million/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("poets", "NNS", "poet"))),
+      PropertyWithFilter(List(Token("lived", "VBD", "live")),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("the", "DT", "the"), Token("19th", "JJ", "19th"),
+            Token("century", "NN", "century"))))))))
 
-      // TODO: handle in second stage:
-      //       filter of empty second property is constraining preceding property
-      //       (empty property is shortened from ~"which is")
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-        AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
-          PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
-          PropertyWithFilter(List(),
-            FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-              Number(List(Token("1", "CD"), Token("million", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("which/WDT cities/NNS have/VBP a/DT population/NN larger/JJR than/IN 1000/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      // TODO: handle in second stage:
-      //       filter of empty second property is constraining preceding property
-      //       (empty property is shortened from ~"which is")
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
-            PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
-            PropertyWithFilter(List(),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-                Number(List(Token("1000", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("cities/NNS which/WDT have/VBP a/DT population/NN "
-                            + "that/WDT is/VBZ larger/JJR than/IN 1000/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Who/WP/who wrote/VBD/write \"/``/\" Le/NNP/le Petit/NNP/petit Prince/NNP/prince \"/''/\" "
+    + "and/CC/and \"/``/\" Vol/NNP/vol de/NNP/de Nuit/NNP/nuit \"/''/\"",
 
-      // TODO: handle in second stage:
-      //       filter of second property with single "be" lemma is constraining preceding property
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
-            PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
-            PropertyWithFilter(List(Token("is", "VBZ")),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-                Number(List(Token("1000", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("cities/NNS which/WDT have/VBP a/DT population/NN larger/JJR than/IN 1000/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    PersonListQuestion(PropertyWithFilter(List(Token("wrote", "VBD", "write")),
+      PlainFilter(AndValue(List(NamedValue(List(Token("Le", "NNP", "le"),
+        Token("Petit", "NNP", "petit"), Token("Prince", "NNP", "prince"))),
+        NamedValue(List(Token("Vol", "NNP", "vol"), Token("de", "NNP", "de"), Token("Nuit", "NNP", "nuit")))))))))
 
-      // TODO: handle in second stage:
-      //       filter of empty second property is constraining preceding property
-      //       (empty property is shortened from ~"which is")
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
-            PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
-            PropertyWithFilter(List(),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-                Number(List(Token("1000", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("What/WP are/VBP California/NNP 's/POS cities/NNS "
-                 + "which/WDT have/VBP a/DT population/NN "
-                 + "larger/JJR than/IN 1/CD million/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      // TODO: handle in second stage:
-      //       filter of empty second property is constraining preceding property
-      //       (empty property is shortened from ~"which is")
-      val expected =
-        ListQuestion(QueryWithProperty(RelationshipQuery(NamedQuery(List(Token("cities", "NNS"))),
-          NamedQuery(List(Token("California", "NNP"))), Token("'s", "POS")),
-          AndProperty(List(PropertyWithFilter(List(Token("have", "VBP")),
-            PlainFilter(NamedValue(List(Token("a", "DT"), Token("population", "NN"))))),
-            PropertyWithFilter(List(),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-                Number(List(Token("1", "CD"), Token("million", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT cities/NNS in/IN California/NNP are/VBP larger/JJR than/IN "
-                 + "cities/NNS in/IN Germany/NNP or/CC in/IN France/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("Who/WP/who is/VBZ/be the/DT/the son/NN/son of/IN/of the/DT/the main/JJ/main actor/NN/actor "
+    + "of/IN/of \"/``/\" I/PRP/i ,/,/, Robot/NNP/robot \"/''/\"",
 
-      // TODO: handle in second stage:
-      //       filter of empty last property is constraining preceding property
-      //       (empty property is shortened from ~"which are located in")
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("California", "NNP"))))),
-            PropertyWithFilter(List(Token("are", "VBP")),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"),
-                Token("than", "IN")),
-                NamedValue(List(Token("cities", "NNS"))))),
-            PropertyWithFilter(List(),
-              OrFilter(List(FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("Germany", "NNP")))),
-                FilterWithModifier(List(Token("in", "IN")),
-                  NamedValue(List(Token("France", "NNP")))))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Who/WP composed/VBN the/DT music/NN for/IN Schindler/NNP 's/POS List/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"), Token("son", "NN", "son"))),
+      RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
+        Token("main", "JJ", "main"), Token("actor", "NN", "actor"))),
+        NamedQuery(List(Token("I", "PRP", "i"), Token(",", ",", ","), Token("Robot", "NNP", "robot"))),
+        Token("of", "IN", "of")),
+      Token("of", "IN", "of"))))
 
-      // TODO: "Schindler's List" should be detected as one name, not as a possessive:
-      //       also run NER for possessives
-      // TODO: handle in second stage:
-      //       filter of empty second property is constraining preceding property
-      val expected =
-        PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("composed", "VBN")),
-          PlainFilter(NamedValue(List(Token("the", "DT"), Token("music", "NN"))))),
-          PropertyWithFilter(List(),
-            FilterWithModifier(List(Token("for", "IN")),
-              ValueRelationship(NamedValue(List(Token("List", "NN"))),
-                NamedValue(List(Token("Schindler", "NNP")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("Which/WDT cities/NNS in/IN California/NNP are/VBP larger/JJR than/IN "
-                 + "cities/NNS which/WDT are/VBD located/VBD in/IN Germany/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      // TODO: handle in second stage:
-      //       filter of second property is constraining preceding property with comparative filter
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS"))),
-          AndProperty(List(PropertyWithFilter(List(),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("California", "NNP"))))),
-            PropertyWithFilter(List(Token("are", "VBP")),
-              FilterWithComparativeModifier(List(Token("larger", "JJR"), Token("than", "IN")),
-                NamedValue(List(Token("cities", "NNS"))))),
-            PropertyWithFilter(List(Token("are", "VBD"), Token("located", "VBD")),
-              FilterWithModifier(List(Token("in", "IN")),
-                NamedValue(List(Token("Germany", "NNP")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("authors/NNS who/WP died/VBD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("What/WP/what did/VBD/do George/NNP/george Orwell/NNP/orwell write/VB/write",
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("authors", "NNS"))),
-          NamedProperty(List(Token("died", "VBD")))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("authors/NNS which/WDT died/VBD in/IN Berlin/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ThingListQuestion(InversePropertyWithFilter(List(Token("did", "VBD", "do"),
+      Token("write", "VB", "write")),
+      PlainFilter(NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell")))))))
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("authors", "NNS"))),
-          PropertyWithFilter(List(Token("died", "VBD")),
-            FilterWithModifier(List(Token("in", "IN")),
-              NamedValue(List(Token("Berlin", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("which/WDT mountains/NNS are/VBP 1000/CD meters/NNS high/JJ")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
-          AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
-            PlainFilter(NumberWithUnit(List(Token("1000", "CD")), List(Token("meters", "NNS")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("which/WDT mountains/NNS are/VBP more/JJR than/IN 1000/CD meters/NNS high/JJ")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("What/WP/what was/VBD/be authored/VBN/author by/IN/by George/NNP/george Orwell/NNP/orwell",
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS"))),
-          AdjectivePropertyWithFilter(List(Token("are", "VBP"), Token("high", "JJ")),
-            FilterWithComparativeModifier(List(Token("more", "JJR"), Token("than", "IN")),
-              NumberWithUnit(List(Token("1000", "CD")), List(Token("meters", "NNS")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens =
-        tokenize("who/WP starred/VBD in/IN movies/NNS directed/VBN by/IN Christopher/NN Nolan/NN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ThingListQuestion(PropertyWithFilter(List(Token("was", "VBD", "be"), Token("authored", "VBN", "author")),
+      FilterWithModifier(List(Token("by", "IN", "by")),
+        NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell")))))))
 
-      // NOTE: AndProperty is correct, next stage should realize second property
-      //       is relative to first one, not subject
-      val expected =
-        PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("starred", "VBD")),
-          FilterWithModifier(List(Token("in", "IN")),
-            NamedValue(List(Token("movies", "NNS"))))),
-          PropertyWithFilter(List(Token("directed", "VBN")),
-            FilterWithModifier(List(Token("by", "IN")),
-              NamedValue(List(Token("Christopher", "NN"), Token("Nolan", "NN"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT country/NN was/VBD Obama/NNP born/VBN in/IN")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN"))),
-          InversePropertyWithFilter(List(Token("was", "VBD"), Token("born", "VBN"),
-            Token("in", "IN")),
-            PlainFilter(NamedValue(List(Token("Obama", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WDT country/NN was/VBD Obama/NNP born/VBN in/IN in/IN 1961/CD")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("What/WP/what books/NNP/book were/VBD/be authored/VBN/author by/IN/by George/NNP/george Orwell/NNP/orwell",
 
-      val expected =
-        ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN"))),
-          AndProperty(List(InversePropertyWithFilter(List(Token("was", "VBD"),
-            Token("born", "VBN"), Token("in", "IN")),
-            PlainFilter(NamedValue(List(Token("Obama", "NNP"))))),
-            PropertyWithFilter(List(), FilterWithModifier(List(Token("in", "IN")),
-              Number(List(Token("1961", "CD")))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("What/WP are/VBP some/DT of/IN Seth/NNP Gabel/NNP 's/POS "
-                            + "father-in-law/NN 's/POS movies/NNS")
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NNP", "book"))),
+      PropertyWithFilter(List(Token("were", "VBD", "be"), Token("authored", "VBN", "author")),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("George", "NNP", "george"), Token("Orwell", "NNP", "orwell"))))))))
 
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
-      val expected =
-        ListQuestion(RelationshipQuery(NamedQuery(List(Token("movies", "NNS"))),
-          RelationshipQuery(NamedQuery(List(Token("father-in-law", "NN"))),
-            NamedQuery(List(Token("Seth", "NNP"), Token("Gabel", "NNP"))),
-            Token("'s", "POS")),
-          Token("'s", "POS")))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP ,/, Copenhagen/NNP ,/, "
-                            + "or/CC New/NNP York/NNP City/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")),
-          OrValue(List(NamedValue(List(Token("Berlin", "NNP"))),
-            NamedValue(List(Token("Copenhagen", "NNP"))),
-            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP ,/, Copenhagen/NNP ,/, "
-                            + "and/CC New/NNP York/NNP City/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("children/NNS/child and/CC/and grand/JJ/grand children/NNS/child of/IN/of Clinton/NNP/clinton",
 
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")),
-          AndValue(List(NamedValue(List(Token("Berlin", "NNP"))),
-            NamedValue(List(Token("Copenhagen", "NNP"))),
-            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP lived/VBD in/IN Berlin/NNP and/CC Paris/NNP ,/, "
-                            + "Copenhagen/NNP or/CC Toronto/NNP ,/, "
-                            + "and/CC New/NNP York/NNP City/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+    ListQuestion(RelationshipQuery(AndQuery(List(NamedQuery(List(Token("children", "NNS", "child"))),
+      NamedQuery(List(Token("grand", "JJ", "grand"), Token("children", "NNS", "child"))))),
+      NamedQuery(List(Token("Clinton", "NNP", "clinton"))),
+      Token("of", "IN", "of"))))
 
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD")),
-        FilterWithModifier(List(Token("in", "IN")),
-          AndValue(List(AndValue(List(NamedValue(List(Token("Berlin", "NNP"))),
-            NamedValue(List(Token("Paris", "NNP"))))),
-            OrValue(List(NamedValue(List(Token("Copenhagen", "NNP"))),
-              NamedValue(List(Token("Toronto", "NNP"))))),
-            NamedValue(List(Token("New", "NNP"), Token("York", "NNP"), Token("City", "NNP"))))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Which/WP universities/NNS did/VBD Obama/NNP go/VBD to/TO")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
 
-      val expected = ListQuestion(QueryWithProperty(NamedQuery(List(Token("universities", "NNS"))),
-        InversePropertyWithFilter(List(Token("did", "VBD"), Token("go", "VBD"), Token("to", "TO")),
-          PlainFilter(NamedValue(List(Token("Obama", "NNP")))))))
-      assertEquals(expected, result.get)
-    }
-    {
-      val tokens = tokenize("Who/WP went/VBD to/TO Stanford/NNP")
-      val result = parseListQuestion(tokens)
-      assertSuccess(result)
+  test("which/WDT/which books/NN/book did/VBD/do Orwell/NNP/orwell write/VB/write "
+    + "before/IN/before the/DT/the world/NN/world war/NN/war",
 
-      val expected = PersonListQuestion(PropertyWithFilter(List(Token("went", "VBD")),
-        FilterWithModifier(List(Token("to", "TO")), NamedValue(List(Token("Stanford", "NNP"))))))
-      assertEquals(expected, result.get)
-    }
-  }
+    // TODO: handle in second stage:
+    //       empty property with modifying filter is constraining preceding property
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("books", "NN", "book"))),
+      AndProperty(List(InversePropertyWithFilter(List(Token("did", "VBD", "do"),
+        Token("write", "VB", "write")),
+        PlainFilter(NamedValue(List(Token("Orwell", "NNP", "orwell"))))),
+        PropertyWithFilter(List(),
+          FilterWithModifier(List(Token("before", "IN", "before")),
+            NamedValue(List(Token("the", "DT", "the"), Token("world", "NN", "world"), Token("war", "NN", "war"))))))))))
+
+
+  test("What/WP/what are/VBP/be cities/NNS/city which/WDT/which have/VBP/have a/DT/a population/NN/population "
+    + "larger/JJR/large than/IN/than 1/CD/1 million/CD/million",
+
+    // TODO: handle in second stage:
+    //       filter of empty second property is constraining preceding property
+    //       (empty property is shortened from ~"which is")
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("a", "DT", "a"), Token("population", "NN", "population"))))),
+        PropertyWithFilter(List(),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            Number(List(Token("1", "CD", "1"), Token("million", "CD", "million"))))))))))
+
+
+  test("which/WDT/which cities/NNS/city have/VBP/have a/DT/a population/NN/population"
+    + " larger/JJR/large than/IN/than 1000/CD/1000",
+
+    // TODO: handle in second stage:
+    //       filter of empty second property is constraining preceding property
+    //       (empty property is shortened from ~"which is")
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("a", "DT", "a"), Token("population", "NN", "population"))))),
+        PropertyWithFilter(List(),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            Number(List(Token("1000", "CD", "1000"))))))))))
+
+
+  test("cities/NNS/city which/WDT/which have/VBP/have a/DT/a population/NN/population "
+    + "that/WDT/that is/VBZ/be larger/JJR/large than/IN/than 1000/CD/1000",
+
+    // TODO: handle in second stage:
+    //       filter of second property with single "be" lemma is constraining preceding property
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("a", "DT", "a"), Token("population", "NN", "population"))))),
+        PropertyWithFilter(List(Token("is", "VBZ", "be")),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            Number(List(Token("1000", "CD", "1000"))))))))))
+
+
+  test("cities/NNS/city which/WDT/which have/VBP/have a/DT/a population/NN/population "
+    + "larger/JJR/large than/IN/than 1000/CD/1000",
+
+    // TODO: handle in second stage:
+    //       filter of empty second property is constraining preceding property
+    //       (empty property is shortened from ~"which is")
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("a", "DT", "a"), Token("population", "NN", "population"))))),
+        PropertyWithFilter(List(),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            Number(List(Token("1000", "CD", "1000"))))))))))
+
+
+  test("What/WP/what are/VBP/be California/NNP/california 's/POS/'s cities/NNS/city "
+    + "which/WDT/which have/VBP/have a/DT/a population/NN/population "
+    + "larger/JJR/large than/IN/than 1/CD/1 million/CD/million",
+
+    // TODO: handle in second stage:
+    //       filter of empty second property is constraining preceding property
+    //       (empty property is shortened from ~"which is")
+
+    ListQuestion(QueryWithProperty(RelationshipQuery(NamedQuery(List(Token("cities", "NNS", "city"))),
+      NamedQuery(List(Token("California", "NNP", "california"))), Token("'s", "POS", "'s")),
+      AndProperty(List(PropertyWithFilter(List(Token("have", "VBP", "have")),
+        PlainFilter(NamedValue(List(Token("a", "DT", "a"), Token("population", "NN", "population"))))),
+        PropertyWithFilter(List(),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            Number(List(Token("1", "CD", "1"), Token("million", "CD", "million"))))))))))
+
+
+  test("which/WDT/which cities/NNS/city in/IN/in California/NNP/california are/VBP/be larger/JJR/large than/IN/than "
+    + "cities/NNS/city in/IN/in Germany/NNP/germany or/CC/or in/IN/in France/NNP/france",
+
+    // TODO: handle in second stage:
+    //       filter of empty last property is constraining preceding property
+    //       (empty property is shortened from ~"which are located in")
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("California", "NNP", "california"))))),
+        PropertyWithFilter(List(Token("are", "VBP", "be")),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"),
+            Token("than", "IN", "than")),
+            NamedValue(List(Token("cities", "NNS", "city"))))),
+        PropertyWithFilter(List(),
+          OrFilter(List(FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("Germany", "NNP", "germany")))),
+            FilterWithModifier(List(Token("in", "IN", "in")),
+              NamedValue(List(Token("France", "NNP", "france"))))))))))))
+
+
+  test("Who/WP/who composed/VBN/compose the/DT/the music/NN/music "
+    + "for/IN/for Schindler/NNP/schindler 's/POS/'s List/NN/list",
+
+    // TODO: "Schindler's List" should be detected as one name, not as a possessive:
+    //       also run NER for possessives
+    // TODO: handle in second stage:
+    //       filter of empty second property is constraining preceding property
+
+    PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("composed", "VBN", "compose")),
+      PlainFilter(NamedValue(List(Token("the", "DT", "the"), Token("music", "NN", "music"))))),
+      PropertyWithFilter(List(),
+        FilterWithModifier(List(Token("for", "IN", "for")),
+          ValueRelationship(NamedValue(List(Token("List", "NN", "list"))),
+            NamedValue(List(Token("Schindler", "NNP", "schindler"))))))))))
+
+
+  test("which/WDT/which cities/NNS/city in/IN/in California/NNP/california are/VBP/be larger/JJR/large than/IN/than "
+    + "cities/NNS/city which/WDT/which are/VBD/be located/VBD/locate in/IN/in Germany/NNP/germany",
+
+    // TODO: handle in second stage:
+    //       filter of second property is constraining preceding property with comparative filter
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+      AndProperty(List(PropertyWithFilter(List(),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("California", "NNP", "california"))))),
+        PropertyWithFilter(List(Token("are", "VBP", "be")),
+          FilterWithComparativeModifier(List(Token("larger", "JJR", "large"), Token("than", "IN", "than")),
+            NamedValue(List(Token("cities", "NNS", "city"))))),
+        PropertyWithFilter(List(Token("are", "VBD", "be"), Token("located", "VBD", "locate")),
+          FilterWithModifier(List(Token("in", "IN", "in")),
+            NamedValue(List(Token("Germany", "NNP", "germany"))))))))))
+
+
+  test("authors/NNS/author who/WP/who died/VBD/die",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("authors", "NNS", "author"))),
+      NamedProperty(List(Token("died", "VBD", "die"))))))
+
+
+  test("authors/NNS/author which/WDT/which died/VBD/die in/IN/in Berlin/NNP/berlin",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("authors", "NNS", "author"))),
+      PropertyWithFilter(List(Token("died", "VBD", "die")),
+        FilterWithModifier(List(Token("in", "IN", "in")),
+          NamedValue(List(Token("Berlin", "NNP", "berlin"))))))))
+
+
+  test("which/WDT/which mountains/NNS/mountain are/VBP/be 1000/CD/1000 meters/NNS/meter high/JJ/high",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
+      AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
+        PlainFilter(NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter"))))))))
+
+
+  test("which/WDT/which mountains/NNS/mountain are/VBP/be "
+    + "more/JJR/more than/IN/than 1000/CD/1000 meters/NNS/meter high/JJ/high",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
+      AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
+        FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+          NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter"))))))))
+
+
+  test("who/WP/who starred/VBD/star in/IN/in movies/NNS/movie "
+    + "directed/VBN/direct by/IN/by Christopher/NN/christopher Nolan/NN/nolan",
+
+    // NOTE: AndProperty is correct, next stage should realize second property
+    //       is relative to first one, not subject
+
+    PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("starred", "VBD", "star")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        NamedValue(List(Token("movies", "NNS", "movie"))))),
+      PropertyWithFilter(List(Token("directed", "VBN", "direct")),
+        FilterWithModifier(List(Token("by", "IN", "by")),
+          NamedValue(List(Token("Christopher", "NN", "christopher"), Token("Nolan", "NN", "nolan")))))))))
+
+
+  test("which/WDT/which country/NN/country was/VBD/be Obama/NNP/obama born/VBN/bear in/IN/in",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN", "country"))),
+      InversePropertyWithFilter(List(Token("was", "VBD", "be"), Token("born", "VBN", "bear"),
+        Token("in", "IN", "in")),
+        PlainFilter(NamedValue(List(Token("Obama", "NNP", "obama"))))))))
+
+
+  test("which/WDT/which country/NN/country was/VBD/be Obama/NNP/obama born/VBN/bear in/IN/in in/IN/in 1961/CD/1961",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("country", "NN", "country"))),
+      AndProperty(List(InversePropertyWithFilter(List(Token("was", "VBD", "be"),
+        Token("born", "VBN", "bear"), Token("in", "IN", "in")),
+        PlainFilter(NamedValue(List(Token("Obama", "NNP", "obama"))))),
+        PropertyWithFilter(List(), FilterWithModifier(List(Token("in", "IN", "in")),
+          Number(List(Token("1961", "CD", "1961"))))))))))
+
+
+  test("What/WP/what are/VBP/be some/DT/some of/IN/of Seth/NNP/seth Gabel/NNP/gabel 's/POS/'s "
+    + "father-in-law/NN/father-in-law 's/POS/'s movies/NNS/movie",
+
+    ListQuestion(RelationshipQuery(NamedQuery(List(Token("movies", "NNS", "movie"))),
+      RelationshipQuery(NamedQuery(List(Token("father-in-law", "NN", "father-in-law"))),
+        NamedQuery(List(Token("Seth", "NNP", "seth"), Token("Gabel", "NNP", "gabel"))),
+        Token("'s", "POS", "'s")),
+      Token("'s", "POS", "'s"))))
+
+
+  test("Who/WP/who lived/VBD/live in/IN/in Berlin/NNP/berlin ,/,/, Copenhagen/NNP/copenhagen ,/,/, "
+    + "or/CC/or New/NNP/new York/NNP/york City/NNP/city",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD", "live")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        OrValue(List(NamedValue(List(Token("Berlin", "NNP", "berlin"))),
+          NamedValue(List(Token("Copenhagen", "NNP", "copenhagen"))),
+          NamedValue(List(Token("New", "NNP", "new"), Token("York", "NNP", "york"), Token("City", "NNP", "city")))))))))
+
+
+  test("Who/WP/who lived/VBD/live in/IN/in Berlin/NNP/berlin ,/,/, Copenhagen/NNP/copenhagen ,/,/, "
+    + "and/CC/and New/NNP/new York/NNP/york City/NNP/city",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD", "live")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        AndValue(List(NamedValue(List(Token("Berlin", "NNP", "berlin"))),
+          NamedValue(List(Token("Copenhagen", "NNP", "copenhagen"))),
+          NamedValue(List(Token("New", "NNP", "new"), Token("York", "NNP", "york"), Token("City", "NNP", "city")))))))))
+
+
+  test("Who/WP/who lived/VBD/live in/IN/in Berlin/NNP/berlin and/CC/and Paris/NNP/paris ,/,/, "
+    + "Copenhagen/NNP/copenhagen or/CC/or Toronto/NNP/toronto ,/,/, "
+    + "and/CC/and New/NNP/new York/NNP/york City/NNP/city",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("lived", "VBD", "live")),
+      FilterWithModifier(List(Token("in", "IN", "in")),
+        AndValue(List(AndValue(List(NamedValue(List(Token("Berlin", "NNP", "berlin"))),
+          NamedValue(List(Token("Paris", "NNP", "paris"))))),
+          OrValue(List(NamedValue(List(Token("Copenhagen", "NNP", "copenhagen"))),
+            NamedValue(List(Token("Toronto", "NNP", "toronto"))))),
+          NamedValue(List(Token("New", "NNP", "new"), Token("York", "NNP", "york"), Token("City", "NNP", "city")))))))))
+
+
+  test("Which/WP/which universities/NNS/university did/VBD/do Obama/NNP/obama go/VBD/go to/TO/to",
+
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("universities", "NNS", "university"))),
+      InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("go", "VBD", "go"), Token("to", "TO", "to")),
+        PlainFilter(NamedValue(List(Token("Obama", "NNP", "obama"))))))))
+
+
+  test("Who/WP/who went/VBD/go to/TO/to Stanford/NNP/stanford",
+
+    PersonListQuestion(PropertyWithFilter(List(Token("went", "VBD", "go")),
+      FilterWithModifier(List(Token("to", "TO", "to")), NamedValue(List(Token("Stanford", "NNP", "stanford")))))))
+
 }

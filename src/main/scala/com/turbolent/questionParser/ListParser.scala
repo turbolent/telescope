@@ -183,7 +183,7 @@ object ListParser extends BaseParser {
     Set("have", "be", "do")
 
   def isAuxiliaryVerb(token: Token): Boolean =
-    token.lemmas.exists(auxiliaryVerbLemmas.contains)
+    auxiliaryVerbLemmas.contains(token.lemma)
 
   lazy val Property =
     opt(pos("WDT")) ~> opt(Verbs) >> {
