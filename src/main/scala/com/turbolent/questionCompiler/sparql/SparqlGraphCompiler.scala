@@ -18,8 +18,8 @@ case object Forward extends EdgeDirection
 case object Backward extends EdgeDirection
 
 
-class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBackend[N, E, EnvT],
-                                                           env: EnvT)
+class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
+  (backend: SparqlBackend[N, E, EnvT], env: EnvT)
 {
 
   type NodeT = Node[N, E]
@@ -157,9 +157,9 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]](backend: SparqlBacken
     }
   }
 
-  // TODO: unable to use TransformPathFlattern, as these won't be
-  //       comparable to parsed compiled algerba of expected queries
-  //       (due to PathCompiler allocating variables with a P prefixe)
+  // TODO: unable to use TransformPathFlatten, as these won't be
+  //       comparable to parsed compiled algebra of expected queries
+  //       (due to PathCompiler allocating variables with a P prefix)
 
   def transformations =
     List(new TransformMergeBGPs)

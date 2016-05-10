@@ -32,9 +32,9 @@ case class ConjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
   override def and(edge: EdgeT) =
     edge match {
       case ConjunctionEdge(otherEdges) =>
-        ConjunctionEdge(this.edges ++ otherEdges)
+        ConjunctionEdge(edges ++ otherEdges)
       case _ =>
-        ConjunctionEdge(this.edges + edge)
+        ConjunctionEdge(edges + edge)
     }
 }
 
@@ -42,9 +42,9 @@ case class DisjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
   override def or(edge: EdgeT) =
     edge match {
       case DisjunctionEdge(otherEdges) =>
-        DisjunctionEdge(this.edges ++ otherEdges)
+        DisjunctionEdge(edges ++ otherEdges)
       case _ =>
-        DisjunctionEdge(this.edges + edge)
+        DisjunctionEdge(edges + edge)
     }
 }
 

@@ -18,9 +18,9 @@ case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N,
   override def and(filter: FilterT) =
     filter match {
       case ConjunctionFilter(otherFilters) =>
-        ConjunctionFilter(this.filters ++ otherFilters)
+        ConjunctionFilter(filters ++ otherFilters)
       case _ =>
-        ConjunctionFilter(this.filters :+ filter)
+        ConjunctionFilter(filters :+ filter)
     }
 }
 
