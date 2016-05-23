@@ -3,7 +3,8 @@ import com.twitter.finagle.http._
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{OptionValues, Matchers, FunSuite, TryValues}
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{FunSuite, Matchers, OptionValues, TryValues}
 
 import scala.util.Try
 
@@ -14,9 +15,12 @@ class QuestionServerSuite extends FunSuite
     with OptionValues
 {
 
-  val service = QuestionServer.getService()
+  val service = QuestionServer.getService(spacyThriftHostname = "192.168.99.100")
 
   implicit val formats = DefaultFormats
+
+  implicit override val patienceConfig =
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(100, Millis))
 
   def get[U](path: String)(fun: Response => U) = {
     val request = Request(Method.Get, path)
