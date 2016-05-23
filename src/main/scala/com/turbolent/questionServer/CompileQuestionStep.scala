@@ -5,7 +5,7 @@ import java.io.{PrintWriter, StringWriter}
 import com.turbolent.questionCompiler.QuestionCompiler
 import com.turbolent.questionParser.ast.Question
 import com.turbolent.wikidataOntology.{WikidataEnvironment, WikidataOntology}
-import com.twitter.finagle.httpx.{Request, Status}
+import com.twitter.finagle.http.{Request, Status}
 import com.twitter.util.Future
 
 

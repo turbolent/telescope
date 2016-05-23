@@ -1,31 +1,28 @@
 package com.turbolent.questionServer
 
-import java.nio.file.{Path, Paths}
-
-import com.twitter.finagle.Httpx
-import com.twitter.finagle.httpx.filter.{LoggingFilter, ExceptionFilter}
-import com.twitter.logging.{ConsoleHandler, FileHandler, Logging, Logger}
-import com.twitter.app.{Flaggable, App}
+import com.twitter.app.App
+import com.twitter.finagle.Http
+import com.twitter.finagle.http.filter.{ExceptionFilter, LoggingFilter}
+import com.twitter.finagle.http.path.{/, Root}
+import com.twitter.finagle.http.service.RoutingService
+import com.twitter.finagle.http.{Method, Request}
+import com.twitter.logging.{ConsoleHandler, FileHandler, Logger, Logging}
 import com.twitter.util.Await
-import com.twitter.finagle.httpx.path.{Root, /}
-import com.twitter.finagle.httpx.{Request, Method}
-import com.twitter.finagle.httpx.service.RoutingService
+import spacyThrift.client.SpacyThriftClient
 
 
 object QuestionServer extends App with Logging {
 
-  implicit val asPath = Flaggable.mandatory(Paths.get(_))
-
   val portFlag =
     flag("port", 8080, "HTTP port")
 
-  val defaultTaggerModelPath = Paths.get("tagger-model")
-  val taggerModelPathFlag =
-    flag("tagger-model", defaultTaggerModelPath, "POS tagger model")
+  val defaultSpacyThriftHostname = "localhost"
+  val spacyThriftHostnameFlag =
+    flag("spacy-thrift-hostname", defaultSpacyThriftHostname, "spacy-thrift service hostname")
 
-  val defaultLemmatizerModelPath = Paths.get("lemmatizer-model")
-  val lemmatizerModelPathFlag =
-    flag("lemmatizer-model", defaultLemmatizerModelPath, "lemmatizer model")
+  val defaultSpacyThriftPort = 9090
+  val spacyThriftPortFlag =
+    flag("spacy-thrift-port", defaultSpacyThriftPort, "spacy-thrift service port")
 
   val defaultLog = "/dev/stderr"
   val parseLogFlag =
@@ -40,12 +37,13 @@ object QuestionServer extends App with Logging {
     })
   }
 
-  def getService(taggerModelPath: Path = defaultTaggerModelPath,
-                 lemmatizerModelPath: Path = defaultLemmatizerModelPath,
+  def getService(spacyThriftHostname: String = defaultSpacyThriftHostname,
+                 spacyThriftPort: Int = defaultSpacyThriftPort,
                  parseLog: String = defaultLog,
                  accessLog: String = defaultLog) =
   {
-    val parseService = new QuestionService(taggerModelPath, lemmatizerModelPath)
+    val spacyThriftClient = new SpacyThriftClient(spacyThriftHostname, spacyThriftPort)
+    val parseService = new QuestionService(spacyThriftClient)
 
     val routingService =
       RoutingService.byMethodAndPathObject[Request] {
@@ -61,11 +59,11 @@ object QuestionServer extends App with Logging {
   }
 
   def main() {
-    val service = getService(taggerModelPath = taggerModelPathFlag(),
-      lemmatizerModelPath = lemmatizerModelPathFlag(),
+    val service = getService(spacyThriftHostname = spacyThriftHostnameFlag(),
+      spacyThriftPort = spacyThriftPortFlag(),
       parseLog = parseLogFlag(),
       accessLog = accessLogFlag())
-    val server = Httpx.serve(":" + portFlag(), service)
+    val server = Http.serve(":" + portFlag(), service)
     onExit {
       server.close()
     }

@@ -1,6 +1,6 @@
 package com.turbolent.questionServer
 
-import com.twitter.finagle.httpx.{Status, Request}
+import com.twitter.finagle.http.{Status, Request}
 import com.twitter.util.Future
 
 

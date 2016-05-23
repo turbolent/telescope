@@ -1,15 +1,12 @@
 import com.turbolent.questionServer.QuestionServer
-import com.twitter.finagle.httpx._
+import com.twitter.finagle.http._
 import org.json4s.DefaultFormats
 import org.json4s.native.JsonMethods
-import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{OptionValues, Matchers, FunSuite, TryValues}
 
 import scala.util.Try
 
-
-@RunWith(classOf[JUnitRunner])
 class QuestionServerSuite extends FunSuite
     with TwitterFutures
     with Matchers

@@ -1,15 +1,12 @@
 package com.turbolent.questionServer
 
-import com.turbolent.lemmatizer.Lemmatizer
 import com.turbolent.questionParser.ast.Question
 import com.turbolent.questionParser.{ListParser, Token}
-import com.twitter.finagle.httpx.{Request, Status}
+import com.twitter.finagle.http.{Request, Status}
 import com.twitter.util.Future
 
 
-class ParseQuestionStep(implicit lemmatizer: Lemmatizer)
-    extends QuestionStep[Seq[Token], Question]
-{
+object ParseQuestionStep extends QuestionStep[Seq[Token], Question] {
 
   def apply(req: Request, tokens: Seq[Token], response: QuestionResponse) = {
     val isStrict = req.getBooleanParam("strict")

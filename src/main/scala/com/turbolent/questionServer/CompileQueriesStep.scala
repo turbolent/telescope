@@ -4,7 +4,7 @@ import java.io.{PrintWriter, StringWriter}
 
 import com.turbolent.questionCompiler.sparql.SparqlGraphCompiler
 import com.turbolent.wikidataOntology.{WikidataEnvironment, WikidataSparqlBackend}
-import com.twitter.finagle.httpx.{Status, Request}
+import com.twitter.finagle.http.{Status, Request}
 import com.twitter.util.Future
 import org.apache.jena.query.{Query => JenaQuery}
 
