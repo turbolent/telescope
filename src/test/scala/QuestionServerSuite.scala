@@ -15,7 +15,7 @@ class QuestionServerSuite extends FunSuite
     with OptionValues
 {
 
-  val service = QuestionServer.getService(spacyThriftHostname = "192.168.99.100")
+  val service = QuestionServer.getService()
 
   implicit val formats = DefaultFormats
 
