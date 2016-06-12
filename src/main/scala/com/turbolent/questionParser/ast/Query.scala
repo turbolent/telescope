@@ -3,7 +3,7 @@ package com.turbolent.questionParser.ast
 import com.turbolent.questionParser.Token
 
 
-abstract class Query
+sealed trait Query
 
 case class AndQuery(queries: Seq[Query]) extends Query
 case class RelationshipQuery(a: Query, b: Query, token: Token) extends Query

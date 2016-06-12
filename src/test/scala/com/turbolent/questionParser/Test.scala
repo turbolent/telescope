@@ -1,11 +1,13 @@
 package com.turbolent.questionParser
 
+import ai.x.diff._
 import com.turbolent.questionParser.ast._
+import org.scalatest.{AppendedClues, FunSuite, Matchers}
 
-import org.scalatest.{FunSuite, Matchers}
 
 
-class Test extends FunSuite with Matchers {
+
+class Test extends FunSuite with Matchers with AppendedClues {
 
   def parseListQuestion(tokens: Seq[Token]) =
     ListParser.parse(tokens, ListParser.phrase(ListParser.Question))
@@ -25,7 +27,13 @@ class Test extends FunSuite with Matchers {
     test(testName) {
       val result = parseListQuestion(tokens)
       assertSuccess(result)
-      result.get shouldEqual expected
+
+      { result.get shouldEqual expected } withClue {
+        DiffShow.diff(result.get, expected).string
+          .replaceAll("\u001B\\[32m", "++++ {{{")
+          .replaceAll("\u001B\\[31m", "---- {{{")
+          .replaceAll("\u001B\\[0m", "}}}")
+      }
     }
   }
 
@@ -186,8 +194,8 @@ class Test extends FunSuite with Matchers {
   test("What/WP/what are/VBP/be the/DT/the members/NNS/member of/IN/of Metallica/NNP/metallica",
 
       ListQuestion(RelationshipQuery(NamedQuery(List(Token("the", "DT", "the"),
-      Token("members", "NNS", "member"))),
-      NamedQuery(List(Token("Metallica", "NNP", "metallica"))), Token("of", "IN", "of"))))
+          Token("members", "NNS", "member"))),
+        NamedQuery(List(Token("Metallica", "NNP", "metallica"))), Token("of", "IN", "of"))))
 
 
   test("members/NNS/member of/IN/of Metallica/NNP/metallica",
@@ -420,10 +428,10 @@ class Test extends FunSuite with Matchers {
         NamedValue(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))))))))
 
 
-  test("In/IN/in which/WDT/which californian/NN/californian cities/NNS/city "
+  test("In/IN/in which/WDT/which californian/JJS/californian cities/NNS/city "
     + "live/VBP/live more/JJR/more than/IN/than 2/CD/2 million/CD/million people/NNS/people",
 
-    ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "NN", "californian"),
+    ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "JJS", "californian"),
       Token("cities", "NNS", "city"))),
       PropertyWithFilter(List(Token("live", "VBP", "live")),
         FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),

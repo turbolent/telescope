@@ -3,7 +3,7 @@ package com.turbolent.questionParser.ast
 import com.turbolent.questionParser.Token
 
 
-abstract class Filter
+sealed trait Filter
 
 case class AndFilter(filters: Seq[Filter]) extends Filter
 case class OrFilter(filters: Seq[Filter]) extends Filter

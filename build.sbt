@@ -8,7 +8,8 @@ scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
 
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+  "ai.x" %% "diff" % "1.0.1" % "test"
 )
 
 publishMavenStyle := true

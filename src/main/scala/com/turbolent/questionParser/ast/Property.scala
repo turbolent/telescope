@@ -3,7 +3,7 @@ package com.turbolent.questionParser.ast
 import com.turbolent.questionParser.Token
 
 
-abstract class Property
+sealed trait Property
 
 case class AndProperty(properties: Seq[Property]) extends Property
 case class OrProperty(properties: Seq[Property]) extends Property
