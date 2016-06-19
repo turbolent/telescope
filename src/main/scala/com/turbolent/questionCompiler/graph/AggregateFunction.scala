@@ -1,7 +1,7 @@
 package com.turbolent.questionCompiler.graph
 
 
-abstract class AggregateFunction
+sealed trait AggregateFunction
 
 case object Avg extends AggregateFunction
 case object Sum extends AggregateFunction

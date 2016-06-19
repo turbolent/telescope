@@ -4,7 +4,8 @@ package com.turbolent.questionCompiler.graph
 case class Node[N, E](label: N,
                       edge: Option[Edge[E, N]] = None,
                       filter: Option[Filter[N, E]] = None,
-                      aggregates: Seq[AggregateFunction] = Nil)
+                      aggregates: Seq[AggregateFunction] = Nil,
+                      order: Option[Order] = None)
 {
   type NodeT = Node[N, E]
   type EdgeT = Edge[E, N]
@@ -19,12 +20,15 @@ case class Node[N, E](label: N,
   def in(source: NodeT, label: E) =
     and(InEdge(source, label))
 
-  def and(edge: EdgeT) =
+  def and(edge: EdgeT): NodeT =
     copy(edge = this.edge map { _.and(edge) } orElse Some(edge))
 
-  def or(edge: EdgeT) =
+  def or(edge: EdgeT): NodeT =
     copy(edge = this.edge map { _.or(edge) } orElse Some(edge))
 
   def aggregate(aggregate: AggregateFunction): NodeT =
     copy(aggregates = this.aggregates :+ aggregate)
+
+  def order(order: Order): NodeT =
+    copy(order = Some(order))
 }
