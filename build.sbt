@@ -10,7 +10,7 @@ resolvers += "turbolent" at "https://raw.githubusercontent.com/turbolent/mvn-rep
 
 libraryDependencies ++= Seq(
   "com.turbolent" %% "question-parser" % "1.0-SNAPSHOT",
-  "org.apache.jena" % "jena-arq" % "3.0.0",
+  "org.apache.jena" % "jena-arq" % "3.1.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 
