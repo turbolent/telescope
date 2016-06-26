@@ -263,7 +263,7 @@ object ListParser extends BaseParser {
     ("," ~ opt(pos("CC"))) |
     (opt(",") ~ pos("CC"))
 
-  lazy val Queries: Parser[ast.Query] =
+  lazy val Queries: Parser[ast.SubQuery] =
     rep1sep(Query, QueriesSeparator) ^^ {
       case Seq(x) => x
       case xs => ast.AndQuery(xs)
@@ -276,9 +276,9 @@ object ListParser extends BaseParser {
   //   - "California's cities' population sizes"
   //   - "Clinton's children and grandchildren"
 
-  lazy val QueryRelationships: Parser[ast.Query] =
+  lazy val QueryRelationships: Parser[ast.SubQuery] =
     chainl1(Queries, pos("POS") ^^ { sep =>
-      (a: ast.Query, b: ast.Query) =>
+      (a: ast.Query, b: ast.SubQuery) =>
         ast.RelationshipQuery(b, a, sep)
     })
 
