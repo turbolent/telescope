@@ -79,14 +79,11 @@ object ListParser extends BaseParser {
   //   - "Obama's children"
   //   - "Obama's children's mothers"
 
-  lazy val NamedValues =
-    rep1sep(NamedValue, pos("POS")) ^^ {
-      (values: Seq[ast.Value]) =>
-        values reduceLeft { (result, x) =>
-          ast.ValueRelationship(x, result)
-        }
-    }
-
+  lazy val NamedValues: Parser[ast.Value] =
+    rep1sep(NamedValue, pos("POS")) ^^
+      (_ reduceLeft[ast.Value] { (result, namedValue) =>
+        ast.RelationshipValue(namedValue, result)
+      })
 
   // Examples:
   //   - "\"The Red Victorian\""

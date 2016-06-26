@@ -424,7 +424,7 @@ class Test extends FunSuite with Matchers with AppendedClues {
   test("Who/WP/who did/VBD/do Bill/NNP/bill Clinton/NNP/clinton 's/POS/'s daughter/NN/daughter marry/VB/marry",
 
     PersonListQuestion(InversePropertyWithFilter(List(Token("did", "VBD", "do"), Token("marry", "VB", "marry")),
-      PlainFilter(ValueRelationship(NamedValue(List(Token("daughter", "NN", "daughter"))),
+      PlainFilter(RelationshipValue(NamedValue(List(Token("daughter", "NN", "daughter"))),
         NamedValue(List(Token("Bill", "NNP", "bill"), Token("Clinton", "NNP", "clinton"))))))))
 
 
@@ -579,7 +579,7 @@ class Test extends FunSuite with Matchers with AppendedClues {
 
     ListQuestion(QueryWithProperty(NamedQuery(List(Token("actor", "NN", "actor"))),
       PropertyWithFilter(List(Token("married", "VBD", "marry")),
-        PlainFilter(ValueRelationship(NamedValue(List(Token("sister", "NN", "sister"))),
+        PlainFilter(RelationshipValue(NamedValue(List(Token("sister", "NN", "sister"))),
           NamedValue(List(Token("John", "NNP", "john"), Token("F.", "NNP", "f."),
             Token("Kennedy", "NNP", "kennedy")))))))))
 
@@ -775,7 +775,7 @@ class Test extends FunSuite with Matchers with AppendedClues {
       PlainFilter(NamedValue(List(Token("the", "DT", "the"), Token("music", "NN", "music"))))),
       PropertyWithFilter(List(),
         FilterWithModifier(List(Token("for", "IN", "for")),
-          ValueRelationship(NamedValue(List(Token("List", "NN", "list"))),
+          RelationshipValue(NamedValue(List(Token("List", "NN", "list"))),
             NamedValue(List(Token("Schindler", "NNP", "schindler"))))))))))
 
 
