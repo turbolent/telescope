@@ -68,6 +68,8 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
       case ast.RelationshipQuery(first, second, _) =>
         val secondNodes = compileRelationshipSubquery(second, nodes)
         compileRelationshipSubquery(first, secondNodes)
+
+      case ast.QueryWithProperty(_, _) => ???
     }
 
   def compileProperty(property: ast.Property, subject: Subject): EdgeT =
@@ -107,10 +109,18 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
     filter match {
       case ast.FilterWithModifier(modifier, value) =>
         compileValue(value, modifier, edgeFactory)
+
       case ast.FilterWithComparativeModifier(modifier, value) =>
         compileValue(value, modifier, edgeFactory)
+
       case ast.PlainFilter(value) =>
         compileValue(value, Nil, edgeFactory)
+
+      case ast.AndFilter(filters) =>
+        ConjunctionEdge(filters.map(compileFilter(_, edgeFactory)).toSet)
+
+      case ast.OrFilter(filters) =>
+        DisjunctionEdge(filters.map(compileFilter(_, edgeFactory)).toSet)
     }
 
   def compileValue(value: ast.Value, filter: Seq[Token], edgeFactory: EdgeFactory): EdgeT =
@@ -139,7 +149,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
       case ast.AndValue(values) =>
         ConjunctionEdge(values.map(compileValue(_, filter, edgeFactory)).toSet)
 
-      case ast.ValueRelationship(ast.NamedValue(name), second) =>
+      case ast.RelationshipValue(ast.NamedValue(name), second) =>
         val secondEdgeFactory: EdgeFactory =
           (node, contextFactory) =>
             ontology.makeRelationshipEdge(name, node, env)
