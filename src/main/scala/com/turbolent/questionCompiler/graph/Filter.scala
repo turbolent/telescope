@@ -1,11 +1,12 @@
 package com.turbolent.questionCompiler.graph
 
+import com.turbolent.questionCompiler.graph
 
-trait Filter[N, E] {
+sealed trait Filter[N, E] {
 
-  type FilterT = Filter[N, E]
+  type Filter = graph.Filter[N, E]
 
-  def and(filter: FilterT) =
+  def and(filter: Filter) =
     filter match {
       case ConjunctionFilter(filters) =>
         ConjunctionFilter(this +: filters)
@@ -15,7 +16,7 @@ trait Filter[N, E] {
 }
 
 case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N, E] {
-  override def and(filter: FilterT) =
+  override def and(filter: Filter) =
     filter match {
       case ConjunctionFilter(otherFilters) =>
         ConjunctionFilter(filters ++ otherFilters)
@@ -25,7 +26,5 @@ case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N,
 }
 
 case class EqualsFilter[N, E](node: Node[N, E]) extends Filter[N, E]
-
 case class LessThanFilter[N, E](node: Node[N, E]) extends Filter[N, E]
-
 case class GreaterThanFilter[N, E](node: Node[N, E]) extends Filter[N, E]

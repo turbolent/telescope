@@ -1,25 +1,27 @@
 package com.turbolent.questionCompiler.graph
 
+import com.turbolent.questionCompiler.graph
 
-trait Edge[E, N] {
 
-  type NodeT = Node[N, E]
-  type EdgeT = Edge[E, N]
+sealed trait Edge[E, N] {
 
-  def and(edge: EdgeT) =
+  type Node = graph.Node[N, E]
+  type Edge = graph.Edge[E, N]
+
+  def and(edge: Edge) =
     edge match {
       case ConjunctionEdge(edges) =>
         ConjunctionEdge(edges + this)
       case _ =>
-        ConjunctionEdge(Set[EdgeT](this, edge))
+        ConjunctionEdge(Set[Edge](this, edge))
     }
 
-  def or(edge: EdgeT) =
+  def or(edge: Edge) =
     edge match {
       case DisjunctionEdge(edges) =>
         DisjunctionEdge(edges + this)
       case _ =>
-        DisjunctionEdge(Set[EdgeT](this, edge))
+        DisjunctionEdge(Set[Edge](this, edge))
     }
 }
 
@@ -29,7 +31,7 @@ case class OutEdge[E, N](label: E, target: Node[N, E]) extends Edge[E, N]
 
 
 case class ConjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
-  override def and(edge: EdgeT) =
+  override def and(edge: Edge) =
     edge match {
       case ConjunctionEdge(otherEdges) =>
         ConjunctionEdge(edges ++ otherEdges)
@@ -39,7 +41,7 @@ case class ConjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
 }
 
 case class DisjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
-  override def or(edge: EdgeT) =
+  override def or(edge: Edge) =
     edge match {
       case DisjunctionEdge(otherEdges) =>
         DisjunctionEdge(edges ++ otherEdges)

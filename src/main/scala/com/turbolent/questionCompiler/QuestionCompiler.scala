@@ -5,20 +5,18 @@ import graph.{Node, Edge, ConjunctionEdge, DisjunctionEdge}
 import com.turbolent.questionParser.{ast, Token}
 
 
-class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
-    (ontology: Ontology[N, E, EnvT], env: EnvT)
-{
+class QuestionCompiler[N, E](ontology: Ontology[N, E], env: Environment[N, E]) {
 
-  type NodeT = Node[N, E]
-  type EdgeT = Edge[E, N]
-  type NodeFactory = (NodeT, Seq[Token]) => NodeT
+  type Node = graph.Node[N, E]
+  type Edge = graph.Edge[E, N]
+  type NodeFactory = (Node, Seq[Token]) => Node
   type EdgeContextFactory = (Subject) => EdgeContext
-  type EdgeFactory = (NodeT, EdgeContextFactory) => EdgeT
+  type EdgeFactory = (Node, EdgeContextFactory) => Edge
 
   val identityNodeFactory: NodeFactory =
     (node, name) => node
 
-  def compileQuestion(question: ast.Question): Seq[NodeT] =
+  def compileQuestion(question: ast.Question): Seq[Node] =
     question match {
       case ast.PersonListQuestion(properties) =>
         val node = env.newNode()
@@ -35,7 +33,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
         compileQuery(query, identityNodeFactory)
     }
 
-  def compileQuery(query: ast.Query, nodeFactory: NodeFactory): Seq[NodeT] =
+  def compileQuery(query: ast.Query, nodeFactory: NodeFactory): Seq[Node] =
     query match {
       case ast.QueryWithProperty(nestedQuery, property) =>
         val nodeFactory: NodeFactory = (node, name) =>
@@ -54,7 +52,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
         compileRelationshipSubquery(first, nodes)
     }
 
-  def compileRelationshipSubquery(query: ast.Query, nodes: Seq[NodeT]): Seq[NodeT] =
+  def compileRelationshipSubquery(query: ast.Query, nodes: Seq[Node]): Seq[Node] =
     query match {
       case ast.NamedQuery(name) =>
         nodes.map { node =>
@@ -72,7 +70,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
       case ast.QueryWithProperty(_, _) => ???
     }
 
-  def compileProperty(property: ast.Property, subject: Subject): EdgeT =
+  def compileProperty(property: ast.Property, subject: Subject): Edge =
     property match {
       case ast.NamedProperty(name) =>
         ontology.makeNamedPropertyEdge(name, env.newNode(), subject, env)
@@ -105,7 +103,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
     }
 
 
-  def compileFilter(filter: ast.Filter, edgeFactory: EdgeFactory): EdgeT =
+  def compileFilter(filter: ast.Filter, edgeFactory: EdgeFactory): Edge =
     filter match {
       case ast.FilterWithModifier(modifier, value) =>
         compileValue(value, modifier, edgeFactory)
@@ -123,7 +121,7 @@ class QuestionCompiler[N, E, EnvT <: Environment[N, E]]
         DisjunctionEdge(filters.map(compileFilter(_, edgeFactory)).toSet)
     }
 
-  def compileValue(value: ast.Value, filter: Seq[Token], edgeFactory: EdgeFactory): EdgeT =
+  def compileValue(value: ast.Value, filter: Seq[Token], edgeFactory: EdgeFactory): Edge =
     value match {
       case ast.NamedValue(name) =>
         val node = ontology.makeValueNode(name, filter, env)

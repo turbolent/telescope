@@ -1,5 +1,6 @@
 package com.turbolent.questionCompiler.sparql
 
+import com.turbolent.questionCompiler.graph
 import com.turbolent.questionCompiler.Environment
 import com.turbolent.questionCompiler.graph._
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs
@@ -18,19 +19,17 @@ case object Forward extends EdgeDirection
 case object Backward extends EdgeDirection
 
 
-class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
-  (backend: SparqlBackend[N, E, EnvT], env: EnvT)
-{
+class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E], env: Environment[N, E]) {
 
-  type NodeT = Node[N, E]
-  type EdgeT = Edge[E, N]
-  type FilterT = Filter[N, E]
+  type Node = graph.Node[N, E]
+  type Edge = graph.Edge[E, N]
+  type Filter = graph.Filter[N, E]
   type OpResultMerger = (OpResult, OpResult) => OpResult
   type Function2ExprFactory = (Expr, Expr) => Expr
   type OpResultFactory = (Option[OpResult]) => OpResult
   type OpResult = (Op, Seq[SortCondition])
 
-  def compileNodeJoining(node: NodeT, opResult: OpResult, context: NodeCompilationContext) = {
+  def compileNodeJoining(node: Node, opResult: OpResult, context: NodeCompilationContext) = {
     val (op, sortings) = opResult
     def join(opResult: OpResult): OpResult = {
       val (otherOp, otherSortings) = opResult
@@ -41,7 +40,7 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
     compileNode(node, factory, context)
   }
 
-  def compileFunction2Filter(compiledNode: JenaNode, otherNode: NodeT,
+  def compileFunction2Filter(compiledNode: JenaNode, otherNode: Node,
                              opResult: OpResult, exprFactory: Function2ExprFactory): OpResult =
   {
     val (compiledOtherNode, (filteredOp, sortings)) =
@@ -63,8 +62,8 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
     (filterOp, sortings)
   }
 
-  def compileFilter(node: JenaNode, opResult: OpResult)(filter: FilterT): OpResult = {
-    def compileComparison(otherNode: NodeT, exprFactory: Function2ExprFactory) =
+  def compileFilter(node: JenaNode, opResult: OpResult)(filter: Filter): OpResult = {
+    def compileComparison(otherNode: Node, exprFactory: Function2ExprFactory) =
       compileFunction2Filter(node, otherNode, opResult, exprFactory)
 
     filter match {
@@ -87,7 +86,7 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
     case Descending => JenaQuery.ORDER_DESCENDING
   }
 
-  def compileNode(node: NodeT, opFactory: OpResultFactory,
+  def compileNode(node: Node, opFactory: OpResultFactory,
                   context: NodeCompilationContext): (JenaNode, OpResult) =
   {
     val expandedNode = backend.expandNode(node, context, env)
@@ -106,11 +105,11 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
     (compiledNode, (op, filterSortings ++ sorting))
   }
 
-  def compileEdges(edges: Set[EdgeT], node: JenaNode, merge: OpResultMerger): OpResult =
+  def compileEdges(edges: Set[Edge], node: JenaNode, merge: OpResultMerger): OpResult =
     edges.map(compileEdge(node))
         .reduce(merge)
 
-  def compileEdge(node: JenaNode)(edge: EdgeT): OpResult = {
+  def compileEdge(node: JenaNode)(edge: Edge): OpResult = {
     edge match {
       case OutEdge(label, target) =>
         compileEdgeLabel(label, node, target, Forward)
@@ -141,7 +140,7 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
   }
 
   def compileEdgeLabel(label: E, compiledNode: JenaNode,
-                       otherNode: NodeT, direction: EdgeDirection): OpResult =
+                       otherNode: Node, direction: EdgeDirection): OpResult =
   {
     backend.compileEdgeLabel(label, env) match {
       case Left(property) =>
@@ -192,7 +191,7 @@ class SparqlGraphCompiler[N, E, EnvT <: Environment[N, E]]
     transformations.foldLeft(op)((op, transform) =>
       Transformer.transform(transform, op))
 
-  def compileQuery(node: Node[N, E]): JenaQuery = {
+  def compileQuery(node: Node): JenaQuery = {
     require(node.edge.isDefined,
       "root node needs to have edges")
 

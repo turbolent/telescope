@@ -1,6 +1,6 @@
 package com.turbolent.questionCompiler.sparql
 
-import com.turbolent.questionCompiler.graph.Node
+import com.turbolent.questionCompiler.graph
 import com.turbolent.questionCompiler.Environment
 import org.apache.jena.graph.{Node => JenaNode}
 import org.apache.jena.query.{Query => JenaQuery}
@@ -10,24 +10,26 @@ import org.apache.jena.sparql.path.Path
 import org.apache.jena.sparql.expr.Expr
 
 
-trait SparqlBackend[N, E, EnvT <: Environment[N, E]] {
+trait SparqlBackend[N, E] {
 
-  type NodeT = Node[N, E]
+  type Node = graph.Node[N, E]
+  type Edge = graph.Edge[E, N]
+  type Env = Environment[N, E]
 
-  def compileNodeLabel(label: N, env: EnvT): JenaNode
+  def compileNodeLabel(label: N, env: Env): JenaNode
 
-  def compileEdgeLabel(label: E, env: EnvT): Either[JenaNode, Path]
+  def compileEdgeLabel(label: E, env: Env): Either[JenaNode, Path]
 
   //// optional hooks
 
-  def expandNode(node: NodeT, context: NodeCompilationContext, env: EnvT): NodeT = node
+  def expandNode(node: Node, context: NodeCompilationContext, env: Env): Node = node
 
-  def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: NodeT): Expr = leftExpr
+  def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr = leftExpr
 
-  def prepareOp(op: Op, env: EnvT) = op
+  def prepareOp(op: Op, env: Env) = op
 
-  def additionalResultVariables(variable: Var, env: EnvT): List[Var] = Nil
+  def additionalResultVariables(variable: Var, env: Env): List[Var] = Nil
 
-  def prepareQuery(query: JenaQuery, env: EnvT) {}
+  def prepareQuery(query: JenaQuery, env: Env) {}
 
 }
