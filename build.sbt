@@ -10,8 +10,8 @@ resolvers += "turbolent" at "https://raw.githubusercontent.com/turbolent/mvn-rep
 
 libraryDependencies ++= Seq(
   "com.turbolent" %% "question-parser" % "1.0-SNAPSHOT",
-  "com.turbolent" %% "question-compiler" % "1.0-SNAPSHOT",
-  "com.turbolent" %% "wikidata-ontology" % "1.0-SNAPSHOT",
+  "com.turbolent" %% "question-compiler" % "1.1-SNAPSHOT",
+  "com.turbolent" %% "wikidata-ontology" % "1.1-SNAPSHOT",
   "com.turbolent" %% "spacy-thrift-scala" % "0.1-SNAPSHOT",
   "com.twitter" %% "finagle-http" % "6.35.0",
   "com.twitter" %% "twitter-server" % "1.20.0",
