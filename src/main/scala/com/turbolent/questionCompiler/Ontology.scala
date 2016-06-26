@@ -3,11 +3,10 @@ package com.turbolent.questionCompiler
 import com.turbolent.questionParser.Token
 
 
-trait Ontology[N, E] {
+trait Ontology[N, E, Env <: Environment[N, E]] {
 
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
-  type Env = Environment[N, E]
 
   def makePersonEdge(env: Env): Edge
 

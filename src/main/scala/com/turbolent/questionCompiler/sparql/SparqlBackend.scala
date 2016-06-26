@@ -10,11 +10,10 @@ import org.apache.jena.sparql.path.Path
 import org.apache.jena.sparql.expr.Expr
 
 
-trait SparqlBackend[N, E] {
+trait SparqlBackend[N, E, Env <: Environment[N, E]] {
 
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
-  type Env = Environment[N, E]
 
   def compileNodeLabel(label: N, env: Env): JenaNode
 

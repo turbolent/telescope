@@ -19,7 +19,7 @@ case object Forward extends EdgeDirection
 case object Backward extends EdgeDirection
 
 
-class SparqlGraphCompiler[N, E](backend: SparqlBackend[N, E], env: Environment[N, E]) {
+class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](backend: SparqlBackend[N, E, Env], env: Env) {
 
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
