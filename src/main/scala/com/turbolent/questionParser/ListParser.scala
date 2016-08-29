@@ -51,10 +51,10 @@ object ListParser extends BaseParser {
       case optDeterminer ~ adjectives ~ nouns =>
         optDeterminer map { determiner =>
           ast.NamedValue(determiner :: adjectives ++ nouns)
-        } getOrElse {
+        } getOrElse
           ast.NamedValue(adjectives ++ nouns)
-        }
     }
+
 
   // Examples:
   //   - "100"
@@ -68,9 +68,8 @@ object ListParser extends BaseParser {
       case numbers ~ optNouns =>
         optNouns map {
           ast.NumberWithUnit(numbers, _)
-        } getOrElse {
-            ast.Number(numbers)
-        }
+        } getOrElse
+          ast.Number(numbers)
     }
 
 
@@ -143,9 +142,8 @@ object ListParser extends BaseParser {
             ast.FilterWithModifier(Seq(preposition), values)
           case Some(comparative) ~ preposition =>
             ast.FilterWithComparativeModifier(Seq(comparative, preposition), values)
-        } getOrElse {
-            ast.PlainFilter(values)
-        }
+        } getOrElse
+          ast.PlainFilter(values)
     }
 
 
@@ -184,7 +182,7 @@ object ListParser extends BaseParser {
         ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
     }
 
-  def auxiliaryVerbLemmas =
+  val auxiliaryVerbLemmas =
     Set("have", "be", "do")
 
   def isAuxiliaryVerb(token: Token): Boolean =
@@ -342,7 +340,7 @@ object ListParser extends BaseParser {
   lazy val ListQuestion =
     (ListQuestionStart ~ FullQuery) ^^ {
       // TODO: handle start
-      case start ~ query =>
+      case _ ~ query =>
         ast.ListQuestion(query)
     }
 
