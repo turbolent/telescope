@@ -7,7 +7,7 @@ object ListParser extends BaseParser {
   //   - "what"
 
   lazy val whichWhat =
-    opt(Preposition) <~ ("which" | "what")
+    ignore(opt(Preposition) ~ ("which" | "what"))
 
 
   // Examples:
@@ -32,9 +32,10 @@ object ListParser extends BaseParser {
   //   - "all"
   //   - "some of"
   //   - "a couple"
+
   lazy val someAllAny =
-    ignore(("some" | "all" | "any" | "only" | "many" | "both"
-            | (opt("a") ~ ("few" | "couple" | "number" | "lot")))
+    ignore((ignore("some" | "all" | "any" | "only" | "many" | "both") |
+             ignore(opt("a") ~ ("few" | "couple" | "number" | "lot")))
            ~ opt("of"))
 
 
@@ -62,7 +63,7 @@ object ListParser extends BaseParser {
   //   - "42 meters"
   //   - "two million inhabitants"
 
-  lazy val NumericValue =
+  lazy val NumericValue: Parser[ast.Value] =
     (Numbers ~ opt(Nouns)) ^^ {
       case numbers ~ optNouns =>
         optNouns map {
@@ -312,7 +313,7 @@ object ListParser extends BaseParser {
   // NOTE: ||| to match as much as possible
 
   lazy val ListQuestionStart =
-    opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny)))
+    ignore(opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny))))
 
 
   // Examples:
