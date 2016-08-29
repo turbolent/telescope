@@ -47,7 +47,7 @@ object ListParser extends BaseParser {
   //   - "people"
 
   lazy val NamedValue =
-    (opt(pos("DT")) ~ rep(pos("JJ")) ~ Nouns) ^^ {
+    (opt(Determiner) ~ rep(AnyAdjective) ~ Nouns) ^^ {
       case optDeterminer ~ adjectives ~ nouns =>
         optDeterminer map { determiner =>
           ast.NamedValue(determiner :: adjectives ++ nouns)
@@ -79,19 +79,26 @@ object ListParser extends BaseParser {
   //   - "Obama's children's mothers"
 
   lazy val NamedValues: Parser[ast.Value] =
-    rep1sep(NamedValue, pos("POS")) ^^
-      (_ reduceLeft[ast.Value] { (result, namedValue) =>
-        ast.RelationshipValue(namedValue, result)
-      })
+    (NamedValue ~ rep(Possessive ~> NamedValue)) ^^ {
+      case first ~ rest =>
+        rest.foldLeft[ast.Value](first) { (result, namedValue) =>
+          ast.RelationshipValue(namedValue, result)
+        }
+    }
+
 
   // Examples:
   //   - "\"The Red Victorian\""
 
-  lazy val AnyExceptEndQuote =
+  lazy val OpeningQuotationMarks = pos("``", strict = true)
+
+  lazy val ClosingQuotationMarks = pos("''", strict = true)
+
+  lazy val AnyExceptClosingQuotationMarks =
     rep(elem("not('')", _.pennTag != "''"))
 
   lazy val Quoted =
-    pos("``") ~> AnyExceptEndQuote <~ pos("''")
+     OpeningQuotationMarks ~> AnyExceptClosingQuotationMarks <~ ClosingQuotationMarks
 
 
   // Examples:
@@ -115,7 +122,8 @@ object ListParser extends BaseParser {
   //   - "Copenhagen and Berlin"
 
   lazy val Values =
-    commaOrAndList(Value, ast.AndValue, ast.OrValue)
+    commaOrAndList(Value, ast.AndValue, ast.OrValue,
+      andOptional = false)
 
 
   // Examples:
@@ -127,8 +135,8 @@ object ListParser extends BaseParser {
   lazy val PrepositionExceptOf =
     Preposition filter { _.word != "of" }
 
-  lazy val Filter =
-    (opt(opt(pos("JJR")) ~ PrepositionExceptOf) ~ Values) ^^ {
+  lazy val Filter: Parser[ast.Filter] =
+    (opt(opt(ComparativeAdjective) ~ PrepositionExceptOf) ~ Values) ^^ {
       case optional ~ values =>
         optional map {
           case None ~ preposition =>
@@ -146,7 +154,8 @@ object ListParser extends BaseParser {
   //   - "before 1900 or after 1910"
 
   lazy val Filters =
-    commaOrAndList(Filter, ast.AndFilter, ast.OrFilter)
+    commaOrAndList(Filter, ast.AndFilter, ast.OrFilter,
+      andOptional = false)
 
 
   // Examples:
@@ -159,7 +168,7 @@ object ListParser extends BaseParser {
   //       "did Orwell write" ~= "were written by" Orwell => "did write Orwell"
 
   lazy val InversePropertySuffix =
-    (Verbs ~ opt(pos("RP") | (Preposition <~ not(NamedValue)))) ^^ { suffix =>
+    (Verbs ~ opt(Particle | (Preposition <~ not(NamedValue)))) ^^ { suffix =>
       (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
           case moreVerbs ~ Some(particle) =>
@@ -170,7 +179,7 @@ object ListParser extends BaseParser {
     }
 
   lazy val PropertyAdjectiveSuffix =
-    pos("JJ", strict = true) ^^ { adjective =>
+    StrictAdjective ^^ { adjective =>
       (verbs: List[Token], filter: ast.Filter) =>
         ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
     }
@@ -181,8 +190,8 @@ object ListParser extends BaseParser {
   def isAuxiliaryVerb(token: Token): Boolean =
     auxiliaryVerbLemmas.contains(token.lemma)
 
-  lazy val Property =
-    opt(pos("WDT")) ~> opt(Verbs) >> {
+  lazy val Property: Parser[ast.Property] =
+    opt(WhDeterminer) ~> opt(Verbs) >> {
       // TODO: more after filters only when verb is auxiliary do/does/did
       case Some(verbs) =>
         val moreParser = verbs match {
@@ -215,7 +224,8 @@ object ListParser extends BaseParser {
   //            valid when starting with "which books")
 
   lazy val Properties =
-    commaOrAndList(Property, ast.AndProperty, ast.OrProperty, andOptional = true)
+    commaOrAndList(Property, ast.AndProperty, ast.OrProperty,
+      andOptional = true)
 
 
   // Examples:
@@ -235,7 +245,7 @@ object ListParser extends BaseParser {
   //       might either be named entity or specific type
 
   lazy val NamedQuery =
-    (opt(pos("DT")) ~ opt(pos("JJS")) ~ rep(pos("JJ")) ~ Nouns) ^^ {
+    (opt(Determiner) ~ opt(SuperlativeAdjective) ~ rep(AnyAdjective) ~ Nouns) ^^ {
       case None ~ None ~ adjectives ~ nouns =>
         ast.NamedQuery(adjectives ++ nouns)
       case None ~ Some(superlative) ~ adjectives ~ nouns =>
@@ -259,8 +269,8 @@ object ListParser extends BaseParser {
   // TODO: handling nesting of "and" and "or"
 
   lazy val QueriesSeparator =
-    ("," ~ opt(pos("CC"))) |
-    (opt(",") ~ pos("CC"))
+    ignore("," ~ opt(CoordinatingConjunction)) |
+    ignore(opt(",") ~ CoordinatingConjunction)
 
   lazy val Queries: Parser[ast.Query] =
     rep1sep(Query, QueriesSeparator) ^^ {
@@ -276,7 +286,7 @@ object ListParser extends BaseParser {
   //   - "Clinton's children and grandchildren"
 
   lazy val QueryRelationships: Parser[ast.Query] =
-    chainl1(Queries, pos("POS") ^^ { sep =>
+    chainl1(Queries, Possessive ^^ { sep =>
       (a: ast.Query, b: ast.Query) =>
         ast.RelationshipQuery(b, a, sep)
     })
@@ -294,14 +304,23 @@ object ListParser extends BaseParser {
   // TODO: execution should "filter" first (use properties),
   //       before applying inner superlative
 
+  lazy val QueryProperties = Properties ^^ { property =>
+    (query: ast.Query) =>
+      ast.QueryWithProperty(query, property)
+  }
+
+  lazy val QueryRelationship = Relationship ^^ {
+    case sep ~ nested =>
+      (query: ast.Query) =>
+        ast.RelationshipQuery(query, nested, sep)
+  }
+
   lazy val FullQuery: Parser[ast.Query] =
-    ((QueryRelationships <~ opt(pos("WDT") | "who")) ~ opt(Properties ||| Relationship)) ^^ {
-      case query ~ rest => rest map {
-        case property: ast.Property =>
-          ast.QueryWithProperty(query, property)
-        case ~(sep: Token, nested: ast.Query) =>
-          ast.RelationshipQuery(query, nested, sep)
-      } getOrElse query
+    ((QueryRelationships <~ opt(WhDeterminer | "who")) ~ opt(QueryProperties ||| QueryRelationship)) ^^ {
+      case query ~ None =>
+        query
+      case query ~ Some(queryConstructor) =>
+        queryConstructor(query)
     }
 
 
@@ -345,5 +364,5 @@ object ListParser extends BaseParser {
 
 
   lazy val Question: Parser[ast.Question] =
-    (ListQuestion | PersonQuestion | ThingQuestion) <~ opt(pos("."))
+    (ListQuestion | PersonQuestion | ThingQuestion) <~ opt(SentenceTerminator)
 }
