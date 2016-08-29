@@ -3,7 +3,7 @@ package com.turbolent.questionParser.ast
 import com.turbolent.questionParser.Token
 
 
-sealed trait Value
+sealed trait Value extends Product with Serializable
 
 case class AndValue(values: Seq[Value]) extends Value
 case class OrValue(values: Seq[Value]) extends Value
