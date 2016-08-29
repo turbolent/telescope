@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 trait BaseParser extends PackratParsers {
   override type Elem = Token
 
-  def parse[T](tokens: Seq[Token], production: Parser[T]) = {
+  def parse[T](tokens: Seq[Token], production: Parser[T]): ParseResult[T] = {
     val tokenReader = new TokensReader(tokens)
     val packratReader = new PackratReader(tokenReader)
     production(packratReader)
