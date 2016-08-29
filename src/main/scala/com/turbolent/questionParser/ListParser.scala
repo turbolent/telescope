@@ -23,13 +23,11 @@ object ListParser extends BaseParser {
   //   - "find"
   //   - "list"
   //   - "show me"
-  // NOTE: might be empty
 
   lazy val findListGiveShow =
     ignore(("find" | "list" | "give" | "show") ~ opt("me"))
 
 
-  // Quantity at start of a generic type question
   // Examples:
   //   - "all"
   //   - "some of"
@@ -306,7 +304,6 @@ object ListParser extends BaseParser {
     }
 
 
-  // Start of a generic type question
   // Examples:
   //   - "which"
   //   - "what are"
@@ -318,7 +315,6 @@ object ListParser extends BaseParser {
     opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny)))
 
 
-  // Generic type question
   // Examples:
   //   - "which presidents were born before 1900"
   //   - "give me all actors born in Berlin and San Francisco"
@@ -331,7 +327,6 @@ object ListParser extends BaseParser {
     }
 
 
-  // Person question
   // Examples:
   //   - "who died in 1900"
   //   - "who was born in Europe and died in the US"
@@ -340,7 +335,6 @@ object ListParser extends BaseParser {
     ("who" ~> Properties) ^^ ast.PersonListQuestion
 
 
-  // Thing questions
   // Examples:
   //   - "what did George Orwell write"
   //   - "what was authored by George Orwell"
