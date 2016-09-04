@@ -45,7 +45,7 @@ class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, 
         Seq(nodeFactory(node, name))
 
       case ast.AndQuery(queries) =>
-        queries.flatMap(compileQuery(_, nodeFactory))
+        queries flatMap { compileQuery(_, nodeFactory) }
 
       case ast.RelationshipQuery(first, second, _) =>
         val nodes = compileQuery(second, nodeFactory)
@@ -55,13 +55,13 @@ class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, 
   def compileRelationshipSubquery(query: ast.Query, nodes: Seq[Node]): Seq[Node] =
     query match {
       case ast.NamedQuery(name) =>
-        nodes.map { node =>
+        nodes map { node =>
           val edge = ontology.makeRelationshipEdge(name, node, env)
           env.newNode().and(edge)
         }
 
       case ast.AndQuery(queries) =>
-        queries.flatMap(compileRelationshipSubquery(_, nodes))
+        queries flatMap { compileRelationshipSubquery(_, nodes) }
 
       case ast.RelationshipQuery(first, second, _) =>
         val secondNodes = compileRelationshipSubquery(second, nodes)
