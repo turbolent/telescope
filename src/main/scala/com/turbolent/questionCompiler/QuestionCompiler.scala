@@ -76,13 +76,15 @@ class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, 
         ontology.makeNamedPropertyEdge(name, env.newNode(), subject, env)
 
       case ast.PropertyWithFilter(name, filter) =>
-        val comparative = filter.isInstanceOf[ast.FilterWithComparativeModifier]
         compileFilter(filter, (node, contextFactory) => {
           val context = contextFactory(subject)
-          if (comparative)
-            ontology.makeComparativePropertyEdge(name, node, context, env)
-          else
-            ontology.makeValuePropertyEdge(name, node, context, env)
+          filter match {
+            case _: ast.FilterWithComparativeModifier =>
+              ontology.makeComparativePropertyEdge(name, node, context, env)
+
+            case _ =>
+              ontology.makeValuePropertyEdge(name, node, context, env)
+          }
         })
 
       case ast.InversePropertyWithFilter(name, filter) =>
