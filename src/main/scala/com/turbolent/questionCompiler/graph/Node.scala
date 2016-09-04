@@ -16,10 +16,10 @@ case class Node[N, E](label: N,
   def filter(filter: Filter): Node =
     copy(filter = this.filter map { _.and(filter) } orElse Some(filter))
 
-  def out(label: E, target: Node) =
+  def out(label: E, target: Node): Node =
     and(OutEdge(label, target))
 
-  def in(source: Node, label: E) =
+  def in(source: Node, label: E): Node =
     and(InEdge(source, label))
 
   def and(edge: Edge): Node =
