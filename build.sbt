@@ -2,7 +2,7 @@ organization := "com.turbolent"
 name := "question-compiler"
 version := "1.1-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
 
 scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
 
@@ -11,7 +11,7 @@ resolvers += "turbolent" at "https://raw.githubusercontent.com/turbolent/mvn-rep
 libraryDependencies ++= Seq(
   "com.turbolent" %% "question-parser" % "1.0-SNAPSHOT",
   "org.apache.jena" % "jena-arq" % "3.1.0",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 )
 
 publishMavenStyle := true
