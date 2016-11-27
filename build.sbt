@@ -2,14 +2,16 @@ organization := "com.turbolent"
 name := "question-parser"
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
 
 scalacOptions ++= Seq("-feature", "-Xfatal-warnings")
 
 libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-  "ai.x" %% "diff" % "1.0.1" % "test"
+  "org.apache.commons" % "commons-lang3" % "3.4",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+  // TODO:
+  // "ai.x" % "diff" % "1.2.0" % "test"
 )
 
 publishMavenStyle := true

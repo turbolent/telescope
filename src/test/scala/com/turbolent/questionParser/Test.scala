@@ -1,10 +1,11 @@
 package com.turbolent.questionParser
 
-import ai.x.diff._
+// import ai.x.diff._
 import com.turbolent.questionParser.ast._
 import org.scalatest.{AppendedClues, FunSuite, Matchers}
 
 
+// scalastyle:off multiple.string.literals
 
 
 class Test extends FunSuite with Matchers with AppendedClues {
@@ -24,16 +25,18 @@ class Test extends FunSuite with Matchers with AppendedClues {
     val tokens = tokenize(sentence)
     val testName = tokens.map(_.word).mkString(" ")
 
-    test(testName) {
+    registerTest(testName) {
       val result = parseListQuestion(tokens)
       assertSuccess(result)
 
-      { result.get shouldEqual expected } withClue {
-        DiffShow.diff(result.get, expected).string
-          .replaceAll("\u001B\\[32m", "++++ {{{")
-          .replaceAll("\u001B\\[31m", "---- {{{")
-          .replaceAll("\u001B\\[0m", "}}}")
-      }
+      { result.get shouldEqual expected }
+      // TODO: enable, once diff has been released for 2.12
+//      withClue {
+//        DiffShow.diff(result.get, expected).string
+//          .replaceAll("\u001B\\[32m", "++++ {{{")
+//          .replaceAll("\u001B\\[31m", "---- {{{")
+//          .replaceAll("\u001B\\[0m", "}}}")
+//      }
     }
   }
 
