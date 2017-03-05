@@ -5,6 +5,7 @@ import com.turbolent.questionParser.ast._
 import org.scalatest.{AppendedClues, FunSuite, Matchers}
 
 
+// scalastyle:off multiple.string.literals
 
 
 class Test extends FunSuite with Matchers with AppendedClues {
@@ -24,11 +25,13 @@ class Test extends FunSuite with Matchers with AppendedClues {
     val tokens = tokenize(sentence)
     val testName = tokens.map(_.word).mkString(" ")
 
-    test(testName) {
+    registerTest(testName) {
       val result = parseListQuestion(tokens)
       assertSuccess(result)
 
-      { result.get shouldEqual expected } withClue {
+      {
+        result.get shouldEqual expected
+      } withClue {
         DiffShow.diff(result.get, expected).string
           .replaceAll("\u001B\\[32m", "++++ {{{")
           .replaceAll("\u001B\\[31m", "---- {{{")
@@ -830,8 +833,8 @@ class Test extends FunSuite with Matchers with AppendedClues {
   test("who/WP/who starred/VBD/star in/IN/in movies/NNS/movie "
     + "directed/VBN/direct by/IN/by Christopher/NN/christopher Nolan/NN/nolan",
 
-    // NOTE: AndProperty is correct, next stage should realize second property
-    //       is relative to first one, not subject
+    // TODO: handle in second stage:
+    //       filter of last property is constraining preceding property (~"which were")
 
     PersonListQuestion(AndProperty(List(PropertyWithFilter(List(Token("starred", "VBD", "star")),
       FilterWithModifier(List(Token("in", "IN", "in")),
