@@ -11,7 +11,7 @@ import org.apache.jena.graph.{Node => JenaNode, Triple => JenaTriple}
 import org.apache.jena.query.{SortCondition, Query => JenaQuery}
 import org.apache.jena.sparql.expr._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 
 sealed trait EdgeDirection
@@ -206,9 +206,9 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](backend: SparqlBackend
     val variables = List(variable) ++
                     backend.additionalResultVariables(variable, env)
 
-    val ordered = new OpOrder(preparedOp, sortings)
+    val ordered = new OpOrder(preparedOp, sortings.asJava)
 
-    val projection = new OpProject(ordered, variables)
+    val projection = new OpProject(ordered, variables.asJava)
     val distinct = new OpDistinct(projection)
 
     val optimized = optimize(distinct)
