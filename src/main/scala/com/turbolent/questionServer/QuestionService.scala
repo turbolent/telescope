@@ -1,20 +1,16 @@
 package com.turbolent.questionServer
 
-import java.nio.file.Path
-
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Level.INFO
 import com.twitter.logging.Logger
 import com.twitter.util.Future
 import org.json4s.FullTypeHints
-import org.json4s.native.Serialization
-import spacyThrift.client.SpacyThriftClient
+import org.json4s.jackson.Serialization
 
 
-class QuestionService(spacyThriftClient: SpacyThriftClient)
-    extends Service[Request, Response]
-{
+class QuestionService(tagger: Tagger) extends Service[Request, Response] {
+
   val log = Logger(classOf[QuestionService])
   log.setUseParentHandlers(false)
   log.setLevel(INFO)
@@ -38,7 +34,7 @@ class QuestionService(spacyThriftClient: SpacyThriftClient)
     Future.value(response)
   }
 
-  val tokenizeSentence = new TokenizeSentenceStep(spacyThriftClient)
+  val tokenizeSentence = new TokenizeSentenceStep(tagger)
 
   def apply(req: Request): Future[Response] = {
     val steps = GetSentenceStep
