@@ -1,24 +1,10 @@
 language: scala
-
 jdk:
   - oraclejdk8
-
 scala:
-  - 2.11.8
-
-services:
-  - docker
-
-before_install:
-- docker pull turbolent/spacy-thrift
-- docker run -d -p 9090:9090 turbolent/spacy-thrift
-- docker ps -a
-
-
+  - 2.12.1
 env:
   global:
     secure: "pSr5spAPfut9mPHHrWAkWXhx76CfR3ew+VwIJGNv4RZ8rZaI45djCZpWCGfXSRc21IFpi1Auke9FPEhfVVkhlQ9ADdepxdDfmk+c1bHX71sg/nzUmbeHIFcg/td1xcU9qshFgoisZSgYZ2qO3EsjoIjH+hoFo88l42Sd1uXNeNCmA6Xvc/o+Ni1C8q0/jXOmPmfZSqt2xWFxOPz0Jhl4UZnDMn5vKWlNd4uVUYS03tAl+ulJHqDFVxwU+UCME01jIMa0dFkWjNdbx/a5BntT4IJGOyqNwsQJ0NJZtlfmjEwLKXiZdTi0CyOXIgMfnf1S+M1AjZwGwG0Ib5lhgRnE643kjidwxSwK+yJJEjKGiVCzMa0rMH+XPDXBksXDizWRUaWyRPgU9SnnaUsef3C6PQU81U+qjF0+4oFubNaDu8L18pBTybr080+U1O9SCr81SlPIkzt75f8JYK0kME2kLgCj2yNEwrf6m0AaJCe34Kj7jRmM2JRS4/fEoal4OeaHgCOUx7dnjYQVTE7bQXL59eh5aFpXoGGlIbIBjo1uN/QiBA1CZtYoVlZvUVeDIxjkz2j7mjTZChm+3I4fRBXuUCAkfdNbNyGhVrgniwwVIJvzIIi4dL9Og3D2AQVgZdm812WuP61wW5ZNrx6+ehUTAl7g8PN8CcHlnIvlodnyYoU="
-
 after_success:
   - .travis/deploy.sh
-

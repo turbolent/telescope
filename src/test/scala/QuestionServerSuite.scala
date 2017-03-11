@@ -1,8 +1,9 @@
+import com.turbolent.questionParser.Token
 import com.turbolent.questionServer.QuestionServer
 import com.twitter.finagle.http._
+import com.twitter.util.Future
 import org.json4s.DefaultFormats
-import org.json4s.native.JsonMethods
-import org.scalatest.junit.JUnitRunner
+import org.json4s.jackson.JsonMethods
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSuite, Matchers, OptionValues, TryValues}
 
@@ -15,7 +16,15 @@ class QuestionServerSuite extends FunSuite
     with OptionValues
 {
 
-  val service = QuestionServer.getService()
+  val tokens = Map(
+    "" -> Seq(),
+    "who" -> Seq(Token("who", "WP", "who")),
+    "who is" -> Seq(Token("who", "WP", "who"), Token("is", "VBD", "be")),
+    "who died" -> Seq(Token("who", "WP", "who"), Token("died", "VBD", "die"))
+  )
+
+  val service = QuestionServer.getService((sentence: String) =>
+    Future.value(tokens(sentence)))
 
   implicit val formats = DefaultFormats
 

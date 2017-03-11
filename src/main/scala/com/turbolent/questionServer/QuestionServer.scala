@@ -37,13 +37,11 @@ object QuestionServer extends App with Logging {
     })
   }
 
-  def getService(spacyThriftHostname: String = defaultSpacyThriftHostname,
-                 spacyThriftPort: Int = defaultSpacyThriftPort,
+  def getService(tagger: Tagger,
                  parseLog: String = defaultLog,
                  accessLog: String = defaultLog) =
   {
-    val spacyThriftClient = new SpacyThriftClient(spacyThriftHostname, spacyThriftPort)
-    val parseService = new QuestionService(spacyThriftClient)
+    val parseService = new QuestionService(tagger)
 
     val routingService =
       RoutingService.byMethodAndPathObject[Request] {
@@ -59,8 +57,13 @@ object QuestionServer extends App with Logging {
   }
 
   def main() {
-    val service = getService(spacyThriftHostname = spacyThriftHostnameFlag(),
-      spacyThriftPort = spacyThriftPortFlag(),
+    val spacyThriftHostname = spacyThriftHostnameFlag()
+    val spacyThriftPort = spacyThriftPortFlag()
+
+    val spacyThriftClient = new SpacyThriftClient(spacyThriftHostname, spacyThriftPort)
+    val tagger = new SpacyTagger(spacyThriftClient)
+
+    val service = getService(tagger,
       parseLog = parseLogFlag(),
       accessLog = accessLogFlag())
     val server = Http.serve(":" + portFlag(), service)
