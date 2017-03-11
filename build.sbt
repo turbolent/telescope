@@ -13,9 +13,9 @@ libraryDependencies ++= Seq(
   "com.turbolent" %% "question-compiler" % "1.1-SNAPSHOT",
   "com.turbolent" %% "wikidata-ontology" % "1.1-SNAPSHOT",
   "com.turbolent" %% "spacy-thrift-scala" % "0.1-SNAPSHOT",
-  "org.json4s" %% "json4s-native" % "3.3.0",
   "com.twitter" %% "finagle-http" % "6.42.0",
   "com.twitter" %% "twitter-server" % "1.27.0",
+  "org.json4s" %% "json4s-jackson" % "3.5.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 

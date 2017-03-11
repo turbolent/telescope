@@ -1,8 +1,8 @@
 import com.turbolent.questionServer.QuestionServer
 import com.twitter.finagle.http._
 import org.json4s.DefaultFormats
-import org.json4s.native.JsonMethods
 import org.scalatest.junit.JUnitRunner
+import org.json4s.jackson.JsonMethods
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSuite, Matchers, OptionValues, TryValues}
 
