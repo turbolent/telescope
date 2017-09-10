@@ -1,12 +1,14 @@
 package com.turbolent.questionParser
 
+import com.turbolent.questionParser.ast._
+
 object ListParser extends BaseParser {
 
   // Examples:
   //   - "in which"
   //   - "what"
 
-  lazy val whichWhat =
+  lazy val whichWhat: PackratParser[Unit] =
     ignore(opt(Preposition) ~ ("which" | "what"))
 
 
@@ -15,7 +17,7 @@ object ListParser extends BaseParser {
   //   - "what are"
   //   - "who were"
 
-  lazy val whoWhatBe =
+  lazy val whoWhatBe: PackratParser[Unit] =
     ignore(("who" | "what") ~ lemma("be"))
 
 
@@ -24,7 +26,7 @@ object ListParser extends BaseParser {
   //   - "list"
   //   - "show me"
 
-  lazy val findListGiveShow =
+  lazy val findListGiveShow: PackratParser[Unit] =
     ignore(("find" | "list" | "give" | "show") ~ opt("me"))
 
 
@@ -33,7 +35,7 @@ object ListParser extends BaseParser {
   //   - "some of"
   //   - "a couple"
 
-  lazy val someAllAny =
+  lazy val someAllAny: PackratParser[Unit] =
     ignore((ignore("some" | "all" | "any" | "only" | "many" | "both") |
              ignore(opt("a") ~ ("few" | "couple" | "number" | "lot")))
            ~ opt("of"))
@@ -46,7 +48,7 @@ object ListParser extends BaseParser {
   //   - "green paintings"
   //   - "people"
 
-  lazy val NamedValue =
+  lazy val NamedValue: PackratParser[NamedValue] =
     (opt(Determiner) ~ rep(AnyAdjective) ~ Nouns) ^^ {
       case optDeterminer ~ adjectives ~ nouns =>
         optDeterminer map { determiner =>
@@ -63,7 +65,7 @@ object ListParser extends BaseParser {
   //   - "42 meters"
   //   - "two million inhabitants"
 
-  lazy val NumericValue: Parser[ast.Value] =
+  lazy val NumericValue: PackratParser[ast.Value] =
     (Numbers ~ opt(Nouns)) ^^ {
       case numbers ~ optNouns =>
         optNouns map {
@@ -77,7 +79,7 @@ object ListParser extends BaseParser {
   //   - "Obama's children"
   //   - "Obama's children's mothers"
 
-  lazy val NamedValues: Parser[ast.Value] =
+  lazy val NamedValues: PackratParser[ast.Value] =
     (NamedValue ~ rep(Possessive ~> NamedValue)) ^^ {
       case first ~ rest =>
         rest.foldLeft[ast.Value](first) { (result, namedValue) =>
@@ -89,15 +91,17 @@ object ListParser extends BaseParser {
   // Examples:
   //   - "\"The Red Victorian\""
 
-  lazy val OpeningQuotationMarks = pos("``", strict = true)
+  lazy val OpeningQuotationMarks: PackratParser[Token] =
+    pos("``", strict = true)
 
-  lazy val ClosingQuotationMarks = pos("''", strict = true)
+  lazy val ClosingQuotationMarks: PackratParser[Token] =
+    pos("''", strict = true)
 
-  lazy val AnyExceptClosingQuotationMarks =
+  lazy val AnyExceptClosingQuotationMarks: PackratParser[List[Token]] =
     rep(elem("not('')", _.pennTag != "''"))
 
-  lazy val Quoted =
-     OpeningQuotationMarks ~> AnyExceptClosingQuotationMarks <~ ClosingQuotationMarks
+  lazy val Quoted: PackratParser[List[Token]] =
+    OpeningQuotationMarks ~> AnyExceptClosingQuotationMarks <~ ClosingQuotationMarks
 
 
   // Examples:
@@ -109,7 +113,7 @@ object ListParser extends BaseParser {
   //   - "two million inhabitants"
   //   - "\"I, Robot\""
 
-  lazy val Value =
+  lazy val Value: PackratParser[Value] =
     NamedValues |
     NumericValue |
     (Quoted ^^ ast.NamedValue)
@@ -120,7 +124,7 @@ object ListParser extends BaseParser {
   //   - "1900 or 1901"
   //   - "Copenhagen and Berlin"
 
-  lazy val Values =
+  lazy val Values: PackratParser[Value] =
     commaOrAndList(Value, ast.AndValue, ast.OrValue,
       andOptional = false)
 
@@ -131,10 +135,10 @@ object ListParser extends BaseParser {
   //   - "larger than Europe"
   //   - "smaller than Europe and the US"
 
-  lazy val PrepositionExceptOf =
+  lazy val PrepositionExceptOf: PackratParser[Token] =
     Preposition filter { _.word != "of" }
 
-  lazy val Filter: Parser[ast.Filter] =
+  lazy val Filter: PackratParser[ast.Filter] =
     (opt(opt(ComparativeAdjective) ~ PrepositionExceptOf) ~ Values) ^^ {
       case optional ~ values =>
         optional map {
@@ -151,7 +155,7 @@ object ListParser extends BaseParser {
   //   - "before 1900"
   //   - "before 1900 or after 1910"
 
-  lazy val Filters =
+  lazy val Filters: PackratParser[Filter] =
     commaOrAndList(Filter, ast.AndFilter, ast.OrFilter,
       andOptional = false)
 
@@ -165,7 +169,7 @@ object ListParser extends BaseParser {
   // NOTE: first two examples are "direct", second two are "inverse":
   //       "did Orwell write" ~= "were written by" Orwell => "did write Orwell"
 
-  lazy val InversePropertySuffix =
+  lazy val InversePropertySuffix: PackratParser[(List[Token], Filter) => InversePropertyWithFilter] =
     (Verbs ~ opt(Particle | (Preposition <~ not(NamedValue)))) ^^ { suffix =>
       (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
@@ -176,7 +180,7 @@ object ListParser extends BaseParser {
         }
     }
 
-  lazy val PropertyAdjectiveSuffix =
+  lazy val PropertyAdjectiveSuffix: PackratParser[(List[Token], Filter) => AdjectivePropertyWithFilter] =
     StrictAdjective ^^ { adjective =>
       (verbs: List[Token], filter: ast.Filter) =>
         ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
@@ -188,7 +192,7 @@ object ListParser extends BaseParser {
   def isAuxiliaryVerb(token: Token): Boolean =
     auxiliaryVerbLemmas.contains(token.lemma)
 
-  lazy val Property: Parser[ast.Property] =
+  lazy val Property: PackratParser[ast.Property] =
     opt(WhDeterminer) ~> opt(Verbs) >> {
       // TODO: more after filters only when verb is auxiliary do/does/did
       case Some(verbs) =>
@@ -221,7 +225,7 @@ object ListParser extends BaseParser {
   //     (NOTE: 2 properties, "and" is optional,
   //            valid when starting with "which books")
 
-  lazy val Properties =
+  lazy val Properties: PackratParser[Property] =
     commaOrAndList(Property, ast.AndProperty, ast.OrProperty,
       andOptional = true)
 
@@ -230,7 +234,7 @@ object ListParser extends BaseParser {
   //   - "of the USA"
   //   - "of China"
 
-  lazy val Relationship =
+  lazy val Relationship: PackratParser[~[Token, Query]] =
     "of" ~ FullQuery
 
 
@@ -242,7 +246,7 @@ object ListParser extends BaseParser {
   // Note: disambiguate/extract superlative and adjective in later stage,
   //       might either be named entity or specific type
 
-  lazy val NamedQuery =
+  lazy val NamedQuery: PackratParser[NamedQuery] =
     (opt(Determiner) ~ opt(SuperlativeAdjective) ~ rep(AnyAdjective) ~ Nouns) ^^ {
       case None ~ None ~ adjectives ~ nouns =>
         ast.NamedQuery(adjectives ++ nouns)
@@ -255,7 +259,7 @@ object ListParser extends BaseParser {
     }
 
 
-  lazy val Query =
+  lazy val Query: PackratParser[NamedQuery] =
     NamedQuery |
     (Quoted ^^ ast.NamedQuery)
 
@@ -266,11 +270,11 @@ object ListParser extends BaseParser {
   // TODO: differentiate "and" and "or"?!
   // TODO: handling nesting of "and" and "or"
 
-  lazy val QueriesSeparator =
+  lazy val QueriesSeparator: PackratParser[Unit] =
     ignore("," ~ opt(CoordinatingConjunction)) |
     ignore(opt(",") ~ CoordinatingConjunction)
 
-  lazy val Queries: Parser[ast.Query] =
+  lazy val Queries: PackratParser[ast.Query] =
     rep1sep(Query, QueriesSeparator) ^^ {
       case Seq(x) => x
       case xs => ast.AndQuery(xs)
@@ -283,7 +287,7 @@ object ListParser extends BaseParser {
   //   - "California's cities' population sizes"
   //   - "Clinton's children and grandchildren"
 
-  lazy val QueryRelationships: Parser[ast.Query] =
+  lazy val QueryRelationships: PackratParser[ast.Query] =
     chainl1(Queries, Possessive ^^ { sep =>
       (a: ast.Query, b: ast.Query) =>
         ast.RelationshipQuery(b, a, sep)
@@ -302,18 +306,20 @@ object ListParser extends BaseParser {
   // TODO: execution should "filter" first (use properties),
   //       before applying inner superlative
 
-  lazy val QueryProperties = Properties ^^ { property =>
-    (query: ast.Query) =>
-      ast.QueryWithProperty(query, property)
-  }
-
-  lazy val QueryRelationship = Relationship ^^ {
-    case sep ~ nested =>
+  lazy val QueryProperties: PackratParser[Query => QueryWithProperty] =
+    Properties ^^ { property =>
       (query: ast.Query) =>
-        ast.RelationshipQuery(query, nested, sep)
-  }
+        ast.QueryWithProperty(query, property)
+    }
 
-  lazy val FullQuery: Parser[ast.Query] =
+  lazy val QueryRelationship: PackratParser[Query => RelationshipQuery] =
+    Relationship ^^ {
+      case sep ~ nested =>
+        (query: ast.Query) =>
+          ast.RelationshipQuery(query, nested, sep)
+    }
+
+  lazy val FullQuery: PackratParser[ast.Query] =
     ((QueryRelationships <~ opt(WhDeterminer | "who")) ~ opt(QueryProperties ||| QueryRelationship)) ^^ {
       case query ~ None =>
         query
@@ -329,7 +335,7 @@ object ListParser extends BaseParser {
   //   - "give me a few"
   // NOTE: ||| to match as much as possible
 
-  lazy val ListQuestionStart =
+  lazy val ListQuestionStart: PackratParser[Unit] =
     ignore(opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny))))
 
 
@@ -337,7 +343,7 @@ object ListParser extends BaseParser {
   //   - "which presidents were born before 1900"
   //   - "give me all actors born in Berlin and San Francisco"
 
-  lazy val ListQuestion =
+  lazy val ListQuestion: PackratParser[ListQuestion] =
     (ListQuestionStart ~ FullQuery) ^^ {
       // TODO: handle start
       case _ ~ query =>
@@ -349,7 +355,7 @@ object ListParser extends BaseParser {
   //   - "who died in 1900"
   //   - "who was born in Europe and died in the US"
 
-  lazy val PersonQuestion =
+  lazy val PersonQuestion: PackratParser[PersonListQuestion] =
     ("who" ~> Properties) ^^ ast.PersonListQuestion
 
 
@@ -357,10 +363,10 @@ object ListParser extends BaseParser {
   //   - "what did George Orwell write"
   //   - "what was authored by George Orwell"
 
-  lazy val ThingQuestion =
+  lazy val ThingQuestion: PackratParser[ThingListQuestion] =
     ("what" ~> Properties) ^^ ast.ThingListQuestion
 
 
-  lazy val Question: Parser[ast.Question] =
+  lazy val Question: PackratParser[ast.Question] =
     (ListQuestion | PersonQuestion | ThingQuestion) <~ opt(SentenceTerminator)
 }

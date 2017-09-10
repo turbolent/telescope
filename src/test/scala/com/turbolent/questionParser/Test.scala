@@ -2,7 +2,7 @@ package com.turbolent.questionParser
 
 import ai.x.diff._
 import com.turbolent.questionParser.ast._
-import org.scalatest.{AppendedClues, FunSuite, Matchers}
+import org.scalatest.{AppendedClues, Assertion, FunSuite, Matchers}
 
 
 // scalastyle:off multiple.string.literals
@@ -10,18 +10,18 @@ import org.scalatest.{AppendedClues, FunSuite, Matchers}
 
 class Test extends FunSuite with Matchers with AppendedClues {
 
-  def parseListQuestion(tokens: Seq[Token]) =
+  private def parseListQuestion(tokens: Seq[Token]): ListParser.ParseResult[Question] =
     ListParser.parse(tokens, ListParser.phrase(ListParser.Question))
 
-  def tokenize(taggedSentence: String) =
+  private def tokenize(taggedSentence: String): Array[Token] =
     taggedSentence.split(" ").map(_.split("/")).map {
       case Array(word, tag, lemma) => Token(word, tag, lemma)
     }
 
-  def assertSuccess(result: ListParser.ParseResult[_]) =
+  private def assertSuccess(result: ListParser.ParseResult[_]): Assertion =
     result shouldBe a [ListParser.Success[_]]
 
-  def test(sentence: String, expected: Question) {
+  private def test(sentence: String, expected: Question): Unit = {
     val tokens = tokenize(sentence)
     val testName = tokens.map(_.word).mkString(" ")
 

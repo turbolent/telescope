@@ -90,6 +90,6 @@ trait BaseParser extends PackratParsers {
     }
   }
 
-  def ignore(p: Parser[_]) = p ^^^ None
+  def ignore(p: Parser[_]): Parser[Unit] = p ^^^ (())
 
 }
