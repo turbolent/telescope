@@ -1,0 +1,3 @@
+# telescope
+
+Go explore
