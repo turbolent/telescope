@@ -1,11 +1,11 @@
 package com.turbolent.questionServer
 
 import com.twitter.app.App
-import com.twitter.finagle.Http
+import com.twitter.finagle.{Http, Service}
 import com.twitter.finagle.http.filter.{ExceptionFilter, LoggingFilter}
 import com.twitter.finagle.http.path.{/, Root}
 import com.twitter.finagle.http.service.RoutingService
-import com.twitter.finagle.http.{Method, Request}
+import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.logging.{ConsoleHandler, FileHandler, Logger, Logging}
 import com.twitter.util.Await
 import com.turbolent.spacyThrift.SpacyThriftClient
@@ -39,7 +39,7 @@ object QuestionServer extends App with Logging {
 
   def getService(tagger: Tagger,
                  parseLog: String = defaultLog,
-                 accessLog: String = defaultLog) =
+                 accessLog: String = defaultLog): Service[Request, Response] =
   {
     val parseService = new QuestionService(tagger)
 

@@ -5,7 +5,8 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Level.INFO
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-import org.json4s.FullTypeHints
+import org.apache.jena.query.Query
+import org.json4s.{Formats, FullTypeHints}
 import org.json4s.jackson.Serialization
 
 
@@ -15,14 +16,14 @@ class QuestionService(tagger: Tagger) extends Service[Request, Response] {
   log.setUseParentHandlers(false)
   log.setLevel(INFO)
 
-  implicit val formats = {
+  implicit val formats: Formats = {
     val typeHints = Serialization.formats(FullTypeHints(List(classOf[AnyRef])))
         .withTypeHintFieldName("$type")
 
     typeHints + new QuerySerializer
   }
 
-  def respond(req: Request, status: Status, content: AnyRef) = {
+  def respond(req: Request, status: Status, content: AnyRef): Future[Response] = {
     val pretty = req.getBooleanParam("pretty")
     val response = Response(req.version, status)
     response.setContentTypeJson()
@@ -37,7 +38,8 @@ class QuestionService(tagger: Tagger) extends Service[Request, Response] {
   val tokenizeSentence = new TokenizeSentenceStep(tagger)
 
   def apply(req: Request): Future[Response] = {
-    val steps = GetSentenceStep
+    val steps: QuestionStep[Unit, Seq[Query]] =
+      GetSentenceStep
         .compose(tokenizeSentence)
         .compose(ParseQuestionStep)
         .compose(CompileQuestionStep)
