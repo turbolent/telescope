@@ -214,29 +214,29 @@ class SentenceSuite extends FunSuite with Utilities {
       """.stripMargin,
       None))
 
+  // TODO:
+  // test("which/WDT/which mountains/NNS/mountain are/VBP/be 1000/CD/1000 meters/NNS/meter high/JJ/high",
 
-  test("which/WDT/which mountains/NNS/mountain are/VBP/be 1000/CD/1000 meters/NNS/meter high/JJ/high",
+  //   // ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
+  //   //   AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
+  //   //     PlainFilter(NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter")))))))
 
-    // ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
-    //   AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
-    //     PlainFilter(NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter")))))))
+  //   { env =>
+  //     val elevation: WikidataNode = (1000.0, U.meter)
 
-    { env =>
-      val elevation: WikidataNode = (1000.0, U.meter)
+  //     val mountain = env.newNode()
+  //         .out(P.isA, Q.mountain)
+  //         .out(P.hasElevation, elevation)
 
-      val mountain = env.newNode()
-          .out(P.isA, Q.mountain)
-          .out(P.hasElevation, elevation)
-
-      List(mountain)
-    },
-    ("1",
-      """
-        |{ ?1 p:P31/(v:P31/(wdt:P279)*) wd:Q8502
-        |  { ?1  wdt:P2044  "1000.0"^^xsd:integer }
-        |}
-      """.stripMargin,
-      None))
+  //     List(mountain)
+  //   },
+  //   ("1",
+  //     """
+  //       |{ ?1 p:P31/(v:P31/(wdt:P279)*) wd:Q8502
+  //       |  { ?1  wdt:P2044  "1000.0"^^xsd:integer }
+  //       |}
+  //     """.stripMargin,
+  //     None))
 
 
   test("authors/NNS/author which/WDT/which died/VBD/die in/IN/in Berlin/NNP/berlin",
@@ -2137,99 +2137,101 @@ class SentenceSuite extends FunSuite with Utilities {
       None))
 
 
-  test("which/WDT/which mountains/NNS/mountain are/VBP/be "
-      + "more/JJR/more than/IN/than 1000/CD/1000 meters/NNS/meter high/JJ/high",
+  // TODO:
+  // test("which/WDT/which mountains/NNS/mountain are/VBP/be "
+  //     + "more/JJR/more than/IN/than 1000/CD/1000 meters/NNS/meter high/JJ/high",
 
-    // ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
-    //   AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
-    //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
-    //       NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter")))))))
+  //   // ListQuestion(QueryWithProperty(NamedQuery(List(Token("mountains", "NNS", "mountain"))),
+  //   //   AdjectivePropertyWithFilter(List(Token("are", "VBP", "be"), Token("high", "JJ", "high")),
+  //   //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+  //   //       NumberWithUnit(List(Token("1000", "CD", "1000")), List(Token("meters", "NNS", "meter")))))))
 
-    { env =>
-      val mountain = env.newNode()
-          .out(P.isA, Q.mountain)
+  //   { env =>
+  //     val mountain = env.newNode()
+  //         .out(P.isA, Q.mountain)
 
-      val minElevation: WikidataNode = (1000.0, U.meter)
+  //     val minElevation: WikidataNode = (1000.0, U.meter)
 
-      val elevation = env.newNode()
-          .filter(GreaterThanFilter(minElevation))
+  //     val elevation = env.newNode()
+  //         .filter(GreaterThanFilter(minElevation))
 
-      List(mountain.out(P.hasElevation, elevation))
-    },
-    ("1",
-      """
-        |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q8502
-        |  { ?1  wdt:P2044  ?2
-        |    FILTER ( ?2 > "1000.0"^^xsd:integer )
-        |  }
-        |}
-      """.stripMargin,
-      None))
+  //     List(mountain.out(P.hasElevation, elevation))
+  //   },
+  //   ("1",
+  //     """
+  //       |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q8502
+  //       |  { ?1  wdt:P2044  ?2
+  //       |    FILTER ( ?2 > "1000.0"^^xsd:integer )
+  //       |  }
+  //       |}
+  //     """.stripMargin,
+  //     None))
 
+  // TODO:
+  // test("Which/WDT/which cities/NNS/city have/VBP/have more/JJR/more than/IN/than "
+  //     + "two/CD/two million/CD/million inhabitants/NNS/inhabitant",
 
-  test("Which/WDT/which cities/NNS/city have/VBP/have more/JJR/more than/IN/than "
-      + "two/CD/two million/CD/million inhabitants/NNS/inhabitant",
+  //   // ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
+  //   //   PropertyWithFilter(List(Token("have", "VBP", "have")),
+  //   //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+  //   //       NumberWithUnit(List(Token("two", "CD", "two"), Token("million", "CD", "million")),
+  //   //         List(Token("inhabitants", "NNS", "inhabitant")))))))
 
-    // ListQuestion(QueryWithProperty(NamedQuery(List(Token("cities", "NNS", "city"))),
-    //   PropertyWithFilter(List(Token("have", "VBP", "have")),
-    //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
-    //       NumberWithUnit(List(Token("two", "CD", "two"), Token("million", "CD", "million")),
-    //         List(Token("inhabitants", "NNS", "inhabitant")))))))
+  //   { env =>
+  //     val city = env.newNode()
+  //         .out(P.isA, Q.city)
 
-    { env =>
-      val city = env.newNode()
-          .out(P.isA, Q.city)
+  //     val minPopulation: WikidataNode = 2000000.0
 
-      val minPopulation: WikidataNode = 2000000.0
+  //     val population = env.newNode()
+  //         .filter(GreaterThanFilter(minPopulation))
 
-      val population = env.newNode()
-          .filter(GreaterThanFilter(minPopulation))
-
-      List(city.out(P.hasPopulation, population))
-    },
-    ("1",
-      """
-        |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q515
-        |  { ?1  wdt:P1082  ?2
-        |    FILTER ( ?2 > "2000000.0"^^xsd:double )
-        |  }
-        |}
-      """.stripMargin,
-      None))
+  //     List(city.out(P.hasPopulation, population))
+  //   },
+  //   ("1",
+  //     """
+  //       |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q515
+  //       |  { ?1  wdt:P1082  ?2
+  //       |    FILTER ( ?2 > "2000000.0"^^xsd:double )
+  //       |  }
+  //       |}
+  //     """.stripMargin,
+  //     None))
 
 
   // TODO: adjective "californian": P.isLocatedIn
 
-  test("In/IN/in which/WDT/which californian/JJ/californian cities/NNS/city "
-    + "live/VBP/live more/JJR/more than/IN/than 2/CD/2 million/CD/million people/NNS/people",
+  // TODO:
+  // test("In/IN/in which/WDT/which californian/JJ/californian cities/NNS/city "
+  //   + "live/VBP/live more/JJR/more than/IN/than 2/CD/2 million/CD/million people/NNS/people",
 
-    // ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "JJ", "californian"),
-    //   Token("cities", "NNS", "city"))),
-    //   PropertyWithFilter(List(Token("live", "VBP", "live")),
-    //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
-    //       NumberWithUnit(List(Token("2", "CD", "2"), Token("million", "CD", "million")),
-    //         List(Token("people", "NNS", "people")))))))
+  //   // ListQuestion(QueryWithProperty(NamedQuery(List(Token("californian", "JJ", "californian"),
+  //   //   Token("cities", "NNS", "city"))),
+  //   //   PropertyWithFilter(List(Token("live", "VBP", "live")),
+  //   //     FilterWithComparativeModifier(List(Token("more", "JJR", "more"), Token("than", "IN", "than")),
+  //   //       NumberWithUnit(List(Token("2", "CD", "2"), Token("million", "CD", "million")),
+  //   //         List(Token("people", "NNS", "people")))))))
 
-    { env =>
-      val city = env.newNode()
-          .out(P.isA, Q.city)
+  //   { env =>
+  //     val city = env.newNode()
+  //         .out(P.isA, Q.city)
 
-      val minPopulation: WikidataNode = 2000000.0
+  //     val minPopulation: WikidataNode = 2000000.0
 
-      val population = env.newNode()
-          .filter(GreaterThanFilter(minPopulation))
+  //     val population = env.newNode()
+  //         .filter(GreaterThanFilter(minPopulation))
 
-      List(city.out(P.hasPopulation, population))
-    },
-    ("1",
-      """
-        |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q515
-        |  { ?1  wdt:P1082  ?2
-        |    FILTER ( ?2 > "2000000.0"^^xsd:double )
-        |  }
-        |}
-      """.stripMargin,
-      None))
+  //     List(city.out(P.hasPopulation, population))
+  //   },
+  //   ("1",
+  //     """
+  //       |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q515
+  //       |  { ?1  wdt:P1082  ?2
+  //       |    FILTER ( ?2 > "2000000.0"^^xsd:double )
+  //       |  }
+  //       |}
+  //     """.stripMargin,
+  //     None))
 
 
   test(s"who/WP/who is/VBD/be the/DT/the discoverer/NNS/discoverer of/IN/of Pluto/NNP/pluto",

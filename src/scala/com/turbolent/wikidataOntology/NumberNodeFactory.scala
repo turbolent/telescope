@@ -1,6 +1,6 @@
 package com.turbolent.wikidataOntology
 
-import com.turbolent.numberParser.NumberParser
+// TODO: import com.turbolent.numberParser.NumberParser
 import com.turbolent.questionCompiler.graph.{LessThanFilter, GreaterThanFilter, Node}
 import com.turbolent.questionParser.Token
 import Tokens._
@@ -46,12 +46,15 @@ object NumberNodeFactory {
 
   def makeNumberUnitNode(name: Seq[Token], unit: Option[Unit]): WikidataNode = {
     val words = mkWordString(name)
-    val number = NumberParser.parse(words)
-    Node(unit map {
-      NumberWithUnitLabel(number, _)
-    } getOrElse {
-      NumberLabel(number)
-    })
+    // TODO:
+    // val number = NumberParser.parse(words)
+    // Node(unit map {
+    //   NumberWithUnitLabel(number, _)
+    // } getOrElse {
+    //   NumberLabel(number)
+    // })
+    // TODO:
+    Node(NumberLabel(0))
   }
 
   def makeTemporalNode(name: Seq[Token], optionalUnit: Option[Unit]): WikidataNode = {
