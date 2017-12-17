@@ -1,2 +1,7 @@
 .idea
 target
+.pants.d
+dist
+.pids
+.pants.workdir.file_lock
+.cache

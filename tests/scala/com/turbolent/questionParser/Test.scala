@@ -1,6 +1,5 @@
 package com.turbolent.questionParser
 
-import ai.x.diff._
 import com.turbolent.questionParser.ast._
 import org.scalatest.{AppendedClues, Assertion, FunSuite, Matchers}
 
@@ -29,14 +28,7 @@ class Test extends FunSuite with Matchers with AppendedClues {
       val result = parseListQuestion(tokens)
       assertSuccess(result)
 
-      {
-        result.get shouldEqual expected
-      } withClue {
-        DiffShow.diff(result.get, expected).string
-          .replaceAll("\u001B\\[32m", "++++ {{{")
-          .replaceAll("\u001B\\[31m", "---- {{{")
-          .replaceAll("\u001B\\[0m", "}}}")
-      }
+      result.get shouldEqual expected
     }
   }
 
