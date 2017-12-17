@@ -1,3 +1,5 @@
+package com.turbolent.questionServer
+
 import com.twitter.util.{Future, Throw, Return}
 import org.scalatest.concurrent.Futures
 

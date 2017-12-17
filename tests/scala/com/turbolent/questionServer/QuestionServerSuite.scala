@@ -1,3 +1,5 @@
+package com.turbolent.questionServer
+
 import com.turbolent.questionParser.Token
 import com.turbolent.questionServer.QuestionServer
 import com.twitter.finagle.http._
