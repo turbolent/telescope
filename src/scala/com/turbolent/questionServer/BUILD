@@ -15,6 +15,6 @@ jvm_binary(name='question-service',
   dependencies=[
     ':question-server',
   ],
-  main = 'com.turbolent.questionServer.QuestionServer',
-  basename = 'question-service',
+  main='com.turbolent.questionServer.QuestionServer',
+  basename='question-service'
 )
