@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .idea
 target
 .pants.d
@@ -5,3 +6,27 @@ dist
 .pids
 .pants.workdir.file_lock
 .cache
+=======
+*.class
+*.log
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Intelij
+.idea/
+
+src_gen
+>>>>>>> spacy-thrift-scala/master
