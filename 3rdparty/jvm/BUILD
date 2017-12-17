@@ -27,3 +27,32 @@ jar_library(
     jar(org='org.apache.jena', name='jena-arq', rev='3.5.0'),
   ],
 )
+
+jar_library(
+  name='json4s-jackson',
+  jars=[
+    scala_jar(org='org.json4s', name='json4s-jackson', rev='3.5.3'),
+  ],
+)
+
+
+jar_library(
+  name='finagle-http',
+  jars=[
+    scala_jar(org='com.twitter', name='finagle-http', rev='17.12.0'),
+  ],
+)
+
+jar_library(
+  name='twitter-server',
+  jars=[
+    scala_jar(org='com.twitter', name='twitter-server', rev='17.12.0'),
+  ],
+)
+
+jar_library(
+  name='spacy-thrift-scala',
+  jars=[
+    scala_jar(org='com.turbolent', name='spacy-thrift-scala', rev='0.1-SNAPSHOT'),
+  ],
+)
