@@ -1,0 +1,9 @@
+junit_tests(
+  dependencies=[
+    'src/scala/com/turbolent/spacyThrift:spacy-thrift-scala',
+    '3rdparty/jvm:junit',
+    '3rdparty/jvm:scalatest',
+  ],
+  sources=rglobs('*.scala'),
+  tags={'integration'},
+)

@@ -1,6 +1,6 @@
 import org.scalatest.{FunSuite, Matchers, OptionValues, TryValues}
-import spacyThrift.Token
-import spacyThrift.client.SpacyThriftClient
+import com.turbolent.spacyThrift.Token
+import com.turbolent.spacyThrift.SpacyThriftClient
 
 class TestSuite extends FunSuite
   with Matchers

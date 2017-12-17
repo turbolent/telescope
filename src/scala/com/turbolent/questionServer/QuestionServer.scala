@@ -8,7 +8,7 @@ import com.twitter.finagle.http.service.RoutingService
 import com.twitter.finagle.http.{Method, Request}
 import com.twitter.logging.{ConsoleHandler, FileHandler, Logger, Logging}
 import com.twitter.util.Await
-import spacyThrift.client.SpacyThriftClient
+import com.turbolent.spacyThrift.SpacyThriftClient
 
 
 object QuestionServer extends App with Logging {

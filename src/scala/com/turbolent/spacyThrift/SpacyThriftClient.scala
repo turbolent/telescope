@@ -1,10 +1,8 @@
-package spacyThrift.client
+package com.turbolent.spacyThrift
 
 import com.twitter.finagle.Thrift
 import com.twitter.finagle.Thrift.param.Framed
 import com.twitter.util.Future
-import spacyThrift.SpacyThrift.FinagledClient
-import spacyThrift.Token
 
 
 class SpacyThriftClient(hostname: String, port: Int) {
@@ -13,7 +11,7 @@ class SpacyThriftClient(hostname: String, port: Int) {
     val serviceFactory =
       Thrift.client.configured(Framed(false))
         .newClient(s"$hostname:$port")
-    new FinagledClient(serviceFactory.toService)
+    new SpacyThriftService.FinagledClient(serviceFactory.toService)
   }
 
   def tag(sentence: String): Future[Seq[Token]] =

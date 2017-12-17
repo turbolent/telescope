@@ -31,10 +31,10 @@ jar_library(
 jar_library(
   name='json4s-jackson',
   jars=[
-    scala_jar(org='org.json4s', name='json4s-jackson', rev='3.5.3'),
+    scala_jar(org='com.fasterxml.jackson.module', name='jackson-module-scala', rev='2.9.0'),
+    scala_jar(org='org.json4s', name='json4s-jackson', rev='3.6.0-M2'),
   ],
 )
-
 
 jar_library(
   name='finagle-http',
@@ -51,8 +51,15 @@ jar_library(
 )
 
 jar_library(
-  name='spacy-thrift-scala',
+  name='finagle-thrift',
   jars=[
-    scala_jar(org='com.turbolent', name='spacy-thrift-scala', rev='0.1-SNAPSHOT'),
+    scala_jar(org='com.twitter', name='finagle-thrift', rev='17.12.0'),
+  ],
+)
+
+jar_library(
+  name='scrooge-core',
+  jars=[
+    scala_jar(org='com.twitter', name='scrooge-core', rev='17.12.0'),
   ],
 )
