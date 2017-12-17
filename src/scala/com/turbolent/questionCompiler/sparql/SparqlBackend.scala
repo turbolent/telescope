@@ -15,12 +15,15 @@ trait SparqlBackend[N, E, Env <: Environment[N, E]] {
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
 
+  /** Return a Jena node for the given node label */
   def compileNodeLabel(label: N, env: Env): JenaNode
 
+  /** Return a Jena node or path for the given edge label */
   def compileEdgeLabel(label: E, env: Env): Either[JenaNode, Path]
 
   //// optional hooks
 
+  /** Expand the given node into another, possibly more complex node, if needed */
   def expandNode(node: Node, context: NodeCompilationContext, env: Env): Node = node
 
   def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr = leftExpr
