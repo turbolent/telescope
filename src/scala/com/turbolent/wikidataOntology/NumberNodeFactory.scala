@@ -12,10 +12,10 @@ object NumberNodeFactory {
 
   val factories: mutable.Map[String, NumberNodeFactory] =
     mutable.Map(
-      "in" -> { (name, unit, env) =>
+      "in" -> { (name, unit, _) =>
         makeTemporalNode(name, unit)
       },
-      "on" -> { (name, unit, env) =>
+      "on" -> { (name, unit, _) =>
         makeTemporalNode(name, unit)
       },
       "before" -> {

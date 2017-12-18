@@ -28,12 +28,12 @@ class QuestionServerSuite extends FunSuite
   val service = QuestionServer.getService((sentence: String) =>
     Future.value(tokens(sentence)))
 
-  implicit val formats = DefaultFormats
+  private implicit val formats: DefaultFormats = DefaultFormats
 
-  implicit override val patienceConfig =
+  implicit override val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(100, Millis))
 
-  def get[U](path: String)(fun: Response => U) = {
+  private def get[U](path: String)(fun: Response => U): U = {
     val request = Request(Method.Get, path)
     whenReady(service(request))(fun)
   }
@@ -45,7 +45,7 @@ class QuestionServerSuite extends FunSuite
     }
   }
 
-  def tryParseResponse(response: Response) =
+  private def tryParseResponse(response: Response): Map[String, _] =
     Try(JsonMethods.parse(response.contentString)
         .extract[Map[String, _]]).success.get
 
@@ -69,11 +69,11 @@ class QuestionServerSuite extends FunSuite
     }
   }
 
-  def checkError(content: Map[String, _]) {
+  private def checkError(content: Map[String, _]) {
     content should contain key "error"
   }
 
-  def checkTokens(content: Map[String, _]) {
+  private def checkTokens(content: Map[String, _]) {
     content should contain key "tokens"
     val maybeTokens = content("tokens")
     maybeTokens shouldBe an[List[_]]
@@ -81,7 +81,7 @@ class QuestionServerSuite extends FunSuite
     tokens should not be empty
   }
 
-  def checkQuestion(content: Map[String, _]) {
+  private def checkQuestion(content: Map[String, _]) {
     content should contain key "question"
     val maybeQuestion = content("question")
     maybeQuestion shouldBe an[Map[_, _]]
@@ -89,7 +89,7 @@ class QuestionServerSuite extends FunSuite
     question should not be empty
   }
 
-  def checkNodes(content: Map[String, _]) {
+  private def checkNodes(content: Map[String, _]) {
     content should contain key "nodes"
     val maybeNodes = content("nodes")
     maybeNodes shouldBe an[List[_]]
@@ -97,7 +97,7 @@ class QuestionServerSuite extends FunSuite
     nodes should not be empty
   }
 
-  def checkQueries(content: Map[String, _]) {
+  private def checkQueries(content: Map[String, _]) {
     content should contain key "queries"
     val maybeQueries = content("queries")
     maybeQueries shouldBe an[List[_]]

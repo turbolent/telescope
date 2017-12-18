@@ -18,12 +18,12 @@ trait Utilities extends Matchers {
       .compileQuestion(question)
   }
 
-  def tokenize(taggedSentence: String) =
+  def tokenize(taggedSentence: String): Array[Token] =
     taggedSentence.split(" ").map(_.split("/")).map {
       case Array(word, tag, lemma) => Token(word, tag, lemma)
     }
 
-  def assertSuccess(result: ListParser.ParseResult[_]) =
+  def assertSuccess(result: ListParser.ParseResult[_]): Assertion =
     result shouldBe a [ListParser.Success[_]]
 
   def assertEquivalent(expected: Query, actual: Query) {
@@ -62,13 +62,13 @@ trait Utilities extends Matchers {
                      """.stripMargin
   val ORDER_FORMAT = "ORDER BY %s"
 
-  def parseSparqlQuery(variable: String, query: String, ordering: Option[String]) =
+  def parseSparqlQuery(variable: String, query: String, ordering: Option[String]): Query =
     QueryFactory.create(PROLOGUE
       + String.format(SELECT_FORMAT, variable, variable)
       + String.format(WHERE_FORMAT, query)
       + ordering.map(String.format(ORDER_FORMAT, _)).getOrElse(""))
 
-  def compileSparqlQuery(node: WikidataNode, env: WikidataEnvironment) = {
+  def compileSparqlQuery(node: WikidataNode, env: WikidataEnvironment): Query = {
     val backend = new WikidataSparqlBackend
     val compiler = new SparqlGraphCompiler(backend, env)
     compiler.compileQuery(node)
