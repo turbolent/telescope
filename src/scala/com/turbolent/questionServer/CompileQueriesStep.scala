@@ -24,7 +24,7 @@ object CompileQueriesStep
       Future.value((queries, response + ("queries" -> queries)))
     } catch {
       case e: RuntimeException =>
-        val writer = new StringWriter()
+        val writer = new StringWriter
         e.printStackTrace(new PrintWriter(writer))
         Future.exception(QuestionError(Status.Ok,
           response + ("error" -> writer.toString)))

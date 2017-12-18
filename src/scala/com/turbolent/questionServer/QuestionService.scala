@@ -1,5 +1,6 @@
 package com.turbolent.questionServer
 
+import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Level.INFO
@@ -10,7 +11,7 @@ import org.json4s.{Formats, FullTypeHints}
 import org.json4s.jackson.Serialization
 
 
-class QuestionService(tagger: Tagger) extends Service[Request, Response] {
+class QuestionService(tagger: Tagger, numberParser: NumberParser) extends Service[Request, Response] {
 
   val log = Logger(classOf[QuestionService])
   log.setUseParentHandlers(false)
@@ -36,13 +37,14 @@ class QuestionService(tagger: Tagger) extends Service[Request, Response] {
   }
 
   val tokenizeSentence = new TokenizeSentenceStep(tagger)
+  val compileQuestionStep = new CompileQuestionStep(numberParser)
 
   def apply(req: Request): Future[Response] = {
     val steps: QuestionStep[Unit, Seq[Query]] =
       GetSentenceStep
         .compose(tokenizeSentence)
         .compose(ParseQuestionStep)
-        .compose(CompileQuestionStep)
+        .compose(compileQuestionStep)
         .compose(CompileQueriesStep)
     val sentence = GetSentenceStep.getSentence(req).getOrElse("")
     steps(req, (), new QuestionResponse).flatMap {

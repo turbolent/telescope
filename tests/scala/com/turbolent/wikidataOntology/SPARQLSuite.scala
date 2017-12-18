@@ -198,4 +198,6 @@ class SPARQLSuite extends FunSuite with Utilities {
     assertEquivalent(expectedQuery, actualQuery)
   }
 
+  val numberParser: NumberParser = (_: String) => ???
+  override val wikidataOntology = new WikidataOntology(numberParser)
 }

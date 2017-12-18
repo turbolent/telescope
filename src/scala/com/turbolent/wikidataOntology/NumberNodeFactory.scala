@@ -1,21 +1,20 @@
 package com.turbolent.wikidataOntology
 
-// TODO: import com.turbolent.numberParser.NumberParser
 import com.turbolent.questionCompiler.graph.{LessThanFilter, GreaterThanFilter, Node}
 import com.turbolent.questionParser.Token
 import Tokens._
 import scala.collection.mutable
 
-object NumberNodeFactory {
+class NumberNodeFactory(numberParser: NumberParser) {
 
   type NumberNodeFactory = (Seq[Token], Option[Unit], WikidataEnvironment) => WikidataNode
 
   val factories: mutable.Map[String, NumberNodeFactory] =
     mutable.Map(
-      "in" -> { (name, unit, env) =>
+      "in" -> { (name, unit, _) =>
         makeTemporalNode(name, unit)
       },
-      "on" -> { (name, unit, env) =>
+      "on" -> { (name, unit, _) =>
         makeTemporalNode(name, unit)
       },
       "before" -> {
@@ -46,15 +45,12 @@ object NumberNodeFactory {
 
   def makeNumberUnitNode(name: Seq[Token], unit: Option[Unit]): WikidataNode = {
     val words = mkWordString(name)
-    // TODO:
-    // val number = NumberParser.parse(words)
-    // Node(unit map {
-    //   NumberWithUnitLabel(number, _)
-    // } getOrElse {
-    //   NumberLabel(number)
-    // })
-    // TODO:
-    Node(NumberLabel(0))
+     val number = numberParser.parse(words)
+     Node(unit map {
+       NumberWithUnitLabel(number, _)
+     } getOrElse {
+       NumberLabel(number)
+     })
   }
 
   def makeTemporalNode(name: Seq[Token], optionalUnit: Option[Unit]): WikidataNode = {
@@ -66,16 +62,9 @@ object NumberNodeFactory {
     }
   }
 
-}
-
-
-trait NumberNodeFactory {
-
   def makeNumberNode(name: Seq[Token], unitName: Seq[Token], filter: Seq[Token],
                      env: WikidataEnvironment): WikidataNode =
   {
-    import NumberNodeFactory._
-
     val unit =
       if (unitName.isEmpty) None
       else units.get(mkLemmaString(unitName))
@@ -90,5 +79,4 @@ trait NumberNodeFactory {
       }
     }
   }
-
 }

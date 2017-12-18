@@ -1,7 +1,10 @@
-.PHONY: compile dist image test integration-test test-changes integration-test-changes clean
+.PHONY: compile run dist image test integration-test test-changes integration-test-changes clean
 
 compile:
 	./pants compile src::
+
+run:
+	./pants run src/scala/com/turbolent/questionServer:question-service
 
 dist:
 	./pants binary src/scala/com/turbolent/questionServer:question-service

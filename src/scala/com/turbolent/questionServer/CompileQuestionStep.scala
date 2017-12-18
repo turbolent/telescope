@@ -4,19 +4,20 @@ import java.io.{PrintWriter, StringWriter}
 
 import com.turbolent.questionCompiler.QuestionCompiler
 import com.turbolent.questionParser.ast.Question
-import com.turbolent.wikidataOntology.{WikidataEnvironment, WikidataOntology}
+import com.turbolent.wikidataOntology.{NumberParser, WikidataEnvironment, WikidataOntology}
 import com.twitter.finagle.http.{Request, Status}
 import com.twitter.util.Future
 
 
-object CompileQuestionStep
-    extends QuestionStep[Question, (Seq[WikidataNode], WikidataEnvironment)]
+class CompileQuestionStep(numberParser: NumberParser)
+  extends QuestionStep[Question, (Seq[WikidataNode], WikidataEnvironment)]
 {
 
   def apply(req: Request, question: Question, response: QuestionResponse) = {
     try {
       val env = new WikidataEnvironment
-      val nodes = new QuestionCompiler(WikidataOntology, env)
+      val wikidataOntology = new WikidataOntology(numberParser)
+      val nodes = new QuestionCompiler(wikidataOntology, env)
           .compileQuestion(question)
       val result = (nodes, env)
       Future.value((result, response + ("nodes" -> nodes)))
