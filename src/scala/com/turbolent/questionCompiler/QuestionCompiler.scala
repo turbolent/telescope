@@ -1,8 +1,7 @@
 package com.turbolent.questionCompiler
 
-import graph.{Node, Edge, ConjunctionEdge, DisjunctionEdge}
-
-import com.turbolent.questionParser.{ast, Token}
+import com.turbolent.questionCompiler.graph.{ConjunctionEdge, DisjunctionEdge}
+import com.turbolent.questionParser.{Token, ast}
 
 
 class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, Env], env: Env) {
@@ -14,7 +13,7 @@ class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, 
   type EdgeFactory = (Node, EdgeContextFactory) => Edge
 
   val identityNodeFactory: NodeFactory =
-    (node, name) => node
+    (node, _) => node
 
   def compileQuestion(question: ast.Question): Seq[Node] =
     question match {
@@ -151,7 +150,7 @@ class QuestionCompiler[N, E, Env <: Environment[N, E]](ontology: Ontology[N, E, 
 
       case ast.RelationshipValue(ast.NamedValue(name), second) =>
         val secondEdgeFactory: EdgeFactory =
-          (node, contextFactory) =>
+          (node, _) =>
             ontology.makeRelationshipEdge(name, node, env)
         val edge = compileValue(second, filter, secondEdgeFactory)
         val node = env.newNode().and(edge)

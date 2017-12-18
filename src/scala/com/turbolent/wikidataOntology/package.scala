@@ -45,18 +45,18 @@ object `package` {
   type ContextfulEdgeFactory = (WikidataNode, EdgeContext, WikidataEnvironment) => WikidataEdge
 
   implicit def asNodeFactory(item: Item): NodeFactory =
-    (node, env) => node.out(P.isA, item)
+    (node, _) => node.out(P.isA, item)
 
   implicit def asContextfulEdgeFactory(property: Property): ContextfulEdgeFactory =
-    (node, context, env) => out(property, node)
+    (node, _, _) => out(property, node)
 
   implicit def asEdgeFactory(property: Property): EdgeFactory =
-    (node, env) => out(property, node)
+    (node, _) => out(property, node)
 
   def reverse(property: Property): EdgeFactory =
-    (node, env) => in(node, property)
+    (node, _) => in(node, property)
 
   def contextfulReverse(property: Property): ContextfulEdgeFactory =
-    (node, context, env) => in(node, property)
+    (node, _, _) => in(node, property)
 
 }

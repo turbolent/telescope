@@ -7,18 +7,18 @@ class TokensPosition(val index: Int, tokens: Seq[Token]) extends Position {
 
   private val separator = ", "
 
-  override def column =
+  override def column: Int =
     separate(tokens.take(index)).length +
     (if (index > 0) separator.length + 1 else 0)
 
   override def line = 1
 
-  def separate(tokens: Seq[Token]) =
+  def separate(tokens: Seq[Token]): String =
     tokens.mkString(separator)
 
-  override protected def lineContents =
+  override protected def lineContents: String =
     separate(tokens)
 
-  override def toString() =
+  override def toString(): String =
     (index + 1).toString
 }

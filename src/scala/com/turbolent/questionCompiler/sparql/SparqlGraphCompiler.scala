@@ -1,5 +1,7 @@
 package com.turbolent.questionCompiler.sparql
 
+import java.lang.reflect.Field
+
 import com.turbolent.questionCompiler.graph
 import com.turbolent.questionCompiler.Environment
 import com.turbolent.questionCompiler.graph._
@@ -29,7 +31,10 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](backend: SparqlBackend
   type OpResultFactory = (Option[OpResult]) => OpResult
   type OpResult = (Op, Seq[SortCondition])
 
-  def compileNodeJoining(node: Node, opResult: OpResult, context: NodeCompilationContext) = {
+  def compileNodeJoining(node: Node,
+                         opResult: OpResult,
+                         context: NodeCompilationContext): (JenaNode, (Op, Seq[SortCondition])) = {
+
     val (op, sortings) = opResult
     def join(opResult: OpResult): OpResult = {
       val (otherOp, otherSortings) = opResult
@@ -133,7 +138,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](backend: SparqlBackend
     }
   }
 
-  val triplePathField = {
+  val triplePathField: Field = {
     val field = classOf[OpPath].getDeclaredField("triplePath")
     field.setAccessible(true)
     field

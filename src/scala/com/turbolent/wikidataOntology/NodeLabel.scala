@@ -6,11 +6,13 @@ import java.time.temporal.Temporal
 trait NodeLabel
 
 case class VarLabel(id: Int) extends NodeLabel {
-  override def toString = "_" + id
+  override def toString: String =
+    "_" + id
 }
 
 case class ItemLabel(item: Item) extends NodeLabel {
-  override def toString = item.toString
+  override def toString: String =
+    item.toString
 }
 
 case class ValueLabel(value: String) extends NodeLabel

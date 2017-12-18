@@ -6,7 +6,7 @@ sealed trait Filter[N, E] {
 
   type Filter = graph.Filter[N, E]
 
-  def and(filter: Filter) =
+  def and(filter: Filter): ConjunctionFilter[N, E] =
     filter match {
       case ConjunctionFilter(filters) =>
         ConjunctionFilter(this +: filters)
@@ -16,7 +16,8 @@ sealed trait Filter[N, E] {
 }
 
 case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N, E] {
-  override def and(filter: Filter) =
+
+  override def and(filter: Filter): ConjunctionFilter[N, E] =
     filter match {
       case ConjunctionFilter(otherFilters) =>
         ConjunctionFilter(filters ++ otherFilters)

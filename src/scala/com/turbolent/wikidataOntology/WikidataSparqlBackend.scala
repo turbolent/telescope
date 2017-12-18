@@ -70,13 +70,13 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
         }
     }
 
-  def compilePropertyNode(property: Property) =
+  def compilePropertyNode(property: Property): JenaNode =
     JenaNodeFactory.createURI(PROPERTY_BASE + "P" + property.id)
 
-  def compilePropertyStatementNode(property: Property) =
+  def compilePropertyStatementNode(property: Property): JenaNode =
     JenaNodeFactory.createURI(STATEMENT_BASE + "P" + property.id)
 
-  def compilePropertyValueNode(property: Property) =
+  def compilePropertyValueNode(property: Property): JenaNode =
     JenaNodeFactory.createURI(VALUE_BASE + "P" + property.id)
 
 
@@ -84,7 +84,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     new P_Seq(new P_Link(compilePropertyNode(property)),
       new P_ZeroOrMore1(new P_Link(compilePropertyNode(P.isLocatedIn))))
 
-  def instanceOfSubclassPath(property: Property) = {
+  def instanceOfSubclassPath(property: Property): Path = {
     // use `p:P<ID>/v:P<ID>/wdt:P279*` instead of plain wdt:P<ID> (P279 = isSubclassOf):
     //   - entities will may have several values for this property and they are only
     //     accessible through the statement/value path
@@ -130,7 +130,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     }
   }
 
-  override def additionalResultVariables(variable: Var, env: WikidataEnvironment) = {
+  override def additionalResultVariables(variable: Var, env: WikidataEnvironment): List[Var] = {
     // add additional label variable, resolved by labeling service.
     // see prepareOp
     val name = variable.getVarName
@@ -138,7 +138,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     List(labelVariable)
   }
 
-  override def prepareOp(op: Op, env: WikidataEnvironment) = {
+  override def prepareOp(op: Op, env: WikidataEnvironment): Op = {
     // enable labeling service by adding
     // `SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }`.
     // see also additionalResultVariables
@@ -168,9 +168,9 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     }
   }
 
-  override def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node) =
+  override def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr =
     otherNode match {
-      case Node(TemporalLabel(year: Year), _, _, _, _) =>
+      case Node(TemporalLabel(_: Year), _, _, _, _) =>
         new E_DateTimeYear(leftExpr)
 
       case _ =>

@@ -20,7 +20,7 @@ object PrepositionEdgeFactory {
   val thingFactories: mutable.Map[String, ContextfulEdgeFactory] =
     mutable.Map()
 
-  def isPrepositionProperty(name: Seq[Token], filter: Seq[Token]) =
+  def isPrepositionProperty(name: Seq[Token], filter: Seq[Token]): Boolean =
     (name, filter) match {
       case (Nil, Seq(Token(_, "IN", _))) => true
       case _ => false

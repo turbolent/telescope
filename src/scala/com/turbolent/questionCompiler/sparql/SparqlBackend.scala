@@ -28,7 +28,7 @@ trait SparqlBackend[N, E, Env <: Environment[N, E]] {
 
   def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr = leftExpr
 
-  def prepareOp(op: Op, env: Env) = op
+  def prepareOp(op: Op, env: Env): Op = op
 
   def additionalResultVariables(variable: Var, env: Env): List[Var] = Nil
 

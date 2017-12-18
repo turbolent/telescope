@@ -13,9 +13,10 @@ object CompileQueriesStep
     extends QuestionStep[(Seq[WikidataNode], WikidataEnvironment), Seq[JenaQuery]]
 {
 
-  def apply(req: Request, input: (Seq[WikidataNode], WikidataEnvironment),
-            response: QuestionResponse) =
-  {
+  def apply(req: Request,
+            input: (Seq[WikidataNode], WikidataEnvironment),
+            response: QuestionResponse) = {
+
     try {
       val (nodes, env) = input
       val compiler = new SparqlGraphCompiler(new WikidataSparqlBackend, env)

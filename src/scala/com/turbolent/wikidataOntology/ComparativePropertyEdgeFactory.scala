@@ -12,7 +12,7 @@ object ComparativePropertyEdgeFactory {
   type FilterFactory = (WikidataNode) => WikidataFilter
 
   def makeComparisonFactory(property: Property, filterFactory: FilterFactory): ContextfulEdgeFactory =
-    (node, context, env) => {
+    (node, _, env) => {
       val otherValue = env.newNode()
           .in(node, property)
       val filter = filterFactory(otherValue)

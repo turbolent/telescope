@@ -36,7 +36,7 @@ object InversePropertyEdgeFactory {
       "attend" -> contextfulReverse(P.wasEducatedAt),
       "study" -> contextfulReverse(P.wasEducatedAt))
 
-  def stripInitialAuxiliaryVerb(name: Seq[Token]) =
+  def stripInitialAuxiliaryVerb(name: Seq[Token]): Seq[Token] =
     name match {
       case initial :: rest
         if ListParser.isAuxiliaryVerb(initial) => rest

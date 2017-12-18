@@ -8,10 +8,10 @@ object GetSentenceStep extends QuestionStep[Unit, String] {
 
   val sentenceParameter = "sentence"
 
-  def getSentence(req: Request) =
+  def getSentence(req: Request): Option[String] =
     req.params.get(sentenceParameter)
 
-  def apply(req: Request, input: Unit, response: QuestionResponse) =
+  def apply(req: Request, input: Unit, response: QuestionResponse): Future[(String, QuestionResponse)] =
     getSentence(req) map { sentence =>
       Future.value((sentence, response))
     } getOrElse {

@@ -17,52 +17,68 @@ trait BaseParser extends PackratParsers {
     elem(s"word '${word.toLowerCase}'",
       _.word equalsIgnoreCase word)
 
-  def pos(pos: String, strict: Boolean) =
+  def pos(pos: String, strict: Boolean): Parser[Token] =
     elem(s"POS $pos*",
       if (strict) _.pennTag.equals(pos)
       else _.pennTag.startsWith(pos))
 
-  def lemma(lemma: String) = {
+  def lemma(lemma: String): Parser[Token] = {
     val lowered = lemma.toLowerCase
     elem(s"lemma '$lowered'",
       _.lemma == lowered)
   }
 
-  lazy val Noun = pos("N", strict = false)
+  lazy val Noun: Parser[Token] =
+    pos("N", strict = false)
 
-  lazy val Nouns = rep1(Noun)
+  lazy val Nouns: Parser[List[Token]] =
+    rep1(Noun)
 
-  lazy val Verb = pos("V", strict = false)
+  lazy val Verb: Parser[Token] =
+    pos("V", strict = false)
 
-  lazy val Verbs = rep1(Verb)
+  lazy val Verbs: Parser[List[Token]] =
+    rep1(Verb)
 
-  lazy val Number = pos("CD", strict = true)
+  lazy val Number: Parser[Token] =
+    pos("CD", strict = true)
 
-  lazy val Numbers = rep1(Number)
+  lazy val Numbers: Parser[List[Token]] =
+    rep1(Number)
 
-  lazy val Particle = pos("RP", strict = true)
+  lazy val Particle: Parser[Token] =
+    pos("RP", strict = true)
 
-  lazy val Preposition =
+  lazy val Preposition: Parser[Token] =
     pos("IN", strict = true) |
     pos("TO", strict = true)
 
-  lazy val Determiner = pos("DT", strict = true)
+  lazy val Determiner: Parser[Token] =
+    pos("DT", strict = true)
 
-  lazy val StrictAdjective = pos("JJ", strict = true)
+  lazy val StrictAdjective: Parser[Token] =
+    pos("JJ", strict = true)
 
-  lazy val AnyAdjective = pos("JJ", strict = false)
+  lazy val AnyAdjective: Parser[Token] =
+    pos("JJ", strict = false)
 
-  lazy val ComparativeAdjective = pos("JJR", strict = true)
+  lazy val ComparativeAdjective: Parser[Token] =
+    pos("JJR", strict = true)
 
-  lazy val SuperlativeAdjective = pos("JJS", strict = true)
+  lazy val SuperlativeAdjective: Parser[Token] =
+    pos("JJS", strict = true)
 
-  lazy val Possessive = pos("POS", strict = true)
+  lazy val Possessive: Parser[Token] =
+    pos("POS", strict = true)
 
-  lazy val CoordinatingConjunction = pos("CC", strict = true)
+  lazy val CoordinatingConjunction: Parser[Token] =
+    pos("CC", strict = true)
 
-  lazy val WhDeterminer = pos("WDT", strict = true)
+  lazy val WhDeterminer: Parser[Token] =
+    pos("WDT", strict = true)
 
-  lazy val SentenceTerminator = pos(".", strict = true)
+  lazy val SentenceTerminator: Parser[Token] =
+    pos(".", strict = true)
 
   def commaOrAndList[T](parser: Parser[T],
                         andReducer: Seq[T] => T,

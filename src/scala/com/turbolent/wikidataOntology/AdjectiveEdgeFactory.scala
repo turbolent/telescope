@@ -1,6 +1,6 @@
 package com.turbolent.wikidataOntology
 
-import com.turbolent.questionCompiler.graph.Descending
+import com.turbolent.questionCompiler.graph.{Descending, OutEdge}
 import com.turbolent.questionParser.Token
 import com.turbolent.wikidataOntology.Tokens._
 
@@ -11,7 +11,7 @@ object AdjectiveEdgeFactory {
 
   type PlainEdgeFactory = (WikidataEnvironment) => WikidataEdge
 
-  def maxPopulation(env: WikidataEnvironment) =
+  def maxPopulation(env: WikidataEnvironment): OutEdge[EdgeLabel, NodeLabel] =
     out(P.hasPopulation,
       env.newNode().order(Descending))
 

@@ -4,7 +4,8 @@ package com.turbolent.wikidataOntology
 trait EdgeLabel
 
 case class PropertyLabel(property: Property) extends EdgeLabel {
-  override def toString = property.toString
+  override def toString: String =
+    property.toString
 }
 
 case object NameLabel extends EdgeLabel {

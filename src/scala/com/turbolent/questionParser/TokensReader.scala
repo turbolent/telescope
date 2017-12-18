@@ -11,13 +11,13 @@ class TokensReader(val elements: Seq[Token], val index: Int) extends Reader[Toke
   override def first =
     elements(index)
 
-  override def atEnd =
+  override def atEnd: Boolean =
     index >= elements.length
 
   override def pos =
     new TokensPosition(index, elements)
 
-  override def rest =
+  override def rest: TokensReader =
     if (index < elements.length)
       new TokensReader(elements, index + 1)
     else this
