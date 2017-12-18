@@ -1,18 +1,18 @@
 SCALA_REV='2.12.4'
 
 # scala-compiler needs explicit dependencies on scala-library and scala-reflect (DPB-4447)
-jar_library(name = 'scalac',
-            jars = [
-              jar(org = 'org.scala-lang', name = 'scala-compiler', rev = SCALA_REV),
+jar_library(name='scalac',
+            jars=[
+              jar(org='org.scala-lang', name='scala-compiler', rev=SCALA_REV),
             ],
             dependencies=[
               ':scala-reflect',
               ':scala-library',
             ])
 
-jar_library(name = 'scala-library',
-            jars = [
-              jar(org = 'org.scala-lang', name = 'scala-library', rev = SCALA_REV),
+jar_library(name='scala-library',
+            jars=[
+              jar(org='org.scala-lang', name='scala-library', rev=SCALA_REV),
             ],
             # Zinc never reports usage of `scala-library`, because it injects it onto the
             # classpath itself.
@@ -20,37 +20,40 @@ jar_library(name = 'scala-library',
             # so there is no need to carry it around.
             scope='compile test',)
 
-target(name = 'scala-repl',
+target(name='scala-repl',
        dependencies=[
          ':scalac',
          ':scala-reflect',
          ':scala-library',
+         ':ammonite',
        ])
 
-jar_library(name = 'scala-actors',
-            jars = [
-              jar(org = 'org.scala-lang', name = 'scala-actors', rev = SCALA_REV),
+jar_library(name='scala-actors',
+            jars=[
+              jar(org='org.scala-lang', name='scala-actors', rev=SCALA_REV),
             ])
 
-jar_library(name = 'scala-reflect',
-            jars = [
-              jar(org = 'org.scala-lang', name = 'scala-reflect', rev = SCALA_REV, intransitive=True),
+jar_library(name='scala-reflect',
+            jars=[
+              jar(org='org.scala-lang', name='scala-reflect', rev=SCALA_REV, intransitive=True),
             ])
 
-jar_library(name = 'scalap',
-            jars = [
-              jar(org = 'org.scala-lang', name = 'scalap', rev = SCALA_REV),
+jar_library(name='scalap',
+            jars=[
+              jar(org='org.scala-lang', name='scalap', rev=SCALA_REV),
             ])
 
-jar_library(name = 'scrooge-gen',
-            jars = [
+jar_library(name='scrooge-gen',
+            jars=[
               jar(org='com.twitter', name='scrooge-generator_2.12', rev='17.12.0'),
             ])
 
-jar_library(name = 'scrooge-linter',
-            jars = [
+jar_library(name='scrooge-linter',
+            jars=[
               jar(org='com.twitter', name='scrooge-linter_2.12', rev='17.12.0'),
             ])
 
-
-
+jar_library(name='ammonite',
+            jars=[
+              jar(org='com.lihaoyi', name='ammonite_{}'.format(SCALA_REV), rev='1.0.3')
+            ])
