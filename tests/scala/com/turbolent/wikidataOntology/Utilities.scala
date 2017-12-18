@@ -5,16 +5,18 @@ import com.turbolent.questionCompiler.sparql.SparqlGraphCompiler
 import com.turbolent.questionParser.{ListParser, Token}
 import org.apache.jena.query.{Query, QueryFactory}
 import org.apache.jena.sparql.algebra.Algebra
-import org.scalatest.Matchers
+import org.scalatest.{Assertion, Matchers}
 
 
 trait Utilities extends Matchers {
 
-  def compileListQuestion(tokens: Seq[Token]) = {
+  val wikidataOntology: WikidataOntology
+
+  def compileListQuestion(tokens: Seq[Token]): Seq[WikidataNode] = {
     val result = ListParser.parse(tokens, ListParser.phrase(ListParser.Question))
     assertSuccess(result)
     val question = result.get
-    new QuestionCompiler(WikidataOntology, new WikidataEnvironment())
+    new QuestionCompiler(wikidataOntology, new WikidataEnvironment())
       .compileQuestion(question)
   }
 

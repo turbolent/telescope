@@ -7,6 +7,7 @@ scala_library(name='question-server',
     "3rdparty/jvm:json4s-jackson",
     "3rdparty/jvm:finagle-http",
     "3rdparty/jvm:twitter-server",
+    "3rdparty/jvm:featherbed",
   ],
   sources=rglobs('*.scala'),
 )

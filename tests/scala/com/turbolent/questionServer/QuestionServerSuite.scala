@@ -1,7 +1,7 @@
 package com.turbolent.questionServer
 
 import com.turbolent.questionParser.Token
-import com.turbolent.questionServer.QuestionServer
+import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.finagle.http._
 import com.twitter.util.Future
 import org.json4s.DefaultFormats
@@ -25,8 +25,9 @@ class QuestionServerSuite extends FunSuite
     "who died" -> Seq(Token("who", "WP", "who"), Token("died", "VBD", "die"))
   )
 
-  val service = QuestionServer.getService((sentence: String) =>
-    Future.value(tokens(sentence)))
+  private val tagger: Tagger = (sentence: String) => Future.value(tokens(sentence))
+  private val numberParser: NumberParser = (_: String) => ???
+  private val service = QuestionServer.getService(tagger, numberParser)
 
   private implicit val formats: DefaultFormats = DefaultFormats
 
