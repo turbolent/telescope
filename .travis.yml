@@ -1,1 +1,14 @@
+sudo: false
+
 language: generic
+
+script: make test
+
+before_cache:
+ - rm -rf $HOME/.cache/pants/stats
+
+cache:
+  directories:
+    - $HOME/.cache/pants
+    - $TRAVIS_BUILD_DIR/.cache
+
