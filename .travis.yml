@@ -10,3 +10,5 @@ before_cache:
 cache:
   directories:
     - $HOME/.cache/pants
+    - $TRAVIS_BUILD_DIR/.cache
+
