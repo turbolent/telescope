@@ -2,6 +2,10 @@ sudo: false
 
 language: generic
 
+branches:
+  only:
+    - master
+
 script: make test
 
 before_cache:
@@ -11,4 +15,3 @@ cache:
   directories:
     - $HOME/.cache/pants
     - $TRAVIS_BUILD_DIR/.cache
-
