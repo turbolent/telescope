@@ -63,3 +63,10 @@ jar_library(
     scala_jar(org='com.twitter', name='scrooge-core', rev='17.12.0'),
   ],
 )
+
+jar_library(
+  name='featherbed',
+  jars=[
+    scala_jar(org='io.github.finagle', name='featherbed', rev='0.3.2'),
+  ],
+)
