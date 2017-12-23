@@ -1,4 +1,7 @@
-.PHONY: compile run dist image test integration-test test-changes integration-test-changes clean
+.PHONY: compile run dist images push-images test integration-test test-changes integration-test-changes clean
+
+IMAGE_NAME = turbolent/telescope
+IMAGE_VERSION = $(shell git log -n 1 --pretty=format:%h -- .)
 
 compile:
 	./pants compile src::
@@ -9,8 +12,12 @@ run:
 dist:
 	./pants binary src/scala/com/turbolent/questionServer:question-service
 
-image: dist
-	docker build -t turbolent/telescope .
+images: dist
+	docker build -t $(IMAGE_NAME):latest -t $(IMAGE_NAME):$(IMAGE_VERSION) .
+
+push-images: images
+	docker push $(IMAGE_NAME):latest
+	docker push $(IMAGE_NAME):$(IMAGE_VERSION)
 
 test:
 	./pants --tag='-integration' test tests::
