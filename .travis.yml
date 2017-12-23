@@ -6,12 +6,17 @@ branches:
   only:
     - master
 
-script: make test
+script:
+ - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+ - make test
+ - make dist
+ - .travis/deploy.sh
 
 before_cache:
- - rm -rf $HOME/.cache/pants/stats
+  - rm -rf $HOME/.cache/pants/stats
 
 cache:
   directories:
     - $HOME/.cache/pants
     - $TRAVIS_BUILD_DIR/.cache
+
