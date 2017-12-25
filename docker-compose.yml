@@ -1,0 +1,26 @@
+
+version: '3'
+
+services:
+  deloyd:
+    image: turbolent/deployd:latest
+    ports:
+      - "7070:7070"
+
+  api:
+    image: turbolent/telescope:latest
+    environment:
+      ARGS: "-spacy-thrift-hostname=spacy-thrift -duckling-hostname=duckling"
+    ports:
+      - "8080:8080"
+
+  spacy-thrift:
+    image: turbolent/spacy-thrift
+    ports:
+      - "9090:9090"
+
+  duckling:
+    image: turbolent/duckling
+    ports:
+      - "8000:8000"
+
