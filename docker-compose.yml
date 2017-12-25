@@ -1,11 +1,21 @@
 
-version: '3'
+version: '3.2'
 
 services:
-  deloyd:
-    image: turbolent/deployd:latest
-    ports:
-      - "7070:7070"
+  ## To allow continuous delivery via https://github.com/turbolent/deployd
+  # deloyd:
+  #  image: turbolent/deployd:latest
+  #  environment:
+  #    DEPLOYD_TOKEN: "SECRET"
+  #  volumes:
+  #    - type: bind
+  #      source: "/var/run/docker.sock"
+  #      target: "/var/run/docker.sock"
+  #  deploy:
+  #    placement:
+  #      constraints: [node.role == manager]
+  #  ports:
+  #    - "7070:7070"
 
   api:
     image: turbolent/telescope:latest
