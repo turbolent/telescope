@@ -3,3 +3,10 @@
 # telescope
 
 Go explore
+
+
+## Deloyment
+
+```shell
+docker stack deploy --compose-file docker-compose.yml telescope
+```
