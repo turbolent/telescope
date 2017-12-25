@@ -1,4 +1,4 @@
-.PHONY: compile run dist images push-images test integration-test test-changes integration-test-changes clean
+.PHONY: compile run dist images push-images image-reference test integration-test test-changes integration-test-changes clean
 
 IMAGE_NAME = turbolent/telescope
 IMAGE_VERSION = $(shell git log -n 1 --pretty=format:%h -- .)
@@ -18,6 +18,9 @@ images: dist
 push-images: images
 	docker push $(IMAGE_NAME):latest
 	docker push $(IMAGE_NAME):$(IMAGE_VERSION)
+
+image-reference:
+	@echo $(IMAGE_NAME):$(IMAGE_VERSION)
 
 test:
 	./pants --tag='-integration' test tests::
