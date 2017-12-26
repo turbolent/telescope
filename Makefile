@@ -37,7 +37,7 @@ api-images: dist-api
 debugger-images: dist-debugger
 	docker build -f Dockerfile.debugger -t $(DEBUGGER_IMAGE_NAME):latest -t $(DEBUGGER_IMAGE_NAME):$(IMAGE_VERSION) .
 
-push-images: push-api-images push-debugger-images
+push-images: images push-api-images push-debugger-images
 
 push-api-images:
 	docker push $(API_IMAGE_NAME):latest
