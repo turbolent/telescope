@@ -7,7 +7,7 @@ if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
   echo "Building and pushing images ..."
   make push-images
 
-  echo "Triggering deploy ..."
+  echo "Triggering deployment of API ..."
   wget --content-on-error --header "Authorization: $DEPLOYD_TOKEN" -qO- \
-    http://$DEPLOYD_HOST/update\?service\=$DEPLOYD_SERVICE\&image\=$(make image-reference)
+    http://$DEPLOYD_HOST/update\?service\=$DEPLOYD_SERVICE\&image\=$(make api-image-reference)
 fi

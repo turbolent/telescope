@@ -1,0 +1,23 @@
+{
+  "name": "telescope-debugger",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-scripts-ts": "2.8.0"
+  },
+  "scripts": {
+    "start": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js start",
+    "build": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js build",
+    "test": "CI=true ./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
+    "watch-test": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",    
+    "eject": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js eject"
+  },
+  "devDependencies": {
+    "@types/jest": "^21.1.9",
+    "@types/node": "^8.5.2",
+    "@types/react": "^16.0.31",
+    "@types/react-dom": "^16.0.3"
+  }
+}
