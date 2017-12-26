@@ -1,0 +1,21 @@
+
+
+node_module(
+  name='debugger-module',
+  sources=globs('package.json', 'yarn.lock', 'tsconfig.json', 'tsconfig.test.json', 'tslint.json', 'src/*', 'public/*'),
+  package_manager='yarn',
+  build_script='build',
+  output_dir='build',
+)
+
+node_bundle(
+  name='debugger',
+  node_module=':debugger-module',
+)
+
+node_test(
+  name='debugger-tests',
+  dependencies=[
+    ':debugger-module',
+  ]
+)
