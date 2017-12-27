@@ -3,21 +3,39 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "axios": "^0.17.1",
+    "d3-scale": "^1.0.7",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-scripts-ts": "2.8.0"
+    "react-redux": "^5.0.6",
+    "react-scripts-ts": "2.8.0",
+    "redux": "^3.7.2",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0"
   },
   "scripts": {
     "start": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js start",
     "build": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js build",
     "test": "CI=true ./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
-    "watch-test": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",    
+    "watch-test": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
     "eject": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js eject"
   },
   "devDependencies": {
+    "@types/d3-scale": "^1.0.10",
     "@types/jest": "^21.1.9",
     "@types/node": "^8.5.2",
     "@types/react": "^16.0.31",
-    "@types/react-dom": "^16.0.3"
+    "@types/react-dom": "^16.0.3",
+    "@types/react-redux": "^5.0.14",
+    "@types/redux-logger": "^3.0.5",
+    "redux-devtools-extension": "^2.13.2"
+  },
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:8080/",
+      "pathRewrite": {
+        "^/api": ""
+      }
+    }
   }
 }
