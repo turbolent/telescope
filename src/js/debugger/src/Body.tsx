@@ -5,10 +5,13 @@ import ErrorComponent from './ErrorComponent';
 
 export default () => (
     <div>
-        <SectionComponent title="Tokens" property="tokens">
+        <SectionComponent title="Error" path={['error']}>
+            <ErrorComponent />
+        </SectionComponent>
+        <SectionComponent title="Tokens" path={['parse', 'tokens']}>
             <TokensComponent />
         </SectionComponent>
-        <SectionComponent title="Error" property="error">
+        <SectionComponent title="Error" path={['parse', 'error']}>
             <ErrorComponent />
         </SectionComponent>
     </div>

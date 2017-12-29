@@ -1,29 +1,35 @@
 import { connect, Dispatch } from 'react-redux';
-import { fetchQuestion } from './actions';
+import { parseQuestion } from './actions';
 import * as React from 'react';
 import { State } from './state';
 
-interface FormProps {
+interface DispatchProps {
     readonly request: (question: string) => void;
 }
+
+interface StateProps {
+    readonly requesting: boolean;
+}
+
+type Props = StateProps & DispatchProps;
 
 interface FormState {
     readonly value: string;
 }
 
-class Form extends React.Component<FormProps, FormState> {
+class Form extends React.Component<Props, FormState> {
 
-    constructor(props: FormProps) {
+    constructor(props: Props) {
         super(props);
         this.state = {value: ''};
     }
 
-    handleChange = (event: React.FormEvent<HTMLInputElement>) => {
+    readonly handleChange = (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
         this.setState({value: target.value});
     }
 
-    handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    readonly handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const {value} = this.state;
         this.props.request(value);
@@ -34,15 +40,20 @@ class Form extends React.Component<FormProps, FormState> {
             <form onSubmit={this.handleSubmit}>
                 <input type="text" value={this.state.value} onChange={this.handleChange} />
                 <input type="submit" value="Ask" />
+                {this.props.requesting ? <span>Loading ...</span> : undefined}
             </form>
         );
     }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch<State>): FormProps =>
+const mapStateToProps = ({requesting}: State): StateProps => ({
+    requesting
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<State>): DispatchProps =>
     ({
         request: (question: string) =>
-            dispatch(fetchQuestion(question)),
+            dispatch(parseQuestion(question)),
     });
 
-export default connect(undefined, mapDispatchToProps)(Form);
+export default connect(mapStateToProps, mapDispatchToProps)(Form);

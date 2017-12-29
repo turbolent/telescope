@@ -3,15 +3,15 @@ import './ErrorComponent.css';
 import { connect } from 'react-redux';
 import { State } from './state';
 
-interface Props {
+interface StateProps {
     readonly message: string;
 }
 
-const FailureComponent = ({message}: Props) =>
+const ErrorComponent = ({message}: StateProps) =>
     <div className="Error">{message}</div>;
 
-const mapStateToProps = (s: State): Props => ({
-    message: s.response && s.response.error || ''
+const mapStateToProps = (s: State): StateProps => ({
+    message: (s.parse && s.parse.error) || s.error || ''
 });
 
-export default connect(mapStateToProps)(FailureComponent);
+export default connect(mapStateToProps)(ErrorComponent);

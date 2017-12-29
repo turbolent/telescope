@@ -1,20 +1,29 @@
 import { State } from './state';
-import { Action, RECEIVE_ANSWER, ReceiveAnswerAction, REQUEST_QUESTION } from './actions';
+import { Action, parseActionCreator } from './actions';
 
-export function reducer(state: State, action: Action): State {
+export function reducer(state: State, action: Action<any>): State {
     switch (action.type) {
-        case REQUEST_QUESTION:
-            return {
-                ...state,
-                requesting: true
-            };
-        case RECEIVE_ANSWER:
-            const {response} = action as ReceiveAnswerAction;
-            return {
-                ...state,
-                requesting: false,
-                response
-            };
+        case parseActionCreator.startedType: {
+            const {cancel: currentCancel} = state;
+            if (currentCancel)
+                currentCancel();
+            const newCancel = parseActionCreator.getStartedPayload(action);
+            return state.withCancel(newCancel);
+        }
+        case parseActionCreator.succeededType: {
+            const response = parseActionCreator.getSuccessPayload(action);
+            return state.withMutations(mutableState =>
+                mutableState.withCancel(undefined)
+                    .withError(undefined)
+                    .withParse(response));
+        }
+        case parseActionCreator.failedType: {
+            const error = parseActionCreator.getError(action);
+            return state.withMutations(mutableState =>
+                mutableState.withCancel(undefined)
+                    .withError(error.message)
+                    .withParse(undefined));
+        }
         default:
             return state;
     }

@@ -12,10 +12,9 @@ import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 
 const middleware = [thunkMiddleware, createLogger()];
-const initialState: State = {requesting: false};
 const store = createStore<State>(
     reducer,
-    initialState,
+    new State(),
     composeWithDevTools(applyMiddleware(...middleware))
 );
 

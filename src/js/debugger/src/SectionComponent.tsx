@@ -9,9 +9,9 @@ interface StateProps {
 }
 
 interface OwnProps {
-    property: string;
     readonly children?: ReactNode;
     readonly title: string;
+    readonly path: string[];
 }
 
 type Props = StateProps & OwnProps;
@@ -29,8 +29,17 @@ const SectionComponent = ({title, show, children}: Props) => {
     );
 };
 
-const mapStateToProps = (state: State, ownProps: OwnProps): StateProps => ({
-    show: state.response ? state.response.hasOwnProperty(ownProps.property) : false
-});
+const mapStateToProps = (state: State, ownProps: OwnProps): StateProps => {
+    const reducedState = ownProps.path.reduce((currentState, property) => {
+        if (currentState === null || currentState === undefined) {
+            return null;
+        }
+        return currentState[property];
+    },                                        state);
+
+    return {
+        show: reducedState !== null && reducedState !== undefined
+    };
+};
 
 export default connect(mapStateToProps)(SectionComponent);
