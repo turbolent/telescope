@@ -2,11 +2,11 @@ import axios from 'axios';
 import { Token } from './types';
 
 export interface QueriesResponse {
-    tokens: Token[];
-    error?: string;
+    readonly tokens: Token[];
+    readonly error?: string;
 }
 
-type Cancel = (message?: string) => void;
+export type Cancel = (message?: string) => void;
 
 export const requestQueries = (sentence: string):
     [Promise<QueriesResponse>, Cancel] => {

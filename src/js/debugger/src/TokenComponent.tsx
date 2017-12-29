@@ -8,7 +8,7 @@ const scale = scaleOrdinal(schemeCategory20).domain(tags);
 const fallbackColor = '#ddd';
 
 interface Props {
-  token: Token;
+    readonly token: Token;
 }
 
 const color = (tag: string): string => {

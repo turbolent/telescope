@@ -4,11 +4,11 @@ import * as React from 'react';
 import { State } from './state';
 
 interface FormProps {
-    request: (question: string) => void;
+    readonly request: (question: string) => void;
 }
 
 interface FormState {
-    value: string;
+    readonly value: string;
 }
 
 class Form extends React.Component<FormProps, FormState> {

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { State } from './state';
 
 interface Props {
-    message: string;
+    readonly message: string;
 }
 
 const FailureComponent = ({message}: Props) =>

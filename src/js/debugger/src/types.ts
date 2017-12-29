@@ -1,6 +1,6 @@
 
 export interface Token {
-    lemma: string;
-    pennTag: string;
-    word: string;
+    readonly lemma: string;
+    readonly pennTag: string;
+    readonly word: string;
 }

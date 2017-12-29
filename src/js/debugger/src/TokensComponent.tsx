@@ -5,20 +5,20 @@ import { Token } from './types';
 import { State } from './state';
 import { connect } from 'react-redux';
 
-interface Props {
-    tokens: Token[];
+interface StateProps {
+    readonly tokens: Token[];
 }
 
-const TokensComponent = ({tokens}: Props) => (
+const TokensComponent = ({tokens}: StateProps) => (
     <div className="Tokens">
         {tokens.map((token, index) =>
             <TokenComponent token={token} key={index} />)}
     </div>
 );
 
-const mapStateToProps = (s: State): Props => ({
-    tokens: s.response
-        ? s.response.tokens
+const mapStateToProps = (s: State): StateProps => ({
+    tokens: s.parse
+        ? s.parse.tokens
         : []
 });
 

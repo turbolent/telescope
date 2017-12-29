@@ -5,13 +5,13 @@ import { connect } from 'react-redux';
 import { State } from './state';
 
 interface StateProps {
-    show: boolean;
+    readonly show: boolean;
 }
 
 interface OwnProps {
-    children?: ReactNode;
-    title: string;
     property: string;
+    readonly children?: ReactNode;
+    readonly title: string;
 }
 
 type Props = StateProps & OwnProps;
