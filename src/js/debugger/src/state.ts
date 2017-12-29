@@ -1,4 +1,5 @@
-import { Cancel, Parse } from './api';
+import { Cancel } from './api';
+import { Parse } from './types';
 import { Map } from 'immutable';
 
 export class State {

@@ -1,0 +1,33 @@
+@import 'common.css';
+
+:root {
+    --subtree-spacing: 10px;
+}
+
+.Subtree {
+    border-top: var(--common-border);
+}
+
+.Subtree .SubtreeType,
+.Subtree .SubtreeName {
+    padding: 0.4rem;
+    background: #ddd;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: var(--common-border);
+    border-left: var(--common-border);
+    border-right: var(--common-border);
+}
+
+.Subtree .SubtreeName {
+    background: #eee;
+}
+
+.Subtree .SubtreeChildren {
+    display: flex;
+    padding: var(--subtree-spacing);
+}
+
+.Subtree + .Subtree {
+    margin-left: var(--subtree-spacing);
+}

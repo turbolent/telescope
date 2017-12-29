@@ -2,6 +2,7 @@ import * as React from 'react';
 import TokensComponent from './TokensComponent';
 import SectionComponent from './SectionComponent';
 import ErrorComponent from './ErrorComponent';
+import TreeComponent from './TreeComponent';
 
 export default () => (
     <div>
@@ -11,8 +12,8 @@ export default () => (
         <SectionComponent title="Tokens" path={['parse', 'tokens']}>
             <TokensComponent />
         </SectionComponent>
-        <SectionComponent title="Error" path={['parse', 'error']}>
-            <ErrorComponent />
+        <SectionComponent title="Tree" path={['parse', 'tree']}>
+            <TreeComponent/>
         </SectionComponent>
     </div>
 );

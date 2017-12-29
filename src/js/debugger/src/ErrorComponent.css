@@ -1,13 +1,13 @@
 :root {
-  --background-color: #fcc;
-  --text-color: #C11F1F;
+  --error-background-color: #fcc;
+  --error-text-color: #C11F1F;
 }
 
 .Error {
-  background: var(--background-color);
+  background: var(--error-background-color);
   margin: 1rem 2rem;
   padding: 0.6rem;
-  color: var(--text-color);
+  color: var(--error-text-color);
   white-space: pre;
   overflow: auto;
   font-family: monospace;

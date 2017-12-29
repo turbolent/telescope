@@ -1,7 +1,8 @@
 import { Dispatch } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 import { State } from './state';
-import { Cancel, Parse, parse } from './api';
+import { Cancel, parse } from './api';
+import { Parse } from './types';
 
 type Thunk = ThunkAction<void, State, void>;
 
@@ -49,11 +50,11 @@ class ActionCreator<T> {
         };
     }
 
-    getPayload(action: Action<any>): T {
+    getPayload(action: Action<{}>): T {
         return action.payload as T;
     }
 
-    getError(action: Action<any>): Error {
+    getError(action: Action<{}>): Error {
         return action.payload as Error;
     }
 }
@@ -85,11 +86,11 @@ class RequestActionCreator<T = void, U = void, V = void> extends ActionCreator<V
         this.succeededType = this.statusType(RequestActionStatus.Success);
     }
 
-    getStartedPayload(action: Action<any>): T {
+    getStartedPayload(action: Action<{}>): T {
         return action.payload as T;
     }
 
-    getSuccessPayload(action: Action<any>): U {
+    getSuccessPayload(action: Action<{}>): U {
         return action.payload as U;
     }
 

@@ -11,7 +11,7 @@ const ErrorComponent = ({message}: StateProps) =>
     <div className="Error">{message}</div>;
 
 const mapStateToProps = (s: State): StateProps => ({
-    message: (s.parse && s.parse.error) || s.error || ''
+    message: s.error || ''
 });
 
 export default connect(mapStateToProps)(ErrorComponent);

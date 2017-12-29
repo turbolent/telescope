@@ -1,10 +1,5 @@
 import axios from 'axios';
-import { Token } from './types';
-
-export interface Parse {
-    readonly tokens: Token[];
-    readonly error?: string;
-}
+import { Parse } from './types';
 
 export type Cancel = (message?: string) => void;
 
@@ -17,14 +12,14 @@ export const parse = (question: string):
         params: {sentence: question},
         cancelToken: source.token
     })
-        .then(response => response.data)
+        .then(response => Parse.decode(response.data))
         .catch(e => {
             if (axios.isCancel(e)) {
                 return;
             }
 
             throw e;
-        });
+        }) as Promise<Parse>;
 
     return [
         promise,
