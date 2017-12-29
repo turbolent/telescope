@@ -1,0 +1,12 @@
+@import "common.css";
+
+.Tree {
+    margin: 1rem 2rem;
+    font-size: 0.8rem;
+    display: flex;
+}
+
+.Tree > .Subtree > .SubtreeChildren {
+    border: var(--common-border);
+    border-top: none;
+}

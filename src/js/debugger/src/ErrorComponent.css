@@ -1,0 +1,14 @@
+:root {
+  --error-background-color: #fcc;
+  --error-text-color: #C11F1F;
+}
+
+.Error {
+  background: var(--error-background-color);
+  margin: 1rem 2rem;
+  padding: 0.6rem;
+  color: var(--error-text-color);
+  white-space: pre;
+  overflow: auto;
+  font-family: monospace;
+}
