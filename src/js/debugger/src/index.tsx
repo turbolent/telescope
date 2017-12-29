@@ -3,21 +3,10 @@ import * as ReactDOM from 'react-dom';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
-import { createStore, applyMiddleware } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension';
 import { Provider } from 'react-redux';
-import { State } from './state';
-import { reducer } from './reducer';
-import thunkMiddleware from 'redux-thunk';
-import { createLogger } from 'redux-logger';
+import createStore from './store';
 
-const middleware = [thunkMiddleware, createLogger()];
-const store = createStore<State>(
-    reducer,
-    new State(),
-    composeWithDevTools(applyMiddleware(...middleware))
-);
-
+const store = createStore();
 const root = document.getElementById('root') as HTMLElement;
 
 ReactDOM.render(
