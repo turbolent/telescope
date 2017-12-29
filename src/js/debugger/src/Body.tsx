@@ -3,6 +3,7 @@ import TokensComponent from './TokensComponent';
 import SectionComponent from './SectionComponent';
 import ErrorComponent from './ErrorComponent';
 import TreeComponent from './TreeComponent';
+import QueriesComponent from './QueriesComponent';
 
 export default () => (
     <div>
@@ -14,6 +15,9 @@ export default () => (
         </SectionComponent>
         <SectionComponent title="Tree" path={['parse', 'tree']}>
             <TreeComponent/>
+        </SectionComponent>
+        <SectionComponent title="Queries" path={['parse', 'queries']}>
+            <QueriesComponent />
         </SectionComponent>
     </div>
 );
