@@ -1,0 +1,29 @@
+@import 'common.css';
+
+.QueryText {
+    font-family: monospace;
+    margin: 0 2rem;
+    display: inline-block;
+    border: var(--common-border);
+    padding: 0.2rem 0.4rem;
+}
+
+.QueryActions {
+    margin: 0 2rem 1.5rem;
+}
+
+.QueryActions a {
+    padding: 0.3rem 0.4em;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.9rem;
+}
+
+.QueryActions a,
+.QueryActions a:active {
+    color: var(--header-text-color);
+}
+
+.cm-s-neo .CodeMirror-linenumber {
+    color: #b3b4b7 !important;
+}

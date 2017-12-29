@@ -1,19 +1,27 @@
 export class Parse {
     readonly tokens: Token[];
-    readonly error?: string;
     readonly tree?: TreeNode;
+    readonly queries?: string[];
+    readonly error?: string;
 
     static decode(json: any): Parse {
         return new Parse(
             json.tokens.map(Token.decode),
             json.question && TreeNode.decode(json.question),
+            json.queries,
             json.error
         );
     }
 
-    private constructor(tokens: Token[], tree: TreeNode, error?: string) {
+    private constructor(
+        tokens: Token[],
+        tree: TreeNode,
+        queries?: string[],
+        error?: string
+    ) {
         this.tokens = tokens;
         this.tree = tree;
+        this.queries = queries;
         this.error = error;
     }
 }
