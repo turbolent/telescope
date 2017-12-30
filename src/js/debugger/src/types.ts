@@ -39,14 +39,14 @@ export class Token {
     readonly pennTag: string;
     readonly word: string;
 
+    static decode(json: any): Token {
+        return new Token(json.lemma, json.pennTag, json.word);
+    }
+
     constructor(lemma: string, pennTag: string, word: string) {
         this.lemma = lemma;
         this.pennTag = pennTag;
         this.word = word;
-    }
-
-    static decode(json: any): Token {
-        return new Token(json.lemma, json.pennTag, json.word);
     }
 }
 
