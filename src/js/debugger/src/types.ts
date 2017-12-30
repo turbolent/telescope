@@ -68,7 +68,7 @@ export class TreeNode {
     readonly name?: string;
 
     static decode(json: any, name?: string): TreeNode {
-        const children = Object.getOwnPropertyNames(json)
+        const children = Object.keys(json)
             .filter(property => property !== '$type')
             .map((property: string): Tree[] => {
                 const value = json[property];
