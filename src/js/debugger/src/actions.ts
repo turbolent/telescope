@@ -38,7 +38,7 @@ class ActionCreator<T> {
         return this.type + '_' + status;
     }
 
-    create(payload?: T): BaseAction<T> {
+    create(payload: T): BaseAction<T> {
         return ActionCreator.create(this.type, payload);
     }
 
@@ -100,15 +100,27 @@ class RequestActionCreator<T = void, U = void, V = void> extends ActionCreator<V
     }
 }
 
-export const parseActionCreator = new RequestActionCreator<Cancel, Parse, void>('PARSE');
+interface ParseStartedPayload {
+    readonly cancel: Cancel;
+    readonly question: string;
+    readonly save: boolean;
+};
 
-export const parseQuestion = (question: string): Thunk =>
+export const parseActionCreator = new RequestActionCreator<ParseStartedPayload, Parse, void>('PARSE');
+
+export const parseQuestion = (question: string, save: boolean): Thunk =>
     (dispatch: Dispatch<State>) => {
         const [promise, cancel] = parse(question);
-        dispatch(parseActionCreator.started(cancel));
+        dispatch(parseActionCreator.started({cancel, question, save}));
         promise.then(response => {
             dispatch(parseActionCreator.succeeded(response));
         }).catch(reason => {
             dispatch(parseActionCreator.failed(new Error(reason)));
         });
     };
+
+
+export const setQuestionActionCreator = new ActionCreator<string>('QUESTION_SET');
+
+export const setQuestion =
+    setQuestionActionCreator.create.bind(setQuestionActionCreator);

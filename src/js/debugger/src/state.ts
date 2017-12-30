@@ -41,4 +41,12 @@ export class State {
     withCancel(cancel: Cancel | undefined): State {
         return new State(this.map.set('cancel', cancel));
     }
+
+    get sentence(): string {
+        return this.map.get('sentence') || '';
+    }
+
+    withSentence(sentence: string): State {
+        return new State(this.map.set('sentence', sentence));
+    }
 }

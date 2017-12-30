@@ -1,5 +1,6 @@
 import { State } from './state';
-import { Action, parseActionCreator } from './actions';
+import { Action, parseActionCreator, setQuestionActionCreator } from './actions';
+import { encodeSentence, getSavedSentence } from './history';
 
 export function reducer(state: State, action: Action<{}>): State {
     switch (action.type) {
@@ -8,7 +9,11 @@ export function reducer(state: State, action: Action<{}>): State {
             if (currentCancel) {
                 currentCancel();
             }
-            const newCancel = parseActionCreator.getStartedPayload(action);
+            const {cancel: newCancel, question, save} =
+                parseActionCreator.getStartedPayload(action);
+            if (save) {
+                saveSentence(question);
+            }
             return state.withCancel(newCancel);
         }
         case parseActionCreator.succeededType: {
@@ -25,7 +30,20 @@ export function reducer(state: State, action: Action<{}>): State {
                     .withError(error.message)
                     .withParse(undefined));
         }
+        case setQuestionActionCreator.type: {
+            const question = setQuestionActionCreator.getPayload(action);
+            return state.withSentence(question);
+        }
         default:
             return state;
     }
+}
+
+function saveSentence(sentence: string) {
+    const url = encodeSentence(sentence);
+    const currentURL = encodeSentence(getSavedSentence());
+    if (url === currentURL) {
+        return
+    }
+    history.pushState({sentence}, document.title, url)
 }
