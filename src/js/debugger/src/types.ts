@@ -78,27 +78,27 @@ export class TreeNode {
                     }
 
                     if (representsToken(value[0])) {
-                        const tokens = value.map(element =>
-                            Token.decode(element));
                         return [
-                            new TreeLeaf(property, tokens)
+                            new TreeLeaf(property,
+                                value.map(element =>
+                                    Token.decode(element)))
                         ];
                     } else {
                         return value.map(element =>
                             TreeNode.decode(element));
                     }
-                }
-
-                if (representsToken(value)) {
-                    return [
-                        new TreeLeaf(property, [
-                            Token.decode(value)
-                        ])
-                    ];
                 } else {
-                    return [
-                        TreeNode.decode(value, property)
-                    ];
+                    if (representsToken(value)) {
+                        return [
+                            new TreeLeaf(property, [
+                                Token.decode(value)
+                            ])
+                        ];
+                    } else {
+                        return [
+                            TreeNode.decode(value, property)
+                        ];
+                    }
                 }
             })
             .reduce((a, b) => a.concat(b), []);
