@@ -41,4 +41,12 @@ export class State {
     withCancel(cancel: Cancel | undefined): State {
         return new State(this.map.set('cancel', cancel));
     }
+
+    get question(): string {
+        return this.map.get('question') || '';
+    }
+
+    withQuestion(question: string): State {
+        return new State(this.map.set('question', question));
+    }
 }

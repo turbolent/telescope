@@ -11,4 +11,5 @@
   white-space: pre;
   overflow: auto;
   font-family: monospace;
+  max-height: 28em;
 }

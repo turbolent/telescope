@@ -68,7 +68,7 @@ export class TreeNode {
     readonly name?: string;
 
     static decode(json: any, name?: string): TreeNode {
-        const children = Object.getOwnPropertyNames(json)
+        const children = Object.keys(json)
             .filter(property => property !== '$type')
             .map((property: string): Tree[] => {
                 const value = json[property];
@@ -78,8 +78,8 @@ export class TreeNode {
                     }
 
                     if (representsToken(value[0])) {
-                        const tokens = value.map(element =>
-                            Token.decode(element));
+                        const tokens =
+                            value.map(element => Token.decode(element));
                         return [
                             new TreeLeaf(property, tokens)
                         ];
@@ -87,11 +87,19 @@ export class TreeNode {
                         return value.map(element =>
                             TreeNode.decode(element));
                     }
+                } else {
+                    if (representsToken(value)) {
+                        return [
+                            new TreeLeaf(property, [
+                                Token.decode(value)
+                            ])
+                        ];
+                    } else {
+                        return [
+                            TreeNode.decode(value, property)
+                        ];
+                    }
                 }
-
-                return [
-                    TreeNode.decode(value, property)
-                ];
             })
             .reduce((a, b) => a.concat(b), []);
 

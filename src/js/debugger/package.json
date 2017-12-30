@@ -21,7 +21,9 @@
     "build": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js build",
     "test": "CI=true ./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
     "watch-test": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
-    "eject": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js eject"
+    "eject": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js eject",
+    "lint": "./node_modules/tslint/bin/tslint src/*.ts src/*.tsx",
+    "fix": "./node_modules/tslint/bin/tslint --fix src/*.ts src/*.tsx"
   },
   "devDependencies": {
     "@types/codemirror": "^0.0.53",
