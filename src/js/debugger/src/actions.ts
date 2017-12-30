@@ -104,7 +104,7 @@ interface ParseStartedPayload {
     readonly cancel: Cancel;
     readonly question: string;
     readonly save: boolean;
-};
+}
 
 export const parseActionCreator = new RequestActionCreator<ParseStartedPayload, Parse, void>('PARSE');
 
@@ -112,13 +112,14 @@ export const parseQuestion = (question: string, save: boolean): Thunk =>
     (dispatch: Dispatch<State>) => {
         const [promise, cancel] = parse(question);
         dispatch(parseActionCreator.started({cancel, question, save}));
-        promise.then(response => {
-            dispatch(parseActionCreator.succeeded(response));
-        }).catch(reason => {
-            dispatch(parseActionCreator.failed(new Error(reason)));
-        });
+        promise
+            .then(response => {
+                dispatch(parseActionCreator.succeeded(response));
+            })
+            .catch(reason => {
+                dispatch(parseActionCreator.failed(new Error(reason)));
+            });
     };
-
 
 export const setQuestionActionCreator = new ActionCreator<string>('QUESTION_SET');
 

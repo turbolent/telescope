@@ -34,7 +34,8 @@ class FormComponent extends React.Component<Props, {}> {
                 <input
                     type="text"
                     value={value}
-                    onChange={this.handleChange} />
+                    onChange={this.handleChange}
+                />
                 <input
                     type="submit"
                     value="Ask"

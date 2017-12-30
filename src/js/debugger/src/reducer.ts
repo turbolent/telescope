@@ -18,17 +18,19 @@ export function reducer(state: State, action: Action<{}>): State {
         }
         case parseActionCreator.succeededType: {
             const parse = parseActionCreator.getSuccessPayload(action);
-            return state.withMutations(mutableState =>
+            return state.withMutations(mutableState => {
                 mutableState.withCancel(undefined)
                     .withError(parse.error)
-                    .withParse(parse));
+                    .withParse(parse);
+            });
         }
         case parseActionCreator.failedType: {
             const error = parseActionCreator.getError(action);
-            return state.withMutations(mutableState =>
+            return state.withMutations(mutableState => {
                 mutableState.withCancel(undefined)
                     .withError(error.message)
-                    .withParse(undefined));
+                    .withParse(undefined);
+            });
         }
         case setQuestionActionCreator.type: {
             const question = setQuestionActionCreator.getPayload(action);
@@ -43,7 +45,7 @@ function saveQuestion(question: string) {
     const url = encodeQuestion(question);
     const currentURL = encodeQuestion(getSavedQuestion());
     if (url === currentURL) {
-        return
+        return;
     }
-    history.pushState({question}, document.title, url)
+    history.pushState({question}, document.title, url);
 }

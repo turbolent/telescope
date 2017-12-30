@@ -20,7 +20,6 @@ ReactDOM.render(
 
 registerServiceWorker();
 
-
 function loadState(state: any) {
     const question =
         state && state.question || getSavedQuestion();

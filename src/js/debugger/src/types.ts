@@ -78,10 +78,10 @@ export class TreeNode {
                     }
 
                     if (representsToken(value[0])) {
+                        const tokens =
+                            value.map(element => Token.decode(element));
                         return [
-                            new TreeLeaf(property,
-                                value.map(element =>
-                                    Token.decode(element)))
+                            new TreeLeaf(property, tokens)
                         ];
                     } else {
                         return value.map(element =>

@@ -1,5 +1,5 @@
 export function encodeQuestion(question: string) {
-    return '#' + encodeURIComponent(question.trim())
+    return '#' + encodeURIComponent(question.trim());
 }
 
 export function getSavedQuestion(): string {
