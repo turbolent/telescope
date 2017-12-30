@@ -40,8 +40,13 @@ export class Token {
     readonly word: string;
 
     static decode(json: any): Token {
-         const token = new Token();
-         return Object.assign(token, json);
+        return new Token(json.lemma, json.pennTag, json.word);
+    }
+
+    constructor(lemma: string, pennTag: string, word: string) {
+        this.lemma = lemma;
+        this.pennTag = pennTag;
+        this.word = word;
     }
 }
 
@@ -107,7 +112,7 @@ export class TreeNode {
         return new TreeNode(type, children, name);
     }
 
-    private constructor(type: string, children: Tree[], name?: string) {
+    constructor(type: string, children: Tree[], name?: string) {
         this.type = type;
         this.children = children;
         this.name = name;

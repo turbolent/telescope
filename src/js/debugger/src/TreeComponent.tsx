@@ -9,7 +9,7 @@ interface StateProps {
     readonly root?: TreeNode;
 }
 
-const TreeComponent = ({root}: StateProps) => {
+export const TreeComponent = ({root}: StateProps) => {
     if (!root) {
         return null;
     }

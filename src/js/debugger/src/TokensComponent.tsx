@@ -9,7 +9,7 @@ interface StateProps {
     readonly tokens: Token[];
 }
 
-const TokensComponent = ({tokens}: StateProps) => (
+export const TokensComponent = ({tokens}: StateProps) => (
     <div className="Tokens">
         {tokens.map((token, index) =>
             <TokenComponent token={token} key={index} />)}
