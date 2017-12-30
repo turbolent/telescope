@@ -13,11 +13,11 @@ interface StateProps {
 
 type Props = StateProps & DispatchProps;
 
-interface FormState {
+interface ComponentState {
     readonly value: string;
 }
 
-class Form extends React.Component<Props, FormState> {
+class FormComponent extends React.Component<Props, ComponentState> {
 
     constructor(props: Props) {
         super(props);
@@ -56,4 +56,4 @@ const mapDispatchToProps = (dispatch: Dispatch<State>): DispatchProps =>
             dispatch(parseQuestion(question)),
     });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Form);
+export default connect(mapStateToProps, mapDispatchToProps)(FormComponent);
