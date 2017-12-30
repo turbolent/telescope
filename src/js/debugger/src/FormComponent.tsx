@@ -49,8 +49,8 @@ class FormComponent extends React.Component<Props, {}> {
     }
 }
 
-const mapStateToProps = ({requesting, sentence}: State): StateProps => ({
-    value: sentence,
+const mapStateToProps = ({requesting, question}: State): StateProps => ({
+    value: question,
     requesting
 });
 

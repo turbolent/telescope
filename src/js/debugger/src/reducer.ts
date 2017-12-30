@@ -1,6 +1,6 @@
 import { State } from './state';
 import { Action, parseActionCreator, setQuestionActionCreator } from './actions';
-import { encodeSentence, getSavedSentence } from './history';
+import { encodeQuestion, getSavedQuestion } from './history';
 
 export function reducer(state: State, action: Action<{}>): State {
     switch (action.type) {
@@ -12,7 +12,7 @@ export function reducer(state: State, action: Action<{}>): State {
             const {cancel: newCancel, question, save} =
                 parseActionCreator.getStartedPayload(action);
             if (save) {
-                saveSentence(question);
+                saveQuestion(question);
             }
             return state.withCancel(newCancel);
         }
@@ -32,18 +32,18 @@ export function reducer(state: State, action: Action<{}>): State {
         }
         case setQuestionActionCreator.type: {
             const question = setQuestionActionCreator.getPayload(action);
-            return state.withSentence(question);
+            return state.withQuestion(question);
         }
         default:
             return state;
     }
 }
 
-function saveSentence(sentence: string) {
-    const url = encodeSentence(sentence);
-    const currentURL = encodeSentence(getSavedSentence());
+function saveQuestion(question: string) {
+    const url = encodeQuestion(question);
+    const currentURL = encodeQuestion(getSavedQuestion());
     if (url === currentURL) {
         return
     }
-    history.pushState({sentence}, document.title, url)
+    history.pushState({question}, document.title, url)
 }

@@ -1,8 +1,8 @@
-export function encodeSentence(sentence: string) {
-    return '#' + encodeURIComponent(sentence.trim())
+export function encodeQuestion(question: string) {
+    return '#' + encodeURIComponent(question.trim())
 }
 
-export function getSavedSentence(): string {
+export function getSavedQuestion(): string {
     const hash = window.location.hash;
     if (!hash.length) {
         return '';

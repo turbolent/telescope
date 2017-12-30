@@ -21,13 +21,13 @@ window.addEventListener('popstate', (event: PopStateEvent) => {
     if (!event.state) {
         return;
     }
-    const {sentence} = event.state;
-    if (!sentence) {
+    const {question} = event.state;
+    if (!question) {
         return;
     }
 
-    store.dispatch(setQuestion(sentence));
-    store.dispatch(parseQuestion(sentence, false));
+    store.dispatch(setQuestion(question));
+    store.dispatch(parseQuestion(question, false));
 });
 
 registerServiceWorker();
