@@ -89,9 +89,17 @@ export class TreeNode {
                     }
                 }
 
-                return [
-                    TreeNode.decode(value, property)
-                ];
+                if (representsToken(value)) {
+                    return [
+                        new TreeLeaf(property, [
+                            Token.decode(value)
+                        ])
+                    ];
+                } else {
+                    return [
+                        TreeNode.decode(value, property)
+                    ];
+                }
             })
             .reduce((a, b) => a.concat(b), []);
 
