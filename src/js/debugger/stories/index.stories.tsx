@@ -2,10 +2,16 @@ import * as React from 'react';
 
 import { storiesOf } from '@storybook/react';
 import TokenComponent from '../src/TokenComponent';
-import { Token, TreeLeaf, TreeNode } from '../src/types';
+import {
+    GraphItemLabel, GraphPropertyLabel, GraphVarLabel, Token, TreeLeaf,
+    TreeNode
+} from '../src/types';
 import { TokensComponent } from '../src/TokensComponent';
 import { TreeComponent } from '../src/TreeComponent';
 import QueryComponent from '../src/QueryComponent';
+import { GraphNode } from '../src/types';
+import nodeData from './node-data';
+import { GraphComponentDirectedEdge, GraphComponentLabelNode, parseGraphNode } from '../src/graph/types';
 
 storiesOf('Token', module)
     .add('noun', () => {
@@ -124,3 +130,43 @@ WHERE
 `;
         return <QueryComponent query={query}/>
 });
+
+storiesOf('Types', module)
+    .add('GraphNode', () => {
+        const node = GraphNode.decode(nodeData);
+        return <code style={{ whiteSpace: 'pre'}}>
+            {JSON.stringify(node, null, 4)}
+        </code>
+    });
+
+storiesOf('Graph', module)
+    .add('ComponentLabelNode', () => {
+        const nodeLabel =
+            new GraphItemLabel({item: {id: 30461, name: 'president'}}, 'ItemLabel');
+        const componentNode = GraphComponentLabelNode.fromGraphNodeLabel(nodeLabel);
+        return <code style={{ whiteSpace: 'pre'}}>
+            {JSON.stringify(componentNode, null, 4)}
+        </code>
+    })
+    .add('ComponentDirectedEdge', () => {
+        const edgeLabel =
+            new GraphPropertyLabel({property: {id: 31, name: 'is instance of'}}, 'PropertyLabel');
+        const sourceNodeLabel = new GraphVarLabel({id: 0}, 'VarLabel');
+        const sourceComponentNode =
+            GraphComponentLabelNode.fromGraphNodeLabel(sourceNodeLabel) as GraphComponentLabelNode;
+        const targetNodeLabel = new GraphItemLabel({item: {id: 6256, name: 'country'}}, 'ItemLabel');
+        const targetComponentNode =
+            GraphComponentLabelNode.fromGraphNodeLabel(targetNodeLabel) as GraphComponentLabelNode;
+        const componentNode =
+            GraphComponentDirectedEdge.fromGraphEdgeLabel(edgeLabel, sourceComponentNode, targetComponentNode);
+        return <code style={{ whiteSpace: 'pre'}}>
+            {JSON.stringify(componentNode, null, 4)}
+        </code>
+    })
+    .add('Parse', () => {
+        const node = GraphNode.decode(nodeData);
+        const parsed = parseGraphNode(node);
+        return <code style={{ whiteSpace: 'pre'}}>
+            {JSON.stringify(parsed, null, 4)}
+        </code>
+    });
