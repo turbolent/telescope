@@ -1,0 +1,30 @@
+@import '../common.css';
+
+.Graph {
+    margin: 1rem 2rem;
+}
+
+.Graph svg {
+    transition-property: width, height;
+    transition-duration: 0.5s;
+}
+
+.GraphBorder {
+    border: var(--common-border);
+    display: inline-block;
+}
+
+.GraphNode text,
+.GraphEdgeLabel {
+    text-anchor: middle;
+    font-size: 13px;
+    font-family: sans-serif;
+}
+
+.GraphNode text {
+    dominant-baseline: central;
+}
+
+.Graph a {
+    cursor: pointer;
+}

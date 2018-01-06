@@ -27,7 +27,10 @@ interface GraphComponentValue {}
 
 // Nodes
 
-abstract class GraphComponentNode implements GraphComponentValue {
+export abstract class GraphComponentNode implements GraphComponentValue {
+    x: number = 0;
+    y: number = 0;
+
     readonly id: number;
     readonly text: string;
     readonly link?: string;
@@ -71,9 +74,16 @@ export class GraphComponentLabelNode extends GraphComponentNode {
             return;
         }
         const link = GraphComponentLabelNode.linkGetter(nodeLabel);
-        return new GraphComponentLabelNode(text, link, isRoot);
+
+        const type = nodeLabel instanceof GraphVarLabel
+            ? GraphComponentVarLabelNode
+            : GraphComponentLabelNode;
+
+        return new type(text, link, isRoot);
     }
 }
+
+export class GraphComponentVarLabelNode extends GraphComponentNode {}
 
 export class GraphComponentConjunctionNode extends GraphComponentNode {
     constructor() {

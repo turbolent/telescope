@@ -12,6 +12,7 @@ import QueryComponent from '../src/QueryComponent';
 import { GraphNode } from '../src/types';
 import nodeData from './node-data';
 import { GraphComponentDirectedEdge, GraphComponentLabelNode, parseGraphNode } from '../src/graph/types';
+import GraphComponent from '../src/graph/GraphComponent';
 
 storiesOf('Token', module)
     .add('noun', () => {
@@ -169,4 +170,14 @@ storiesOf('Graph', module)
         return <code style={{ whiteSpace: 'pre'}}>
             {JSON.stringify(parsed, null, 4)}
         </code>
+    })
+    .add('GraphComponent', () => {
+        const node = GraphNode.decode(nodeData);
+        const [nodes, edges] = parseGraphNode(node, true);
+        return (
+            <GraphComponent
+                nodes={nodes}
+                links={edges}
+            />
+        );
     });
