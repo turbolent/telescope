@@ -32,11 +32,6 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         return () => nextId++
     })();
 
-    static adjustSizeValue(value: number, nodeCount: number, edgeCount: number): number {
-        const totalCount = nodeCount + edgeCount;
-        return Math.round(value * (2 + 0.2 * Math.pow(totalCount, 1.2)))
-    }
-
     private static getLinkDistance(edge: GraphComponentEdge): number {
         const {getLabeled, getLong} =
             settings.edge.distance;
@@ -196,7 +191,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         return `edgepath-${this.id}-${index}`
     }
 
-    private static getEdgeLabelTransform(edge: GraphComponentEdge, element: SVGTextElement): string {
+    private static getEdgeLabelTransform(edge: GraphComponentEdge, element: SVGGraphicsElement): string {
         if (edge.target.x >= edge.source.x) {
             return 'rotate(0)';
         }
@@ -212,8 +207,8 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         const {baseWidth, baseHeight} = settings.size;
         const nodeCount = nodes.length;
         const linkCount = links.length;
-        const width = GraphComponent.adjustSizeValue(baseWidth, nodeCount, linkCount);
-        const height = GraphComponent.adjustSizeValue(baseHeight, nodeCount, linkCount);
+        const width = settings.size.adjustValue(baseWidth, nodeCount, linkCount);
+        const height = settings.size.adjustValue(baseHeight, nodeCount, linkCount);
 
         return {
             nodes,
@@ -247,6 +242,10 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     }
 
     componentDidMount() {
+        this.startForceSimulation();
+    }
+
+    private startForceSimulation() {
         this.force = forceSimulation(this.state.nodes)
             .force("charge",
                    forceManyBody()
@@ -272,7 +271,24 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     }
 
     componentWillUnmount() {
+        this.stopForceSimulation();
+    }
+
+    private stopForceSimulation() {
         this.force.stop();
+    }
+
+    componentWillReceiveProps(nextProps: Props) {
+        if (nextProps.nodes === this.props.nodes
+            && nextProps.links === this.props.links)
+        {
+            return
+        }
+        const nextState = GraphComponent.getNextState(nextProps);
+        this.setState(nextState, () => {
+            this.stopForceSimulation();
+            this.startForceSimulation();
+        });
     }
 
     render() {
@@ -300,7 +316,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
         for (let index = 0; index < container.childNodes.length; index++) {
             const child = container.childNodes.item(index);
-            if (!(child instanceof SVGTextElement)) {
+            if (!(child instanceof SVGGraphicsElement)) {
                 continue;
             }
 

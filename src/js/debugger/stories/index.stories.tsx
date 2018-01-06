@@ -10,7 +10,7 @@ import { TokensComponent } from '../src/TokensComponent';
 import { TreeComponent } from '../src/TreeComponent';
 import QueryComponent from '../src/QueryComponent';
 import { GraphNode } from '../src/types';
-import nodeData from './node-data';
+import {graph1, graph2} from './graph-data';
 import { GraphComponentDirectedEdge, GraphComponentLabelNode, parseGraphNode } from '../src/graph/types';
 import GraphComponent from '../src/graph/GraphComponent';
 
@@ -134,11 +134,48 @@ WHERE
 
 storiesOf('Types', module)
     .add('GraphNode', () => {
-        const node = GraphNode.decode(nodeData);
+        const node = GraphNode.decode(graph1);
         return <code style={{ whiteSpace: 'pre'}}>
             {JSON.stringify(node, null, 4)}
         </code>
     });
+
+class GraphComponentWrapper extends React.Component<{}, {first: boolean}> {
+    private static graphs = [
+        ['presidents born before 1900', graph1],
+        ['books written by George Orwell', graph2]
+    ];
+
+    constructor(props: {}) {
+        super(props);
+        this.state = {
+           first: true
+        }
+    }
+
+    onToggle = () => {
+        this.setState(state => ({
+            first: !state.first
+        }));
+    };
+
+    render() {
+        const index = this.state.first ? 0 : 1;
+        const [name, graph] = GraphComponentWrapper.graphs[index];
+        const node = GraphNode.decode(graph);
+        const [ nodes, edges ] = parseGraphNode(node, true);
+        return (
+            <div>
+                <p><b>Showing:</b> {name}</p>
+                <p><button onClick={this.onToggle}>Toggle</button></p>
+                <GraphComponent
+                    nodes={nodes}
+                    links={edges}
+                />
+            </div>
+        );
+    }
+}
 
 storiesOf('Graph', module)
     .add('ComponentLabelNode', () => {
@@ -165,19 +202,11 @@ storiesOf('Graph', module)
         </code>
     })
     .add('Parse', () => {
-        const node = GraphNode.decode(nodeData);
+        const node = GraphNode.decode(graph1);
         const parsed = parseGraphNode(node);
         return <code style={{ whiteSpace: 'pre'}}>
             {JSON.stringify(parsed, null, 4)}
         </code>
     })
-    .add('GraphComponent', () => {
-        const node = GraphNode.decode(nodeData);
-        const [nodes, edges] = parseGraphNode(node, true);
-        return (
-            <GraphComponent
-                nodes={nodes}
-                links={edges}
-            />
-        );
-    });
+    .add('GraphComponent', () =>
+        <GraphComponentWrapper />);

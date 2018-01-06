@@ -16,11 +16,14 @@ function generateShadow(x: number, y: number, blur: number, color: string): stri
 const settings = {
     size: {
         baseWidth: 140,
-        baseHeight: 100
+        baseHeight: 100,
+        adjustValue(value: number, nodeCount: number, edgeCount: number): number {
+            const totalCount = nodeCount + edgeCount;
+            return Math.round(value * (2 + 0.2 * Math.pow(totalCount, 1.2)))
+        }
     },
     layout: {
         manyBodyForceStrength: -30,
-        startAlpha: 0.0065
     },
     node: {
         radius: 14,
@@ -65,7 +68,7 @@ const settings = {
             getOther: () => settings.node.textColor.getOther()
         },
         distance: {
-            getLabeled: (length: number) => Math.max(80, length * 12),
+            getLabeled: (length: number) => Math.max(100, length * 14),
             getLong: () => 60,
             getShort: () => 10,
         }
