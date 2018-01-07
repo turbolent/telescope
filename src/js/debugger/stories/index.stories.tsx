@@ -203,7 +203,7 @@ storiesOf('Graph', module)
     })
     .add('Parse', () => {
         const node = GraphNode.decode(graph1);
-        const parsed = parseGraphNode(node);
+        const parsed = parseGraphNode(node, true);
         return <code style={{ whiteSpace: 'pre'}}>
             {JSON.stringify(parsed, null, 4)}
         </code>

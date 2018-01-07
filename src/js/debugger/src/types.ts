@@ -3,6 +3,7 @@ export class Parse {
     readonly tokens: Token[];
     readonly tree?: TreeNode;
     readonly queries?: string[];
+    readonly nodes?: GraphNode[];
     readonly error?: string;
 
     static decode(json: any): Parse {
@@ -10,6 +11,7 @@ export class Parse {
             json.tokens.map(Token.decode),
             json.question && TreeNode.decode(json.question),
             json.queries,
+            json.nodes && json.nodes.map((json: any) => GraphNode.decode(json)),
             json.error
         );
     }
@@ -18,11 +20,13 @@ export class Parse {
         tokens: Token[],
         tree: TreeNode,
         queries?: string[],
+        nodes?: GraphNode[],
         error?: string
     ) {
         this.tokens = tokens;
         this.tree = tree;
         this.queries = queries;
+        this.nodes = nodes;
         this.error = error;
     }
 }
