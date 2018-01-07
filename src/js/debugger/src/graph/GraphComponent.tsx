@@ -197,9 +197,9 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return 'rotate(0)';
         }
 
-        const bbox = element.getBBox();
-        const rx = bbox.x + bbox.width / 2;
-        const ry = bbox.y + bbox.height / 2;
+        const {x, y, width, height} = element.getBBox();
+        const rx = x + width / 2;
+        const ry = y + height / 2;
         return `rotate(180 ${rx} ${ry})`
     }
 
@@ -328,7 +328,8 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         );
     }
 
-    private transformEdgeLabels(container: SVGGElement | null) {
+
+    private transformEdgeLabels = (container: SVGGElement | null) => {
         if (!container) {
             return
         }
@@ -347,13 +348,13 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             const transform = GraphComponent.getEdgeLabelTransform(edge, child);
             child.setAttribute('transform', transform);
         }
-    }
+    };
 
     private renderEdgeLabels() {
         const {labelOffsetX, labelOffsetY} = settings.edge;
 
         return (
-            <g ref={(container) => this.transformEdgeLabels(container)}>
+            <g ref={this.transformEdgeLabels}>
                 {
                     this.state.links.map(
                         (edge, index) => (
