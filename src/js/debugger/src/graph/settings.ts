@@ -28,7 +28,8 @@ const settings = {
         initialForwardPercentage: 0.2,
         relayoutAlpha: 0.8,
         alphaDecay: 0.012,
-        dragAlphaTarget: 0.1
+        dragAlphaTarget: 0.1,
+        scaleExtent: <[number, number]>[0.2, 3]
     },
     node: {
         radius: 14,

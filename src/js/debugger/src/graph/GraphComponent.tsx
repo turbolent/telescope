@@ -12,6 +12,7 @@ import { Key, ReactNode } from 'react';
 import { select } from 'd3-selection';
 import * as d3Selection from 'd3-selection';
 import { drag } from 'd3-drag';
+import { zoom } from 'd3-zoom';
 
 interface Props {
     nodes: GraphComponentNode[];
@@ -23,6 +24,7 @@ interface ComponentState {
     links: GraphComponentEdge[];
     width: number;
     height: number;
+    transform?: string;
 }
 
 export default class GraphComponent extends React.Component<Props, ComponentState> {
@@ -314,19 +316,29 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     };
 
     render() {
+        const {width, height, transform} = this.state;
         return (
             <div className="Graph">
                 <div className="GraphBorder">
                     <button onClick={this.relayout}>🔃</button>
                     <svg
-                        width={this.state.width}
-                        height={this.state.height}
+                        width={width}
+                        height={height}
                         ref={(svg) => this.applyDrag(svg)}
                     >
-                        {this.renderEdges()}
-                        {this.renderMarkers()}
-                        {this.renderNodes()}
-                        {this.renderEdgeLabels()}
+                        <rect
+                            fill="none"
+                            pointerEvents="all"
+                            width={width}
+                            height={height}
+                            ref={(rect) => this.applyZoom(rect)}
+                        />
+                        <g transform={transform}>
+                            {this.renderEdges()}
+                            {this.renderMarkers()}
+                            {this.renderNodes()}
+                            {this.renderEdgeLabels()}
+                        </g>
                     </svg>
                 </div>
             </div>
@@ -516,5 +528,23 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                 );
             }
         );
+    }
+
+    private applyZoom(rect: SVGRectElement | null) {
+        if (!rect) {
+            return
+        }
+
+        const component = this;
+
+        function zoomed() {
+            const transform = d3Selection.event.transform.toString();
+            component.setState({transform})
+        }
+
+        const zoomBehaviour = zoom()
+            .scaleExtent(settings.layout.scaleExtent)
+            .on("zoom", zoomed);
+        select(rect).call(zoomBehaviour)
     }
 }
