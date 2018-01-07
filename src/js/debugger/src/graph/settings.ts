@@ -24,6 +24,7 @@ const settings = {
     },
     layout: {
         manyBodyForceStrength: -30,
+        getCollisionRadius: () => settings.node.radius * 3
     },
     node: {
         radius: 14,
@@ -69,8 +70,8 @@ const settings = {
         },
         distance: {
             getLabeled: (length: number) => Math.max(100, length * 14),
-            getLong: () => 60,
-            getShort: () => 10,
+            getLong: () => 80,
+            getShort: () => 20,
         }
     },
     marker: {

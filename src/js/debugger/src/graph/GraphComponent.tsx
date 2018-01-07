@@ -35,6 +35,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     private static getLinkDistance(edge: GraphComponentEdge): number {
         const {getLabeled, getLong} =
             settings.edge.distance;
+
         const length = edge.text && edge.text.length || 0;
 
         if (edge instanceof GraphComponentDirectedEdge
@@ -261,13 +262,24 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                        this.state.height / 2
                    ))
             .force('collide',
-                   forceCollide(settings.node.radius));
+                   forceCollide(settings.layout.getCollisionRadius()));
+
+        this.forwardForceSimulation();
 
         this.force.on('tick', () =>
             this.setState({
                               links: this.state.links,
                               nodes: this.state.nodes
                           }));
+    }
+
+    private forwardForceSimulation(percentage = 1) {
+        const {force} = this;
+        // from https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
+        const n = Math.ceil(Math.log(force.alphaMin()) / Math.log(1 - force.alphaDecay())) * percentage;
+        for (let i = 0; i < n; ++i) {
+            force.tick();
+        }
     }
 
     componentWillUnmount() {
@@ -301,8 +313,8 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                     >
                         {this.renderEdges()}
                         {this.renderMarkers()}
-                        {this.renderEdgeLabels()}
                         {this.renderNodes()}
+                        {this.renderEdgeLabels()}
                     </svg>
                 </div>
             </div>
