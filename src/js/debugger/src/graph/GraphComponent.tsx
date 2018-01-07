@@ -357,8 +357,8 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             <g ref={this.transformEdgeLabels}>
                 {
                     this.state.links.map(
-                        (edge, index) => (
-                            GraphComponent.linkify(edge.link,
+                        (edge, index) => {
+                            const text = (
                                 <text
                                     className="GraphEdgeLabel"
                                     dy={labelOffsetY}
@@ -373,9 +373,10 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     >
                                         {edge.text}
                                     </textPath>
-                                </text>, index)
-                        )
-                    )
+                                </text>
+                            );
+                            return GraphComponent.linkify(edge.link, text, index)
+                        })
                 }
             </g>
         );
@@ -444,6 +445,15 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         return this.state.nodes.map(
             (node, index) => {
                 const transform = `translate(${node.x}, ${node.y})`;
+                const text = (
+                    <text
+                        fill={GraphComponent.getNodeTextFill(node).toString()}
+                        fontWeight={GraphComponent.getNodeTextFontWeight(node)}
+                        style={{textShadow: GraphComponent.getTextShadow(node)}}
+                    >
+                        {node.text}
+                    </text>
+                );
                 return (
                     <g
                         className="GraphNode"
@@ -456,17 +466,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                             strokeWidth={stroke.width}
                             stroke={GraphComponent.getNodeStroke(node).toString()}
                         />
-
-                        {
-                            GraphComponent.linkify(node.link,
-                                <text
-                                    fill={GraphComponent.getNodeTextFill(node).toString()}
-                                    fontWeight={GraphComponent.getNodeTextFontWeight(node)}
-                                    style={{textShadow: GraphComponent.getTextShadow(node)}}
-                                >
-                                    {node.text}
-                                </text>, undefined)
-                        }
+                        {GraphComponent.linkify(node.link, text, undefined)}
                     </g>
                 );
             }
