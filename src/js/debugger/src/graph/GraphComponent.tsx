@@ -8,7 +8,7 @@ import {
 import settings from './settings';
 import { HSLColor } from 'd3-color';
 import './GraphComponent.css';
-import { ReactNode } from 'react';
+import { Key, ReactNode } from 'react';
 
 interface Props {
     nodes: GraphComponentNode[];
@@ -219,13 +219,13 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         };
     }
 
-    private static linkify(link: string | undefined, content: ReactNode): ReactNode {
+    private static linkify(link: string | undefined, content: ReactNode, key: Key | undefined): ReactNode {
         if (!link) {
             return content;
         }
 
         return (
-            <a href={link} target="_blank">
+            <a href={link} target="_blank" key={key}>
                 {content}
             </a>
         );
@@ -364,6 +364,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     fontWeight="bold"
                                     style={{textShadow: GraphComponent.getTextShadow(edge)}}
                                     fill={GraphComponent.getEdgeLabelFill(edge).toString()}
+                                    key={index}
                                 >
                                     <textPath
                                         xlinkHref={'#' + this.getEdgePathIdentifier(index)}
@@ -371,8 +372,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     >
                                         {edge.text}
                                     </textPath>
-                                </text>
-                            )
+                                </text>, index)
                         )
                     )
                 }
@@ -447,13 +447,13 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                     <g
                         className="GraphNode"
                         transform={transform}
+                        key={index}
                     >
                         <circle
                             r={radius}
                             fill={GraphComponent.getNodeFill(node).toString()}
                             strokeWidth={stroke.width}
                             stroke={GraphComponent.getNodeStroke(node).toString()}
-                            key={index}
                         />
 
                         {
@@ -464,7 +464,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     style={{textShadow: GraphComponent.getTextShadow(node)}}
                                 >
                                     {node.text}
-                                </text>)
+                                </text>, undefined)
                         }
                     </g>
                 );
