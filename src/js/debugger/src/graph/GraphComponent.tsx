@@ -159,11 +159,11 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         return;
     }
 
-    private static getNodeTextShadow(node: GraphComponentNode): string {
+    private static getTextShadow(element: GraphComponentNode | GraphComponentEdge): string {
         const {normal, strong} =
             settings.textShadow;
 
-        if (node instanceof GraphComponentLabelNode) {
+        if (element instanceof GraphComponentLabelNode) {
             return strong;
         }
 
@@ -362,6 +362,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     className="GraphEdgeLabel"
                                     dy={labelOffsetY}
                                     fontWeight="bold"
+                                    style={{textShadow: GraphComponent.getTextShadow(edge)}}
                                     fill={GraphComponent.getEdgeLabelFill(edge).toString()}
                                 >
                                     <textPath
@@ -460,7 +461,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                 <text
                                     fill={GraphComponent.getNodeTextFill(node).toString()}
                                     fontWeight={GraphComponent.getNodeTextFontWeight(node)}
-                                    style={{textShadow: GraphComponent.getNodeTextShadow(node)}}
+                                    style={{textShadow: GraphComponent.getTextShadow(node)}}
                                 >
                                     {node.text}
                                 </text>)
