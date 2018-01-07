@@ -329,7 +329,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     }
 
 
-    private transformEdgeLabels = (container: SVGGElement | null) => {
+    private transformEdgeLabels(container: SVGGElement | null) {
         if (!container) {
             return
         }
@@ -354,7 +354,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         const {labelOffsetX, labelOffsetY} = settings.edge;
 
         return (
-            <g ref={this.transformEdgeLabels}>
+            <g ref={(container) => this.transformEdgeLabels(container)}>
                 {
                     this.state.links.map(
                         (edge, index) => {
