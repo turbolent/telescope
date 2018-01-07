@@ -12,6 +12,13 @@
 .GraphBorder {
     border: var(--common-border);
     display: inline-block;
+    position: relative;
+}
+
+.graphBorder button {
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 .GraphNode text,
@@ -19,10 +26,16 @@
     text-anchor: middle;
     font-size: 13px;
     font-family: sans-serif;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .GraphNode text {
     dominant-baseline: central;
+    cursor: default;
 }
 
 .Graph a {

@@ -303,10 +303,17 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         });
     }
 
+    relayout = () => {
+        this.force.alpha(0.8);
+        this.force.alphaDecay(0.012);
+        this.force.restart();
+    };
+
     render() {
         return (
             <div className="Graph">
                 <div className="GraphBorder">
+                    <button onClick={this.relayout}>🔃</button>
                     <svg
                         width={this.state.width}
                         height={this.state.height}
