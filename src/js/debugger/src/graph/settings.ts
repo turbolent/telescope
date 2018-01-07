@@ -24,7 +24,11 @@ const settings = {
     },
     layout: {
         manyBodyForceStrength: -30,
-        getCollisionRadius: () => settings.node.radius * 3
+        getCollisionRadius: () => settings.node.radius * 3,
+        initialForwardPercentage: 0.2,
+        relayoutAlpha: 0.8,
+        alphaDecay: 0.012,
+        dragAlphaTarget: 0.1
     },
     node: {
         radius: 14,

@@ -265,9 +265,10 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                        this.state.height / 2
                    ))
             .force('collide',
-                   forceCollide(settings.layout.getCollisionRadius()));
+                   forceCollide(settings.layout.getCollisionRadius()))
+            .alphaDecay(settings.layout.alphaDecay);
 
-        this.forwardForceSimulation(0.2);
+        this.forwardForceSimulation(settings.layout.initialForwardPercentage);
 
         this.force.on('tick', () =>
             this.setState({
@@ -308,8 +309,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     }
 
     relayout = () => {
-        this.force.alpha(0.8);
-        this.force.alphaDecay(0.012);
+        this.force.alpha(settings.layout.relayoutAlpha);
         this.force.restart();
     };
 
@@ -340,9 +340,12 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
         const component = this;
 
-        function dragstarted(d: {y: number; x: number; fy: number; fx: number}) {
-            if (!d3Selection.event.active)
-                component.force.alphaTarget(0.3).restart();
+        function dragStarted(d: {y: number; x: number; fy: number; fx: number}) {
+            if (!d3Selection.event.active) {
+                component.force
+                    .alphaTarget(settings.layout.dragAlphaTarget)
+                    .restart();
+            }
             d.fx = d.x;
             d.fy = d.y;
         }
@@ -352,17 +355,18 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             d.fy = d3Selection.event.y;
         }
 
-        function dragended(d: {fx: number | null; fy: number | null}) {
-            if (!d3Selection.event.active)
+        function dragEnded(d: {fx: number | null; fy: number | null}) {
+            if (!d3Selection.event.active) {
                 component.force.alphaTarget(0);
+            }
             d.fx = null;
             d.fy = null;
         }
 
         const dragBehaviour = drag()
-            .on("start", dragstarted)
+            .on("start", dragStarted)
             .on("drag", dragged)
-            .on("end", dragended);
+            .on("end", dragEnded);
 
         select(container)
             .selectAll<SVGGElement, GraphComponentNode>('.GraphNode')
