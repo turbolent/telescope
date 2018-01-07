@@ -32,7 +32,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
     private static getNextId = (() => {
         let nextId = 0;
-        return () => nextId++
+        return () => nextId++;
     })();
 
     private static getLinkDistance(edge: GraphComponentEdge): number {
@@ -47,7 +47,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return getLabeled(length);
         }
 
-        return getLong()
+        return getLong();
     }
 
     private static getEdgeStroke(edge: GraphComponentEdge): HSLColor {
@@ -62,14 +62,14 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return getFilter();
         }
 
-        return getOther()
+        return getOther();
     }
 
     private static getLinkOffset(edge: GraphComponentEdge): [number, number] {
         if (!(edge instanceof GraphComponentDirectedEdge)
             && !(edge instanceof GraphComponentFilterEdge))
         {
-            return [0, 0]
+            return [0, 0];
         }
 
         const diffX = edge.target.x - edge.source.x;
@@ -77,7 +77,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
         const pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
         if (!pathLength) {
-            return [0, 0]
+            return [0, 0];
         }
 
         const offset = settings.node.radius
@@ -92,7 +92,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     private static edgePath(edge: GraphComponentEdge): string {
         const [offsetX, offsetY] = GraphComponent.getLinkOffset(edge);
         return 'M' + [edge.source.x, edge.source.y].join(',')
-            + 'L' + [edge.target.x - offsetX, edge.target.y - offsetY].join(',')
+            + 'L' + [edge.target.x - offsetX, edge.target.y - offsetY].join(',');
     }
 
     private static getNodeFill(node: GraphComponentNode): HSLColor {
@@ -108,10 +108,10 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         }
 
         if (node instanceof GraphComponentLabelNode) {
-            return getLabel()
+            return getLabel();
         }
 
-        return getOther()
+        return getOther();
     }
 
     private static getNodeStroke(node: GraphComponentNode): HSLColor {
@@ -127,10 +127,10 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         }
 
         if (node instanceof GraphComponentLabelNode) {
-            return getLabel()
+            return getLabel();
         }
 
-        return getOther()
+        return getOther();
     }
 
     private static getNodeTextFill(node: GraphComponentNode): HSLColor {
@@ -151,12 +151,12 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         if (node.link)
             return getLink();
 
-        return getOther()
+        return getOther();
     }
 
     private static getNodeTextFontWeight(node: GraphComponentNode): string | undefined {
         if (node instanceof GraphComponentLabelNode) {
-            return 'bold'
+            return 'bold';
         }
 
         return;
@@ -170,7 +170,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return strong;
         }
 
-        return normal
+        return normal;
     }
 
     private static getEdgeStrokeDashArray(edge: GraphComponentEdge): string | undefined {
@@ -185,14 +185,14 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         const {getLink, getOther} = settings.edge.textColor;
 
         if (edge.link) {
-            return getLink()
+            return getLink();
         }
 
-        return getOther()
+        return getOther();
     }
 
     private getEdgePathIdentifier(index: number): string {
-        return `edgepath-${this.id}-${index}`
+        return `edgepath-${this.id}-${index}`;
     }
 
     private static getEdgeLabelTransform(edge: GraphComponentEdge, element: SVGGraphicsElement): string {
@@ -203,7 +203,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         const {x, y, width, height} = element.getBBox();
         const rx = x + width / 2;
         const ry = y + height / 2;
-        return `rotate(180 ${rx} ${ry})`
+        return `rotate(180 ${rx} ${ry})`;
     }
 
     private static getNextState(props: Props): ComponentState {
@@ -242,7 +242,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
     }
 
     private getMarkerId(type: string): string {
-        return `end-arrow-${this.id}-${type}`
+        return `end-arrow-${this.id}-${type}`;
     }
 
     componentDidMount() {
@@ -267,7 +267,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             .force('collide',
                    forceCollide(settings.layout.getCollisionRadius()));
 
-        this.forwardForceSimulation();
+        this.forwardForceSimulation(0.2);
 
         this.force.on('tick', () =>
             this.setState({
@@ -297,8 +297,9 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         if (nextProps.nodes === this.props.nodes
             && nextProps.links === this.props.links)
         {
-            return
+            return;
         }
+
         const nextState = GraphComponent.getNextState(nextProps);
         this.setState(nextState, () => {
             this.stopForceSimulation();
@@ -371,7 +372,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
     private transformEdgeLabels(container: SVGGElement | null) {
         if (!container) {
-            return
+            return;
         }
 
         for (let index = 0; index < container.childNodes.length; index++) {
@@ -415,7 +416,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                                     </textPath>
                                 </text>
                             );
-                            return GraphComponent.linkify(edge.link, text, index)
+                            return GraphComponent.linkify(edge.link, text, index);
                         })
                 }
             </g>
@@ -444,7 +445,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                     />
                 </marker>
             );
-        })
+        });
     }
 
     private renderEdges() {
@@ -476,7 +477,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
         const type = isDirected ? 'getDirected' : 'getFilter';
         const id = this.getMarkerId(type);
-        return `url(#${id})`
+        return `url(#${id})`;
     }
 
     private renderNodes() {
