@@ -9,6 +9,9 @@ import settings from './settings';
 import { HSLColor } from 'd3-color';
 import './GraphComponent.css';
 import { Key, ReactNode } from 'react';
+import { select } from 'd3-selection';
+import * as d3Selection from 'd3-selection';
+import { drag } from 'd3-drag';
 
 interface Props {
     nodes: GraphComponentNode[];
@@ -317,6 +320,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                     <svg
                         width={this.state.width}
                         height={this.state.height}
+                        ref={(svg) => this.applyDrag(svg)}
                     >
                         {this.renderEdges()}
                         {this.renderMarkers()}
@@ -328,6 +332,42 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         );
     }
 
+    private applyDrag(container: SVGSVGElement | null) {
+        if (!container) {
+            return;
+        }
+
+        const component = this;
+
+        function dragstarted(d: {y: number; x: number; fy: number; fx: number}) {
+            if (!d3Selection.event.active)
+                component.force.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(d: {fx: number; fy: number}) {
+            d.fx = d3Selection.event.x;
+            d.fy = d3Selection.event.y;
+        }
+
+        function dragended(d: {fx: number | null; fy: number | null}) {
+            if (!d3Selection.event.active)
+                component.force.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        const dragBehaviour = drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+
+        select(container)
+            .selectAll<SVGGElement, GraphComponentNode>('.GraphNode')
+            .data(this.state.nodes)
+            .call(dragBehaviour);
+    }
 
     private transformEdgeLabels(container: SVGGElement | null) {
         if (!container) {
