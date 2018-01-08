@@ -28,7 +28,7 @@ const GraphsComponent = ({graphNodes}: StateProps) => {
 };
 
 const mapStateToProps = (s: State): StateProps => ({
-    nodes: s.parse && s.parse.nodes
+    graphNodes: s.parse && s.parse.nodes
 });
 
 export default connect(mapStateToProps)(GraphsComponent);
