@@ -29,13 +29,13 @@ interface ComponentState {
 
 export default class GraphComponent extends React.Component<Props, ComponentState> {
 
-    private force: Simulation<GraphComponentNode, GraphComponentEdge>;
-    private id: number;
-
     private static getNextId = (() => {
         let nextId = 0;
         return () => nextId++;
     })();
+
+    private force: Simulation<GraphComponentNode, GraphComponentEdge>;
+    private id: number;
 
     private static getLinkDistance(edge: GraphComponentEdge): number {
         const {getLabeled, getLong} =
@@ -44,8 +44,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         const length = edge.text && edge.text.length || 0;
 
         if (edge instanceof GraphComponentDirectedEdge
-            || edge instanceof GraphComponentFilterEdge)
-        {
+            || edge instanceof GraphComponentFilterEdge) {
             return getLabeled(length);
         }
 
@@ -69,8 +68,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
     private static getLinkOffset(edge: GraphComponentEdge): [number, number] {
         if (!(edge instanceof GraphComponentDirectedEdge)
-            && !(edge instanceof GraphComponentFilterEdge))
-        {
+            && !(edge instanceof GraphComponentFilterEdge)) {
             return [0, 0];
         }
 
@@ -147,11 +145,13 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return getVariable();
         }
 
-        if (node instanceof GraphComponentConjunctionNode)
+        if (node instanceof GraphComponentConjunctionNode) {
             return getConjunction();
+        }
 
-        if (node.link)
+        if (node.link) {
             return getLink();
+        }
 
         return getOther();
     }
@@ -191,10 +191,6 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         }
 
         return getOther();
-    }
-
-    private getEdgePathIdentifier(index: number): string {
-        return `edgepath-${this.id}-${index}`;
     }
 
     private static getEdgeLabelTransform(edge: GraphComponentEdge, element: SVGGraphicsElement): string {
@@ -243,63 +239,17 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         this.state = GraphComponent.getNextState(props);
     }
 
-    private getMarkerId(type: string): string {
-        return `end-arrow-${this.id}-${type}`;
-    }
-
     componentDidMount() {
         this.startForceSimulation();
-    }
-
-    private startForceSimulation() {
-        this.force = forceSimulation(this.state.nodes)
-            .force("charge",
-                   forceManyBody()
-                       .strength(settings.layout.manyBodyForceStrength)
-            )
-            .force("link",
-                   forceLink()
-                       .distance(GraphComponent.getLinkDistance)
-                       .links(this.state.links))
-            .force("center",
-                   forceCenter(
-                       this.state.width / 2,
-                       this.state.height / 2
-                   ))
-            .force('collide',
-                   forceCollide(settings.layout.getCollisionRadius()))
-            .alphaDecay(settings.layout.alphaDecay);
-
-        this.forwardForceSimulation(settings.layout.initialForwardPercentage);
-
-        this.force.on('tick', () =>
-            this.setState({
-                              links: this.state.links,
-                              nodes: this.state.nodes
-                          }));
-    }
-
-    private forwardForceSimulation(percentage = 1) {
-        const {force} = this;
-        // from https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
-        const n = Math.ceil(Math.log(force.alphaMin()) / Math.log(1 - force.alphaDecay())) * percentage;
-        for (let i = 0; i < n; ++i) {
-            force.tick();
-        }
     }
 
     componentWillUnmount() {
         this.stopForceSimulation();
     }
 
-    private stopForceSimulation() {
-        this.force.stop();
-    }
-
     componentWillReceiveProps(nextProps: Props) {
         if (nextProps.nodes === this.props.nodes
-            && nextProps.links === this.props.links)
-        {
+            && nextProps.links === this.props.links) {
             return;
         }
 
@@ -309,11 +259,6 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             this.startForceSimulation();
         });
     }
-
-    relayout = () => {
-        this.force.alpha(settings.layout.relayoutAlpha);
-        this.force.restart();
-    };
 
     render() {
         const {width, height, transform} = this.state;
@@ -343,6 +288,60 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
                 </div>
             </div>
         );
+    }
+
+    private getEdgePathIdentifier(index: number): string {
+        return `edgepath-${this.id}-${index}`;
+    }
+
+    private getMarkerId(type: string): string {
+        return `end-arrow-${this.id}-${type}`;
+    }
+
+    private startForceSimulation() {
+        this.force = forceSimulation(this.state.nodes)
+            .force('charge',
+                   forceManyBody()
+                       .strength(settings.layout.manyBodyForceStrength)
+            )
+            .force('link',
+                   forceLink()
+                       .distance(GraphComponent.getLinkDistance)
+                       .links(this.state.links))
+            .force('center',
+                   forceCenter(
+                       this.state.width / 2,
+                       this.state.height / 2
+                   ))
+            .force('collide',
+                   forceCollide(settings.layout.getCollisionRadius()))
+            .alphaDecay(settings.layout.alphaDecay);
+
+        this.forwardForceSimulation(settings.layout.initialForwardPercentage);
+
+        this.force.on('tick', () =>
+            this.setState({
+                              links: this.state.links,
+                              nodes: this.state.nodes
+                          }));
+    }
+
+    private forwardForceSimulation(percentage: number = 1) {
+        const {force} = this;
+        // from https://bl.ocks.org/mbostock/01ab2e85e8727d6529d20391c0fd9a16
+        const n = Math.ceil(Math.log(force.alphaMin()) / Math.log(1 - force.alphaDecay())) * percentage;
+        for (let i = 0; i < n; ++i) {
+            force.tick();
+        }
+    }
+
+    private stopForceSimulation() {
+        this.force.stop();
+    }
+
+    private relayout = () => {
+        this.force.alpha(settings.layout.relayoutAlpha);
+        this.force.restart();
     }
 
     private applyDrag(container: SVGSVGElement | null) {
@@ -376,9 +375,9 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         }
 
         const dragBehaviour = drag()
-            .on("start", dragStarted)
-            .on("drag", dragged)
-            .on("end", dragEnded);
+            .on('start', dragStarted)
+            .on('drag', dragged)
+            .on('end', dragEnded);
 
         select(container)
             .selectAll<SVGGElement, GraphComponentNode>('.GraphNode')
@@ -405,7 +404,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             const transform = GraphComponent.getEdgeLabelTransform(edge, child);
             child.setAttribute('transform', transform);
         }
-    };
+    }
 
     private renderEdgeLabels() {
         const {labelOffsetX, labelOffsetY} = settings.edge;
@@ -441,7 +440,7 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
     private renderMarkers() {
         const {color, size} = settings.marker;
-        return Object.keys(color).map(type => {
+        return Object.keys(color).map((type, index) => {
             const id = this.getMarkerId(type);
 
             const colorFactory = color[type];
@@ -449,14 +448,15 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
             return (
                 <marker
                     id={id}
-                    viewBox='0 -5 10 10'
+                    viewBox="0 -5 10 10"
                     markerWidth={size}
                     markerHeight={size}
-                    orient='auto'
-                    markerUnits='userSpaceOnUse'
+                    orient="auto"
+                    markerUnits="userSpaceOnUse"
+                    key={index}
                 >
                     <path
-                        d='M0,-5L10,0L0,5'
+                        d="M0,-5L10,0L0,5"
                         fill={colorFactory()}
                     />
                 </marker>
@@ -532,19 +532,19 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
 
     private applyZoom(rect: SVGRectElement | null) {
         if (!rect) {
-            return
+            return;
         }
 
         const component = this;
 
         function zoomed() {
             const transform = d3Selection.event.transform.toString();
-            component.setState({transform})
+            component.setState({transform});
         }
 
         const zoomBehaviour = zoom()
             .scaleExtent(settings.layout.scaleExtent)
-            .on("zoom", zoomed);
-        select(rect).call(zoomBehaviour)
+            .on('zoom', zoomed);
+        select(rect).call(zoomBehaviour);
     }
 }

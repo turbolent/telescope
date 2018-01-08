@@ -10,7 +10,7 @@ function generateShadow(x: number, y: number, blur: number, color: string): stri
 
     return offsets
         .map(offset => offset + ` ${blur}px ${color}`)
-        .join(', ')
+        .join(', ');
 }
 
 const settings = {
@@ -19,7 +19,7 @@ const settings = {
         baseHeight: 100,
         adjustValue(value: number, nodeCount: number, edgeCount: number): number {
             const totalCount = nodeCount + edgeCount;
-            return Math.round(value * (2 + 0.2 * Math.pow(totalCount, 1.2)))
+            return Math.round(value * (2 + 0.2 * Math.pow(totalCount, 1.2)));
         }
     },
     layout: {
@@ -29,7 +29,7 @@ const settings = {
         relayoutAlpha: 0.8,
         alphaDecay: 0.012,
         dragAlphaTarget: 0.1,
-        scaleExtent: <[number, number]>[0.2, 3]
+        scaleExtent: <[number, number]> [0.2, 3]
     },
     node: {
         radius: 14,

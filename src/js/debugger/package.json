@@ -27,8 +27,8 @@
     "test": "CI=true ./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
     "watch-test": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js test --env=jsdom",
     "eject": "./node_modules/react-scripts-ts/bin/react-scripts-ts.js eject",
-    "lint": "./node_modules/tslint/bin/tslint src/*.ts src/*.tsx",
-    "fix": "./node_modules/tslint/bin/tslint --fix src/*.ts src/*.tsx",
+    "lint": "./node_modules/tslint/bin/tslint -p .",
+    "fix": "./node_modules/tslint/bin/tslint -p . --fix",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

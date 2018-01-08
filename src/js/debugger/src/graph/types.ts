@@ -8,8 +8,8 @@ import {
 } from '../types';
 import { Wikidata } from '../wikidata';
 
-type GetterFunction<T, U> = (value: T, ...args: any[]) => U
-type GetterEntry<T, U> = [Function, GetterFunction<T, U>]
+type GetterFunction<T, U> = (value: T, ...args: any[]) => U;
+type GetterEntry<T, U> = [Function, GetterFunction<T, U>];
 
 function makeGetter<T, U>(entries: GetterEntry<T, U>[]): GetterFunction<T, U | undefined> {
     const map = new Map(entries);
@@ -28,6 +28,9 @@ interface GraphComponentValue {}
 // Nodes
 
 export abstract class GraphComponentNode implements GraphComponentValue {
+
+    private static nextID = 0;
+
     x: number = 0;
     y: number = 0;
 
@@ -35,8 +38,6 @@ export abstract class GraphComponentNode implements GraphComponentValue {
     readonly text: string;
     readonly link?: string;
     readonly isRoot?: boolean;
-
-    private static nextID = 0;
 
     protected constructor(text: string, link?: string, isRoot?: boolean) {
         this.id = GraphComponentNode.nextID++;
@@ -57,7 +58,7 @@ export class GraphComponentLabelNode extends GraphComponentNode {
                 [GraphNumberLabel, (label: GraphNumberLabel) => label.value + ''],
                 [GraphTemporalLabel, (label: GraphTemporalLabel) => {
                     // TODO:
-                    return label.temporal + "";
+                    return label.temporal + '';
                 }]
             ]
         );
@@ -68,7 +69,7 @@ export class GraphComponentLabelNode extends GraphComponentNode {
                                                    Wikidata.getItemURL(label.item.id)]
                                            ]);
 
-    static fromGraphNodeLabel(nodeLabel: GraphNodeLabel, isRoot = false): GraphComponentLabelNode | undefined {
+    static fromGraphNodeLabel(nodeLabel: GraphNodeLabel, isRoot: boolean = false): GraphComponentLabelNode | undefined {
         const text = GraphComponentLabelNode.textGetter(nodeLabel);
         if (text === undefined) {
             return;
@@ -83,17 +84,17 @@ export class GraphComponentLabelNode extends GraphComponentNode {
     }
 }
 
-export class GraphComponentVarLabelNode extends GraphComponentNode {}
+export class GraphComponentVarLabelNode extends GraphComponentLabelNode {}
 
 export class GraphComponentConjunctionNode extends GraphComponentNode {
     constructor() {
-        super('&')
+        super('&');
     }
 }
 
 export class GraphComponentDisjunctionNode extends GraphComponentNode {
     constructor() {
-        super('|')
+        super('|');
     }
 }
 
@@ -163,9 +164,9 @@ export class GraphComponentGreaterThanFilterEdge extends GraphComponentFilterEdg
 type GraphComponentNodesAndEdges = [
     GraphComponentNode[],
     GraphComponentEdge[]
-]
+];
 
-export function parseGraphNode(graphNode: GraphNode, isRoot = false): GraphComponentNodesAndEdges {
+export function parseGraphNode(graphNode: GraphNode, isRoot: boolean = false): GraphComponentNodesAndEdges {
     const {label, edge, filter} = graphNode;
 
     const source = GraphComponentLabelNode.fromGraphNodeLabel(label, isRoot);
@@ -188,7 +189,7 @@ export function parseGraphNode(graphNode: GraphNode, isRoot = false): GraphCompo
     const allEdges = edgeEdges
         .concat(filterEdges);
 
-    return [allNodes, allEdges]
+    return [allNodes, allEdges];
 }
 
 const parseGraphFilter =
@@ -197,12 +198,12 @@ const parseGraphFilter =
             [GraphLessThanFilter, (filter: GraphLessThanFilter, source: GraphComponentNode) => {
                 const [nodes, edges] = parseGraphNode(filter.node);
                 const edge = new GraphComponentLessThanFilterEdge(source, nodes[0]);
-                return [nodes, [edge].concat(edges)]
+                return [nodes, [edge].concat(edges)];
             }],
             [GraphGreaterThanFilter, (filter: GraphGreaterThanFilter, source: GraphComponentNode) => {
                 const [nodes, edges] = parseGraphNode(filter.node);
                 const edge = new GraphComponentGreaterThanFilterEdge(source, nodes[0]);
-                return [nodes, [edge].concat(edges)]
+                return [nodes, [edge].concat(edges)];
             }]
         ]
     );
@@ -217,7 +218,7 @@ const parseGraphEdge =
                 return [
                     [componentNode].concat(componentNodes),
                     [componentEdge].concat(componentEdges)
-                ]
+                ];
             }],
             [GraphDisjunctionEdge, (value: GraphDisjunctionEdge, source: GraphComponentNode) => {
                 const componentNode = new GraphComponentDisjunctionNode();
@@ -226,7 +227,7 @@ const parseGraphEdge =
                 return [
                     [componentNode].concat(componentNodes),
                     [componentEdge].concat(componentEdges)
-                ]
+                ];
             }],
             [GraphOutEdge, (value: GraphOutEdge, source: GraphComponentNode) => {
                 const [nodes, edges] = parseGraphNode(value.target);
@@ -234,7 +235,7 @@ const parseGraphEdge =
                 if (!edge) {
                     return [[], []];
                 }
-                return [nodes, [edge].concat(edges)]
+                return [nodes, [edge].concat(edges)];
             }],
             [GraphInEdge, (value: GraphInEdge, source: GraphComponentNode) => {
                 const [nodes, edges] = parseGraphNode(value.source);
@@ -242,19 +243,19 @@ const parseGraphEdge =
                 if (!edge) {
                     return [[], []];
                 }
-                return [nodes, [edge].concat(edges)]
+                return [nodes, [edge].concat(edges)];
             }]
         ]);
 
 function parseEdges(edges: GraphEdge[], source: GraphComponentNode): GraphComponentNodesAndEdges {
     return edges.reduce<GraphComponentNodesAndEdges>(
         ([currentNodes, currentEdges], edge: GraphEdge) => {
-            const [nodes, edges] = parseGraphEdge(edge, source) || [[], []];
+            const [newNodes, newEdges] = parseGraphEdge(edge, source) || [[], []];
             return [
-                currentNodes.concat(nodes),
-                currentEdges.concat(edges)
-            ]
+                currentNodes.concat(newNodes),
+                currentEdges.concat(newEdges)
+            ];
         },
         [[], []]
-    )
+    );
 }

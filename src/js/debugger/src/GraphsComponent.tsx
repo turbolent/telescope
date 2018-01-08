@@ -6,13 +6,13 @@ import { GraphNode } from './types';
 import { parseGraphNode } from './graph/types';
 
 interface StateProps {
-    readonly nodes?: GraphNode[];
+    readonly graphNodes?: GraphNode[];
 }
 
-const GraphsComponent = ({nodes}: StateProps) => {
+const GraphsComponent = ({graphNodes}: StateProps) => {
     return (
         <div>
-            {(nodes || [])
+            {(graphNodes || [])
                 .map((node: GraphNode, index: number) => {
                     const [ nodes, edges ] = parseGraphNode(node, true);
                     return (

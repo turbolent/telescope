@@ -11,7 +11,8 @@ export class Parse {
             json.tokens.map(Token.decode),
             json.question && TreeNode.decode(json.question),
             json.queries,
-            json.nodes && json.nodes.map((json: any) => GraphNode.decode(json)),
+            json.nodes && json.nodes.map((nodeJSON: any) =>
+                                             GraphNode.decode(nodeJSON)),
             json.error
         );
     }
@@ -125,16 +126,17 @@ export class TreeNode {
 }
 
 export class Item {
+
     readonly id: number;
     readonly name: string;
+
+    static decode(json: any): Item {
+        return new Item(json.id, json.name);
+    }
 
     constructor(id: number, name: string) {
         this.id = id;
         this.name = name;
-    }
-
-    static decode(json: any): Item {
-        return new Item(json.id, json.name);
     }
 }
 
@@ -142,13 +144,13 @@ export class Property {
     readonly id: number;
     readonly name: string;
 
+    static decode(json: any): Item {
+        return new Property(json.id, json.name);
+    }
+
     constructor(id: number, name: string) {
         this.id = id;
         this.name = name;
-    }
-
-    static decode(json: any): Item {
-        return new Property(json.id, json.name);
     }
 }
 
@@ -168,19 +170,19 @@ export class GraphNode extends GraphValue {
     readonly aggregates: GraphAggregateFunction[];
     readonly order?: GraphOrder;
 
-    constructor(_type: string, label: GraphNodeLabel, edge?: GraphEdge, filter?: GraphFilter) {
-        super(_type);
-        this.label = label;
-        this.edge = edge;
-        this.filter = filter;
-    }
-
     static decode(json: any): GraphNode {
         const _type = decodeType(json.$type);
         const label = GraphNodeLabel.decode(json.label);
         const edge = json.edge && GraphEdge.decode(json.edge);
         const filter = json.filter && GraphFilter.decode(json.filter);
         return new GraphNode(_type, label, edge, filter);
+    }
+
+    constructor(_type: string, label: GraphNodeLabel, edge?: GraphEdge, filter?: GraphFilter) {
+        super(_type);
+        this.label = label;
+        this.edge = edge;
+        this.filter = filter;
     }
 }
 
