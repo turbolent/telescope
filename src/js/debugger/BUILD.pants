@@ -2,7 +2,7 @@
 
 node_module(
   name='debugger-module',
-  sources=globs('package.json', 'yarn.lock', 'tsconfig.json', 'tsconfig.test.json', 'tslint.json', 'src/*', 'public/*'),
+  sources=rglobs('package.json', 'yarn.lock', 'tsconfig.json', 'tsconfig.test.json', 'tslint.json', 'src/*', 'public/*'),
   package_manager='yarn',
   build_script='build',
   output_dir='build',

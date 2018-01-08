@@ -19,6 +19,10 @@ interface ErrorAction {
 
 export type Action<T> = BaseAction<T> | ErrorAction;
 
+enum BaseActionStatus {
+    Error = 'ERROR'
+}
+
 class ActionCreator<T> {
     readonly type: string;
 
@@ -57,10 +61,6 @@ class ActionCreator<T> {
     getError(action: Action<{}>): Error {
         return action.payload as Error;
     }
-}
-
-enum BaseActionStatus {
-    Error = 'ERROR'
 }
 
 enum RequestActionStatus {
