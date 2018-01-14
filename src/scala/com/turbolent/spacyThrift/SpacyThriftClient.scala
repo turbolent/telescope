@@ -7,12 +7,11 @@ import com.twitter.util.Future
 
 class SpacyThriftClient(hostname: String, port: Int) {
 
-  private val client = {
-    val serviceFactory =
-      Thrift.client.configured(Framed(false))
-        .newClient(s"$hostname:$port")
-    new SpacyThriftService.FinagledClient(serviceFactory.toService)
-  }
+  private val client = Thrift.client
+    .configured(Framed(false))
+    .withSessionQualifier.noFailFast
+    .withSessionQualifier.noFailureAccrual
+    .build[SpacyThriftService.MethodPerEndpoint](s"$hostname:$port")
 
   def tag(sentence: String): Future[Seq[Token]] =
     client.tag(sentence)
