@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  name: debugger
+spec:
+  rules:
+  - host: debugger.telescope.turbolent.com
+    http:
+      paths:
+      - backend:
+          serviceName: telescope-debugger
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - debugger.telescope.turbolent.com
+    secretName: debugger-tls
