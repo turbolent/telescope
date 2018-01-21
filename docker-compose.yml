@@ -1,5 +1,5 @@
 
-version: '3.2'
+version: '3'
 
 services:
   ## To allow continuous delivery via https://github.com/turbolent/deployd
@@ -18,7 +18,7 @@ services:
   #    - "7070:7070"
 
   api:
-    image: turbolent/telescope:latest
+    image: turbolent/telescope-api:latest
     environment:
       ARGS: "-spacy-thrift-hostname=spacy-thrift -duckling-hostname=duckling"
     ports:
@@ -34,3 +34,7 @@ services:
     ports:
       - "8000:8000"
 
+  debugger:
+    image: turbolent/telescope-debugger:latest
+    ports:
+      - "7070:80"

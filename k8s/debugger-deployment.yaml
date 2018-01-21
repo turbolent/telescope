@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telescope-debugger
+  labels:
+    app: telescope-debugger
+spec:
+  selector:
+    matchLabels:
+      app: telescope-debugger
+  template:
+    metadata:
+      labels:
+        app: telescope-debugger
+    spec:
+      containers:
+      - name: telescope-debugger
+        image: turbolent/telescope-debugger:latest
+        ports:
+        - containerPort: 80

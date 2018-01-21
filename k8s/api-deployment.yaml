@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telescope-api
+  labels:
+    app: telescope-api
+spec:
+  selector:
+    matchLabels:
+      app: telescope-api
+  template:
+    metadata:
+      labels:
+        app: telescope-api
+    spec:
+      containers:
+      - name: telescope-api
+        image: turbolent/telescope:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ARGS
+          value: -spacy-thrift-hostname=spacy-thrift -duckling-hostname=duckling
