@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spacy-thrift 
+  labels:
+    app: spacy-thrift
+spec:
+  selector:
+    matchLabels:
+      app: spacy-thrift
+  template:
+    metadata:
+      labels:
+        app: spacy-thrift
+    spec:
+      containers:
+      - name: spacy-thrift
+        image: turbolent/spacy-thrift:latest
+        ports:
+        - containerPort: 9090

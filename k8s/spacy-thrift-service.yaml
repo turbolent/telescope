@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spacy-thrift
+  labels:
+    app: spacy-thrift
+spec:
+  selector:
+    app: spacy-thrift
+  ports:
+  - port: 9090
+    targetPort: 9090
