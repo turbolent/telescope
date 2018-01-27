@@ -9,5 +9,9 @@ if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
 
   echo "Triggering deployment of API ..."
   wget --content-on-error --header "Authorization: $DEPLOYD_TOKEN" -qO- \
-    http://$DEPLOYD_HOST/update\?service\=$DEPLOYD_SERVICE\&image\=$(make api-image-reference)
+    https://$DEPLOYD_HOST/update\?name\=telescope-api\&image\=$(make api-image-reference)
+    
+  echo "Triggering deployment of Debugger ..."
+  wget --content-on-error --header "Authorization: $DEPLOYD_TOKEN" -qO- \
+    https://$DEPLOYD_HOST/update\?name\=telescope-debugger\&image\=$(make debugger-image-reference)
 fi
