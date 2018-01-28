@@ -5,9 +5,10 @@ import ErrorComponent from './ErrorComponent';
 import TreeComponent from './TreeComponent';
 import QueriesComponent from './QueriesComponent';
 import GraphsComponent from './GraphsComponent';
+import './BodyComponent.css';
 
 export default () => (
-    <div>
+    <div className="Body">
         <SectionComponent title="Error" path={['error']}>
             <ErrorComponent />
         </SectionComponent>

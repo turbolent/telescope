@@ -1,8 +1,10 @@
 import * as React from 'react';
-import './SectionComponent.css';
 import { ReactNode } from 'react';
 import { connect } from 'react-redux';
 import { State } from './state';
+import Typography from 'material-ui/Typography';
+import Card, { CardContent } from 'material-ui/Card';
+import './SectionComponent.css';
 
 interface StateProps {
     readonly show: boolean;
@@ -22,10 +24,14 @@ const SectionComponent = ({title, show, children}: Props) => {
     }
 
     return (
-        <div className="Section">
-            <h2>{title}</h2>
-            {children}
-        </div>
+        <Card className="Section">
+            <CardContent>
+                <Typography type="headline" component="h2">
+                    {title}
+                </Typography>
+                {children}
+            </CardContent>
+        </Card>
     );
 };
 

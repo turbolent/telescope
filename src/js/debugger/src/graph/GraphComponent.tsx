@@ -13,6 +13,7 @@ import { select } from 'd3-selection';
 import * as d3Selection from 'd3-selection';
 import { drag } from 'd3-drag';
 import { zoom } from 'd3-zoom';
+import Button from 'material-ui/Button';
 
 interface Props {
     nodes: GraphComponentNode[];
@@ -265,7 +266,13 @@ export default class GraphComponent extends React.Component<Props, ComponentStat
         return (
             <div className="Graph">
                 <div className="GraphBorder">
-                    <button onClick={this.relayout}>🔃</button>
+                    <Button
+                        color="primary"
+                        dense={true}
+                        onClick={this.relayout}
+                    >
+                        Improve
+                    </Button>
                     <svg
                         width={width}
                         height={height}

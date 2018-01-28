@@ -1,0 +1,12 @@
+.Body {
+    display: grid;
+    grid-gap: 1.4em;
+    padding: 1.4em;
+    grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 1200px) {
+    .Body {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

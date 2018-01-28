@@ -1,0 +1,25 @@
+.FormInput {
+    margin-right: 0.2em;
+    min-width: 20em;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.6em 1em;
+    border-radius: 2px;
+    font: inherit;
+    border: 0;
+    color: inherit;
+    font-weight: 500;
+}
+
+.FormInput:focus {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.FormInput::placeholder {
+    color: white;
+}
+
+@media (min-width: 1200px) {
+    .FormInput {
+        min-width: 34em;
+    }
+}
