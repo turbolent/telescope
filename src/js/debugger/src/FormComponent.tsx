@@ -2,6 +2,9 @@ import { connect, Dispatch } from 'react-redux';
 import { parseQuestion, setQuestion } from './actions';
 import * as React from 'react';
 import { State } from './state';
+import './FormComponent.css';
+import IconButton from 'material-ui/IconButton';
+import BugReportIcon from 'material-ui-icons/BugReport';
 
 interface DispatchProps {
     readonly request: (question: string) => void;
@@ -17,7 +20,7 @@ type Props = StateProps & DispatchProps;
 
 class FormComponent extends React.Component<Props, {}> {
 
-    readonly handleChange = (event: React.FormEvent<HTMLInputElement>) => {
+    readonly handleChange = (event: React.FormEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         const target = event.target as HTMLInputElement;
         this.props.update(target.value);
     }
@@ -32,19 +35,17 @@ class FormComponent extends React.Component<Props, {}> {
         return (
             <form onSubmit={this.handleSubmit}>
                 <input
+                    className="FormInput"
                     type="text"
                     value={value}
+                    placeholder="Query"
                     onChange={this.handleChange}
                 />
-                <input
+                <IconButton
                     type="submit"
-                    value="Ask"
-                />
-                {
-                    this.props.requesting
-                        ? <span>Loading ...</span>
-                        : undefined
-                }
+                >
+                    <BugReportIcon nativeColor="white"/>
+                </IconButton>
             </form>
         );
     }

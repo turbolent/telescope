@@ -6,6 +6,9 @@ import 'codemirror/mode/sparql/sparql.js';
 import './QueryComponent.css';
 import * as React from 'react';
 import { EditorConfiguration } from 'codemirror';
+import OpenIcon from 'material-ui-icons/OpenInNew';
+import IconButton from 'material-ui/IconButton';
+import Tooltip from 'material-ui/Tooltip';
 
 interface Props {
     readonly query: string;
@@ -31,7 +34,14 @@ export default class QueryComponent extends React.Component<Props, {}> {
                     onBeforeChange={this.onBeforeChange}
                 />
                 <div className="QueryActions">
-                    <a href={link} target="_blank">Open in Query Editor</a>
+                    <Tooltip title="Open in Query Editor">
+                        <IconButton
+                            color="primary"
+                            component={props => <a href={link} target="_blank" {...props} />}
+                        >
+                            <OpenIcon />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             </div>
         );

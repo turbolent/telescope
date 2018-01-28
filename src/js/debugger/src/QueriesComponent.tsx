@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import { State } from './state';
 import * as React from 'react';
 import QueryComponent from './QueryComponent';
+import './QueriesComponent.css';
 
 interface StateProps {
     readonly queries?: string[];
@@ -9,7 +10,7 @@ interface StateProps {
 
 const QueriesComponent = ({queries}: StateProps) => {
     return (
-        <div>
+        <div className="Queries">
             {(queries || [])
                 .map((query: string, index: number) =>
                     <QueryComponent query={query} key={index} />)}
