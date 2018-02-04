@@ -1,10 +1,9 @@
-import * as React from 'react';
+import * as React from 'react'
 import { CollectionView, CollectionViewDelegate, GridLayout } from 'collection-view'
-import './ResultsComponent.css';
-
+import './ResultsComponent.css'
 
 interface ContentComponentState {
-    view?: CollectionView;
+    view?: CollectionView
     count: number
 }
 
@@ -17,37 +16,8 @@ export default class ContentComponent
     implements CollectionViewDelegate {
 
     constructor(props: ContentComponentProps) {
-        super(props);
+        super(props)
         this.state = props
-    }
-
-    private onRef = (element: HTMLDivElement | null) => {
-        if (!element) {
-            this.uninstallView();
-            return;
-        }
-
-        this.installView(element)
-    };
-
-    private installView(element: HTMLDivElement) {
-        const layout = new GridLayout();
-        const view = new CollectionView(element, layout, this);
-        this.setState({view})
-    }
-
-    private uninstallView() {
-        if (!this.state.view)
-            return;
-        this.state.view.uninstall()
-    }
-
-    private update(count: number) {
-        this.setState({count}, () => {
-            if (!this.state.view)
-                return;
-            this.state.view.changeIndices([], [count - 1], new Map())
-        })
     }
 
     getCount() {
@@ -55,8 +25,8 @@ export default class ContentComponent
     }
 
     configureElement(element: HTMLElement, index: number) {
-        element.classList.add('ResultsItem');
-        element.innerText = String(index);
+        element.classList.add('ResultsItem')
+        element.innerText = String(index)
     }
 
     shouldComponentUpdate() {
@@ -64,9 +34,10 @@ export default class ContentComponent
     }
 
     componentWillReceiveProps(nextProps: ContentComponentProps) {
-        if (nextProps.count === this.props.count)
-            return;
-        this.update(nextProps.count);
+        if (nextProps.count === this.props.count) {
+            return
+        }
+        this.update(nextProps.count)
     }
 
     componentWillUnmount() {
@@ -74,9 +45,46 @@ export default class ContentComponent
     }
 
     render() {
-        return <div className="Results">
-            <div ref={this.onRef}>
+        return (
+            <div className="Results">
+                <div ref={this.onRef} />
             </div>
-        </div>
+        )
+    }
+
+    private onRef = (element: HTMLDivElement | null) => {
+        if (!element) {
+            this.uninstallView()
+            return
+        }
+
+        this.installView(element)
+    }
+
+    private installView(element: HTMLDivElement) {
+        const inset = 16
+        const layout = new GridLayout({
+                                          insets: [[inset, inset], [inset, inset]],
+                                          itemSize: [230, 210],
+                                          spacing: [30, 30]
+                                      })
+        const view = new CollectionView(element, layout, this)
+        this.setState({view})
+    }
+
+    private uninstallView() {
+        if (!this.state.view) {
+            return
+        }
+        this.state.view.uninstall()
+    }
+
+    private update(count: number) {
+        this.setState({count}, () => {
+            if (!this.state.view) {
+                return
+            }
+            this.state.view.changeIndices([], [count - 1], new Map())
+        })
     }
 }
