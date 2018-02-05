@@ -1,12 +1,13 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import App from './App'
+import App from './components/App/App'
 import registerServiceWorker from './registerServiceWorker'
 import './index.css'
 import { Provider } from 'react-redux'
 import createStore from './store'
-import { parseQuestion, setQuestion } from './actions'
+import { requestParse, setQuestion } from './actions'
 import { getSavedQuestion } from './history'
+import 'typeface-fira-sans'
 
 const store = createStore()
 const root = document.getElementById('root') as HTMLElement
@@ -27,7 +28,7 @@ function loadState(state: any) {
         return
     }
     store.dispatch(setQuestion(question))
-    store.dispatch(parseQuestion(question, false))
+    store.dispatch(requestParse(question, false))
 }
 
 window.addEventListener('load', () => {

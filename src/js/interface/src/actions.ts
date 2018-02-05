@@ -1,8 +1,8 @@
 import { Dispatch } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { State } from './state'
-import { Cancel, parse } from './api'
-import { Parse } from './types'
+import { Cancel, parse, search } from './api'
+import { Parse, Result } from './types'
 
 type Thunk = ThunkAction<void, State, void>
 
@@ -106,18 +106,39 @@ interface ParseStartedPayload {
     readonly save: boolean
 }
 
-export const parseActionCreator = new RequestActionCreator<ParseStartedPayload, Parse, void>('PARSE')
+interface ResultsStartedPayload {
+    readonly cancel: Cancel
+}
 
-export const parseQuestion = (question: string, save: boolean): Thunk =>
+export const parseActionCreator = new RequestActionCreator<ParseStartedPayload, Parse, void>('PARSE')
+export const resultsActionCreator = new RequestActionCreator<ResultsStartedPayload, Result[], void>('RESULTS')
+
+export const requestParse = (question: string, save: boolean): Thunk =>
     (dispatch: Dispatch<State>) => {
         const [promise, cancel] = parse(question)
         dispatch(parseActionCreator.started({cancel, question, save}))
         promise
             .then(response => {
                 dispatch(parseActionCreator.succeeded(response))
+                if (response.queries && response.queries.length) {
+                    dispatch(requestResults(response.queries[0]))
+                }
             })
             .catch(reason => {
                 dispatch(parseActionCreator.failed(new Error(reason)))
+            })
+    }
+
+export const requestResults = (query: string): Thunk =>
+    (dispatch: Dispatch<State>) => {
+        const [promise, cancel] = search(query)
+        dispatch(resultsActionCreator.started({cancel}))
+        promise
+            .then(response => {
+                dispatch(resultsActionCreator.succeeded(response))
+            })
+            .catch(reason => {
+                dispatch(resultsActionCreator.failed(new Error(reason)))
             })
     }
 

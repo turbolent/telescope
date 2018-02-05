@@ -1,43 +1,51 @@
 import * as React from 'react'
 import { CollectionView, CollectionViewDelegate, GridLayout } from 'collection-view'
-import './ResultsComponent.css'
+import './Results.css'
+import { Result } from '../../types'
+import { diff } from '../../diff'
 
-interface ContentComponentState {
+interface ComponentState {
     view?: CollectionView
-    count: number
+    results: Result[]
 }
 
-interface ContentComponentProps {
-    count: number
+export interface Props {
+    query: string
+    results: Result[]
 }
 
-export default class ContentComponent
-    extends React.Component<ContentComponentProps, ContentComponentState>
+export default class Results
+    extends React.Component<Props, ComponentState>
     implements CollectionViewDelegate {
 
-    constructor(props: ContentComponentProps) {
+    constructor(props: Props) {
         super(props)
         this.state = props
     }
 
     getCount() {
-        return this.state.count
+        return this.state.results.length
     }
 
     configureElement(element: HTMLElement, index: number) {
         element.classList.add('ResultsItem')
-        element.innerText = String(index)
+
+        const result = this.state.results[index]
+        element.innerHTML = result.label
     }
 
     shouldComponentUpdate() {
         return false
     }
 
-    componentWillReceiveProps(nextProps: ContentComponentProps) {
-        if (nextProps.count === this.props.count) {
+    componentWillReceiveProps(nextProps: Props) {
+        if (nextProps.query === this.props.query
+            && nextProps.results.length === this.props.results.length) {
+
             return
         }
-        this.update(nextProps.count)
+
+        this.update(nextProps.results)
     }
 
     componentWillUnmount() {
@@ -79,12 +87,19 @@ export default class ContentComponent
         this.state.view.uninstall()
     }
 
-    private update(count: number) {
-        this.setState({count}, () => {
-            if (!this.state.view) {
-                return
-            }
-            this.state.view.changeIndices([], [count - 1], new Map())
+    private update(results: Result[]) {
+
+        this.setState(({results: oldResults}) => {
+            this.setState({results}, () => {
+                if (!this.state.view) {
+                    return
+                }
+
+                const [removed, added, moved] =
+                    diff(oldResults, results, result => result.uri)
+
+                this.state.view.changeIndices(removed, added, moved)
+            })
         })
     }
 }

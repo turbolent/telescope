@@ -1,5 +1,5 @@
 import { Cancel } from './api'
-import { Parse } from './types'
+import { Parse, Result } from './types'
 import { Map } from 'immutable'
 
 export class State {
@@ -31,7 +31,15 @@ export class State {
     }
 
     withParse(parse: Parse | undefined): State {
-        return new State( this.map.set('parse', parse))
+        return new State(this.map.set('parse', parse))
+    }
+
+    get results(): Result[] | undefined {
+        return this.map.get('results')
+    }
+
+    withResults(results: Result[] | undefined): State {
+        return new State(this.map.set('results', results))
     }
 
     get cancel(): Cancel | undefined {
