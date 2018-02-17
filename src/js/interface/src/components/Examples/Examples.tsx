@@ -1,6 +1,7 @@
 import * as React from 'react'
 import './Examples.css'
 import Example from '../Example/Example'
+import * as classNames from 'classnames'
 
 export interface Props {
     readonly hidden: boolean
@@ -26,7 +27,7 @@ export default class Examples extends React.Component<Props, {}> {
     render() {
         const {hidden} = this.props
         return (
-            <div className={'Examples' + (hidden ? ' Examples-hidden' : '')}>
+            <div className={classNames('Examples', {'Examples-hidden': hidden})}>
                 <h3 className="ExamplesHeader">
                     Examples
                 </h3>

@@ -3,9 +3,10 @@ import { connect, Dispatch } from 'react-redux'
 import { requestParse, saveQuestion, setQuestion } from '../../actions'
 import Form, { InputProps, OutputProps } from '../../components/Form/Form'
 
-const mapStateToProps = ({requesting, question}: State): InputProps => ({
+const mapStateToProps = ({requesting, question, results}: State): InputProps => ({
     value: question,
     requesting,
+    empty: !question || !question.length || !results || !results.length
 })
 
 const mapDispatchToProps = (dispatch: Dispatch<State>): OutputProps => ({

@@ -1,9 +1,11 @@
 import * as React from 'react'
 import './Form.css'
+import Progress from '../Progress/Progress'
 
 export interface InputProps {
     readonly value: string
     readonly requesting: boolean
+    readonly empty: boolean
 }
 
 export interface OutputProps {
@@ -29,12 +31,19 @@ export default class Form extends React.Component<Props, {}> {
     }
 
     render() {
-        const {value} = this.props
+        const {value, requesting, empty} = this.props
+        const hidden = empty && !requesting
+        // tslint:disable-next-line
+        console.log(hidden)
         return (
             <form
                 className="Form"
                 onSubmit={this.handleSubmit}
             >
+                <Progress
+                    active={requesting}
+                    hidden={hidden}
+                />
                 <input
                     className="FormInput"
                     type="text"

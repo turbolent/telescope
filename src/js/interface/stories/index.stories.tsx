@@ -3,6 +3,8 @@ import * as React from 'react'
 import { storiesOf } from '@storybook/react'
 import Result from '../src/components/Result/Result'
 import 'typeface-fira-sans'
+import Progress from '../src/components/Progress/Progress'
+import { withKnobs, boolean } from '@storybook/addon-knobs'
 
 const resultWrapperStyle = {width: 300, height: 330}
 
@@ -29,3 +31,12 @@ storiesOf('Result', module)
         </div>
          )
     )
+
+storiesOf('Progress', module)
+    .addDecorator(withKnobs)
+    .add('Progress', () => (
+        <Progress
+            active={boolean('Active', false)}
+            hidden={boolean('Hidden', false)}
+        />
+    ))
