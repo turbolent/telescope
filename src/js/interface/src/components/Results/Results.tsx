@@ -3,11 +3,8 @@ import { CollectionView, CollectionViewDelegate, GridLayout } from 'collection-v
 import './Results.css'
 import { Result } from '../../types'
 import { diff } from '../../diff'
-
-interface ComponentState {
-    view?: CollectionView
-    results: Result[]
-}
+import ResultComponent from '../Result/Result'
+import * as ReactDOM from 'react-dom'
 
 export interface Props {
     query: string
@@ -15,23 +12,36 @@ export interface Props {
 }
 
 export default class Results
-    extends React.Component<Props, ComponentState>
+    extends React.Component<Props, {}>
     implements CollectionViewDelegate {
+
+    private view?: CollectionView
+    private results: Result[]
+    private wrapper: HTMLDivElement | null
 
     constructor(props: Props) {
         super(props)
-        this.state = props
+
+        this.results = props.results
     }
 
     getCount() {
-        return this.state.results.length
+        return this.results.length
     }
 
     configureElement(element: HTMLElement, index: number) {
         element.classList.add('ResultsItem')
 
-        const result = this.state.results[index]
-        element.innerHTML = result.label
+        const result = this.results[index]
+        let component = (
+            <ResultComponent
+                imageURL=""
+                label={result.label}
+                description=""
+                extractHTML=""
+            />
+        )
+        ReactDOM.render(component, element)
     }
 
     shouldComponentUpdate() {
@@ -54,13 +64,18 @@ export default class Results
 
     render() {
         return (
-            <div className="Results">
-                <div ref={this.onRef} />
+            <div className="Results" ref={this.onWrapperRef}>
+                <div ref={this.onScrollRef} />
             </div>
         )
     }
 
-    private onRef = (element: HTMLDivElement | null) => {
+    private onWrapperRef = (element: HTMLDivElement | null) => {
+        this.wrapper = element
+        this.updateWrapperClasses()
+    }
+
+    private onScrollRef = (element: HTMLDivElement | null) => {
         if (!element) {
             this.uninstallView()
             return
@@ -73,33 +88,45 @@ export default class Results
         const inset = 16
         const layout = new GridLayout({
                                           insets: [[inset, inset], [inset, inset]],
-                                          itemSize: [230, 210],
-                                          spacing: [30, 30]
+                                          itemSize: [300, 330],
+                                          spacing: [20, 20]
                                       })
-        const view = new CollectionView(element, layout, this)
-        this.setState({view})
+        this.view = new CollectionView(element, layout, this)
     }
 
     private uninstallView() {
-        if (!this.state.view) {
+        if (!this.view) {
             return
         }
-        this.state.view.uninstall()
+        this.view.uninstall(element =>
+                                ReactDOM.unmountComponentAtNode(element))
     }
 
     private update(results: Result[]) {
+        const oldResults = this.results
+        this.results = results
 
-        this.setState(({results: oldResults}) => {
-            this.setState({results}, () => {
-                if (!this.state.view) {
-                    return
-                }
+        this.updateWrapperClasses()
 
-                const [removed, added, moved] =
-                    diff(oldResults, results, result => result.uri)
+        if (!this.view) {
+            return
+        }
 
-                this.state.view.changeIndices(removed, added, moved)
-            })
-        })
+        const [removed, added, moved] =
+            diff(oldResults, results, result => result.uri)
+
+        this.view.changeIndices(removed, added, moved)
+    }
+
+    private updateWrapperClasses() {
+        if (!this.wrapper) {
+            return
+        }
+
+        if (this.results.length) {
+            this.wrapper.classList.remove('Results-empty')
+        } else {
+            this.wrapper.classList.add('Results-empty')
+        }
     }
 }

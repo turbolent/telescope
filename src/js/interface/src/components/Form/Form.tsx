@@ -7,6 +7,7 @@ export interface InputProps {
 }
 
 export interface OutputProps {
+    readonly save: (question: string) => void
     readonly request: (question: string) => void
     readonly update: (question: string) => void
 }
@@ -22,7 +23,9 @@ export default class Form extends React.Component<Props, {}> {
 
     readonly handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        this.props.request(this.props.value)
+        const question = this.props.value
+        this.props.save(question)
+        this.props.request(question)
     }
 
     render() {

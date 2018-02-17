@@ -102,8 +102,6 @@ class RequestActionCreator<T = void, U = void, V = void> extends ActionCreator<V
 
 interface ParseStartedPayload {
     readonly cancel: Cancel
-    readonly question: string
-    readonly save: boolean
 }
 
 interface ResultsStartedPayload {
@@ -113,10 +111,14 @@ interface ResultsStartedPayload {
 export const parseActionCreator = new RequestActionCreator<ParseStartedPayload, Parse, void>('PARSE')
 export const resultsActionCreator = new RequestActionCreator<ResultsStartedPayload, Result[], void>('RESULTS')
 
-export const requestParse = (question: string, save: boolean): Thunk =>
+export const requestParse = (question: string): Thunk =>
     (dispatch: Dispatch<State>) => {
+        if (!question) {
+            return
+        }
+
         const [promise, cancel] = parse(question)
-        dispatch(parseActionCreator.started({cancel, question, save}))
+        dispatch(parseActionCreator.started({cancel}))
         promise
             .then(response => {
                 dispatch(parseActionCreator.succeeded(response))
@@ -146,3 +148,8 @@ export const setQuestionActionCreator = new ActionCreator<string>('QUESTION_SET'
 
 export const setQuestion =
     setQuestionActionCreator.create.bind(setQuestionActionCreator)
+
+export const saveQuestionActionCreator = new ActionCreator<string>('QUESTION_SAVE')
+
+export const saveQuestion =
+    saveQuestionActionCreator.create.bind(saveQuestionActionCreator)

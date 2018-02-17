@@ -1,5 +1,6 @@
 .Form {
-    display: flex
+    display: flex;
+    align-items: center;
 }
 
 .FormInput {

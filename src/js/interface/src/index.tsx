@@ -5,7 +5,7 @@ import registerServiceWorker from './registerServiceWorker'
 import './index.css'
 import { Provider } from 'react-redux'
 import createStore from './store'
-import { requestParse, setQuestion } from './actions'
+import { requestParse, saveQuestion, setQuestion } from './actions'
 import { getSavedQuestion } from './history'
 import 'typeface-fira-sans'
 
@@ -22,13 +22,10 @@ ReactDOM.render(
 registerServiceWorker()
 
 function loadState(state: any) {
-    const question =
-        state && state.question || getSavedQuestion()
-    if (!question) {
-        return
-    }
+    const question = state && state.question || getSavedQuestion()
     store.dispatch(setQuestion(question))
-    store.dispatch(requestParse(question, false))
+    store.dispatch(saveQuestion(question))
+    store.dispatch(requestParse(question))
 }
 
 window.addEventListener('load', () => {

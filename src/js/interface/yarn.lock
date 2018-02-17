@@ -1982,9 +1982,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-collection-view@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-0.2.0.tgz#7e1313be762c3270231d711bc8aa0dff81a2b32e"
+collection-view@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-0.2.1.tgz#d743c90a905b193ff8c489933cd6f3df0bf917c6"
   dependencies:
     "@types/bezier-easing" "2.0.x"
     "@types/lodash-es" "4.17.x"

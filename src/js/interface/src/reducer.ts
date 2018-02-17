@@ -1,5 +1,8 @@
 import { State } from './state'
-import { Action, parseActionCreator, resultsActionCreator, setQuestionActionCreator } from './actions'
+import {
+    Action, parseActionCreator, resultsActionCreator, saveQuestionActionCreator,
+    setQuestionActionCreator
+} from './actions'
 import { encodeQuestion, getSavedQuestion } from './history'
 
 export function reducer(state: State, action: Action<{}>): State {
@@ -10,11 +13,8 @@ export function reducer(state: State, action: Action<{}>): State {
             if (currentCancel) {
                 currentCancel()
             }
-            const {cancel: newCancel, question, save} =
+            const {cancel: newCancel} =
                 parseActionCreator.getStartedPayload(action)
-            if (save) {
-                saveQuestion(question)
-            }
             return state.withCancel(newCancel)
         }
         case parseActionCreator.succeededType: {
@@ -58,6 +58,23 @@ export function reducer(state: State, action: Action<{}>): State {
         case setQuestionActionCreator.type: {
             const question = setQuestionActionCreator.getPayload(action)
             return state.withQuestion(question)
+        }
+        case saveQuestionActionCreator.type: {
+            const question = saveQuestionActionCreator.getPayload(action)
+            saveQuestion(question)
+            if (question) {
+                return state
+            } else {
+                const {cancel} = state
+                if (cancel) {
+                    cancel()
+                }
+
+                return state.withMutations(mutableState => {
+                    mutableState.withError(undefined)
+                        .withResults(undefined)
+                })
+            }
         }
         default:
             return state
