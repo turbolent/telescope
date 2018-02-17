@@ -1,0 +1,26 @@
+.Examples {
+    text-align: center;
+    overflow: scroll;
+    padding-top: 20px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 200ms;
+    transition-delay: 300ms;
+}
+
+.Examples-hidden {
+    opacity: 0;
+    transition-delay: 0s;
+    pointer-events: none;
+}
+
+.ExamplesHeader {
+    margin: 0.67em 0;
+    color: rgba(18, 24, 33, .7);
+    font-weight: 500;
+}

@@ -1,5 +1,5 @@
 node_module(
-  name='debugger-module',
+  name='interface-module',
   sources=rglobs('package.json', 'yarn.lock', 'tsconfig.json', 'tsconfig.test.json', 'tslint.json', 'src/*', 'public/*'),
   package_manager='yarn',
   build_script='build',
@@ -7,13 +7,13 @@ node_module(
 )
 
 node_bundle(
-  name='debugger',
-  node_module=':debugger-module',
+  name='interface',
+  node_module=':interface-module',
 )
 
 node_test(
-  name='debugger-tests',
+  name='interface-tests',
   dependencies=[
-    ':debugger-module',
+    ':interface-module',
   ]
 )

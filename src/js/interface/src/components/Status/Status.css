@@ -1,0 +1,24 @@
+.Status {
+    text-align: center;
+    overflow: scroll;
+    padding-top: 34px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 200ms;
+    transition-delay: 200ms;
+    pointer-events: none;
+}
+
+.Status-hidden {
+    opacity: 0;
+    transition-delay: 0s;
+}
+
+.StatusHeader {
+    color: rgba(18, 24, 33, .7);
+}

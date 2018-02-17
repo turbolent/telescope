@@ -1,0 +1,22 @@
+.Results {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: scroll;
+}
+
+.Results-empty {
+    pointer-events: none;
+}
+
+.ResultsItem {
+    background-color: white;
+    color: #3e4551;
+    font-size: 18px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    pointer-events: auto;
+}

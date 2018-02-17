@@ -1,0 +1,55 @@
+.Result {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    height: 100%;
+    color: rgba(0, 0, 0, 0.87)
+}
+
+.ResultImage {
+    object-fit: cover;
+    height: 30%;
+    object-position: 50% 30%;
+}
+
+.ResultContent {
+    padding: 16px;
+}
+
+.ResultLabel {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+}
+
+.ResultDescription {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.54)
+}
+
+.ResultExtract {
+    --line-height: 21px;
+    --line-count: 8;
+
+    position: relative;
+    font-size: 14px;
+    line-height: var(--line-height);
+    max-height: calc(var(--line-count) * var(--line-height));
+    overflow: hidden;
+}
+
+.ResultExtract:after {
+    content: ' ';
+    position: absolute;
+    bottom: 0;
+    width: 20%;
+    height: var(--line-height);
+    background-color: transparent;
+}
+
+.ResultExtract:after {
+    right: 0;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba( 255, 255, 255, 1) 50%);
+}
