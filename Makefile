@@ -1,15 +1,16 @@
 .PHONY: compile \
-	run-api run-debugger \
-	dist dist-api dist-debugger \
-	images api-images api-images \
-	push-images push-api-images push-debugger-images \
-	api-image-reference debugger-image-reference \
+	run-api run-debugger run-interface \
+	dist dist-api dist-debugger dist-interface \
+	images api-images debugger-images interface \
+	push-images push-api-images push-debugger-images push-interface-images \
+	api-image-reference debugger-image-reference interface-image-reference \
 	test integration-test \
 	test-changes integration-test-changes \
 	clean
 
 API_IMAGE_NAME = turbolent/telescope-api
 DEBUGGER_IMAGE_NAME = turbolent/telescope-debugger
+INTERFACE_IMAGE_NAME = turbolent/telescope-interface
 IMAGE_VERSION = $(shell git log -n 1 --pretty=format:%h -- .)
 
 compile:
@@ -21,6 +22,9 @@ run-api:
 run-debugger:
 	./pants run src/js/debugger:debugger-module
 
+run-interface:
+	./pants run src/js/interface:interface-module
+
 dist: dist-api dist-debugger
 
 dist-api:
@@ -29,7 +33,10 @@ dist-api:
 dist-debugger:
 	./pants bundle src/js/debugger
 
-images: api-images debugger-images
+dist-interface:
+	./pants bundle src/js/interface
+
+images: api-images debugger-images interface-images
 
 api-images: dist-api
 	docker build -f Dockerfile.api -t $(API_IMAGE_NAME):latest -t $(API_IMAGE_NAME):$(IMAGE_VERSION) .
@@ -37,7 +44,10 @@ api-images: dist-api
 debugger-images: dist-debugger
 	docker build -f Dockerfile.debugger -t $(DEBUGGER_IMAGE_NAME):latest -t $(DEBUGGER_IMAGE_NAME):$(IMAGE_VERSION) .
 
-push-images: images push-api-images push-debugger-images
+interface-images: dist-interface
+	docker build -f Dockerfile.interface -t $(INTERFACE_IMAGE_NAME):latest -t $(INTERFACE_IMAGE_NAME):$(IMAGE_VERSION) .
+
+push-images: images push-api-images push-debugger-images push-interface-images
 
 push-api-images:
 	docker push $(API_IMAGE_NAME):latest
@@ -47,11 +57,18 @@ push-debugger-images:
 	docker push $(DEBUGGER_IMAGE_NAME):latest
 	docker push $(DEBUGGER_IMAGE_NAME):$(IMAGE_VERSION)
 
+push-interface-images:
+	docker push $(INTERFACE_IMAGE_NAME):latest
+	docker push $(INTERFACE_IMAGE_NAME):$(IMAGE_VERSION)
+
 api-image-reference:
 	@echo $(API_IMAGE_NAME):$(IMAGE_VERSION)
 
 debugger-image-reference:
 	@echo $(DEBUGGER_IMAGE_NAME):$(IMAGE_VERSION)
+
+interface-image-reference:
+	@echo $(INTERFACE_IMAGE_NAME):$(IMAGE_VERSION)
 
 test:
 	./pants --tag='-integration' test tests:: src::

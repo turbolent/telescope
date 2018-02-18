@@ -1,0 +1,3 @@
+FROM nginx:alpine
+
+ADD dist/interface.tar.gz /usr/share/nginx/html/
