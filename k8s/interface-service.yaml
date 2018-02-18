@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: telescope-interface
+  labels:
+    app: telescope-interface
+spec:
+  selector:
+    app: telescope-interface
+  ports:
+  - port: 80
+    targetPort: 80

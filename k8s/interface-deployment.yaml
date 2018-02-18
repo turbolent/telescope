@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telescope-interface
+  labels:
+    app: telescope-interface
+spec:
+  selector:
+    matchLabels:
+      app: telescope-interface
+  template:
+    metadata:
+      labels:
+        app: telescope-interface
+    spec:
+      containers:
+      - name: telescope-interface
+        image: turbolent/telescope-interface:latest
+        ports:
+        - containerPort: 80

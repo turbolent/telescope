@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: interface-api
+spec:
+  rules:
+  - host: telescope.turbolent.com
+    http:
+      paths:
+      - backend:
+          serviceName: telescope-api
+          servicePort: 80
+        path: /api
+  tls:
+  - hosts:
+    - telescope.turbolent.com
+    secretName: interface-tls
