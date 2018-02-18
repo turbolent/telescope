@@ -14,7 +14,7 @@
 .ProgressItem {
     border-radius: 1.4px;
     margin: 2px;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: #c5ced7;
 }
 
 .ProgressItem-active {
