@@ -206,8 +206,8 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](backend: SparqlBackend
     assert(compiledNode.isInstanceOf[Var],
       "root node needs to be compiled to a variable")
 
-    val preparedOp = backend.prepareOp(op, env)
     val variable = compiledNode.asInstanceOf[Var]
+    val preparedOp = backend.prepareOp(op, variable, env)
     val variables = List(variable) ++
                     backend.additionalResultVariables(variable, env)
 

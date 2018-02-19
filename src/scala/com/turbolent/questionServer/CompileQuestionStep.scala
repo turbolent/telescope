@@ -15,7 +15,15 @@ class CompileQuestionStep(numberParser: NumberParser)
 
   def apply(req: Request, question: Question, response: QuestionResponse) = {
     try {
-      val env = new WikidataEnvironment
+      val generateLabel = req.params.getBooleanOrElse("label", default = true)
+      val generateWikipediaTitle = req.params.getBooleanOrElse("wikipediaTitle", default = true)
+      val wikipediaTitleIsOptional = req.params.getBooleanOrElse("wikipediaTitleOptional", default = true)
+
+      val env = new WikidataEnvironment(
+        generateLabel = generateLabel,
+        generateWikipediaTitle = generateWikipediaTitle,
+        wikipediaTitleIsOptional = wikipediaTitleIsOptional
+      )
       val wikidataOntology = new WikidataOntology(numberParser)
       val nodes = new QuestionCompiler(wikidataOntology, env)
           .compileQuestion(question)

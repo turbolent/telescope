@@ -28,7 +28,7 @@ class SentenceSuite extends FunSuite with Utilities {
 
     test(testName) {
       val actualNodes = compileListQuestion(tokens)
-      val env = new WikidataEnvironment()
+      val env = newEnvironment()
       val expectedNodes = expectedNodesGenerator(env)
       actualNodes shouldEqual expectedNodes
 

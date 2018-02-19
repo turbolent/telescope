@@ -7,11 +7,11 @@ import com.turbolent.questionCompiler.graph.Node
 import com.turbolent.questionCompiler.sparql.{NodeCompilationContext, SparqlBackend, TripleNodeCompilationContext}
 import org.apache.jena.datatypes.RDFDatatype
 import org.apache.jena.datatypes.xsd.XSDDatatype
-import org.apache.jena.graph.{NodeFactory => JenaNodeFactory, Node => JenaNode, Triple => JenaTriple}
+import org.apache.jena.graph.{Node => JenaNode, NodeFactory => JenaNodeFactory, Triple => JenaTriple}
 import org.apache.jena.query.Query
 import org.apache.jena.sparql.algebra.Op
-import org.apache.jena.sparql.algebra.op.{OpBGP, OpJoin, OpService}
-import org.apache.jena.sparql.core.{Var, BasicPattern}
+import org.apache.jena.sparql.algebra.op.{OpBGP, OpJoin, OpLeftJoin, OpService}
+import org.apache.jena.sparql.core.{BasicPattern, Var}
 import org.apache.jena.sparql.path._
 import org.apache.jena.sparql.expr.{E_DateTimeYear, Expr}
 
@@ -28,6 +28,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
   val BIGDATA_BASE = "http://www.bigdata.com/rdf#"
   val STATEMENT_BASE = "http://www.wikidata.org/prop/"
   val VALUE_BASE = "http://www.wikidata.org/prop/statement/"
+  val SCHEMA_BASE = "http://schema.org/"
 
   override def prepareQuery(query: Query, env: WikidataEnvironment) {
     query.setPrefix("wd", ENTITY_BASE)
@@ -38,6 +39,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     query.setPrefix("bd", BIGDATA_BASE)
     query.setPrefix("p", STATEMENT_BASE)
     query.setPrefix("v", VALUE_BASE)
+    query.setPrefix("schema", SCHEMA_BASE)
   }
 
   def compileUnit(unit: Unit): RDFDatatype =
@@ -119,6 +121,53 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
       Left(node)
     }
 
+  private val rdfsLabelNode: JenaNode =
+    JenaNodeFactory.createURI(RDFS_BASE + "label")
+
+  // enable labeling service by adding
+  // `SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }`.
+  private val labelServiceOp: Op = {
+    val triple = new JenaTriple(
+      JenaNodeFactory.createURI(BIGDATA_BASE + "serviceParam"),
+      JenaNodeFactory.createURI(WIKIBASE_BASE + "language"),
+      JenaNodeFactory.createLiteral("en")
+    )
+    val pattern = new BasicPattern()
+    pattern.add(triple)
+    val subOp = new OpBGP(pattern)
+    new OpService(JenaNodeFactory.createURI(WIKIBASE_BASE + "label"), subOp, false)
+  }
+
+  private val wikipediaTitleVariable: Var =
+    Var.alloc("wikipediaTitle")
+
+  // include title of English Wikipedia page
+  // ```
+  // ?sitelink schema:about ?item ;
+  //           schema:isPartOf <https://en.wikipedia.org/> ;
+  //           schema:name ?wikipediaTitle
+  // ```
+  private def wikipediaTitleOp(target: Var): Op = {
+    val site = Var.alloc("site")
+    val pattern = new BasicPattern()
+    pattern.add(new JenaTriple(
+      site,
+      JenaNodeFactory.createURI(SCHEMA_BASE + "about"),
+      target
+    ))
+    pattern.add(new JenaTriple(
+      site,
+      JenaNodeFactory.createURI(SCHEMA_BASE + "isPartOf"),
+      JenaNodeFactory.createURI("https://en.wikipedia.org/")
+    ))
+    pattern.add(new JenaTriple(
+      site,
+      JenaNodeFactory.createURI(SCHEMA_BASE + "name"),
+      wikipediaTitleVariable
+    ))
+    new OpBGP(pattern)
+  }
+
   override def compileEdgeLabel(label: EdgeLabel,
                                 env: WikidataEnvironment): Either[JenaNode, Path] = {
     label match {
@@ -126,34 +175,52 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
         compileProperty(property)
 
       case NameLabel =>
-        Left(JenaNodeFactory.createURI(RDFS_BASE + "label"))
+        Left(rdfsLabelNode)
     }
   }
 
   override def additionalResultVariables(variable: Var, env: WikidataEnvironment): List[Var] = {
     // add additional label variable, resolved by labeling service.
-    // see prepareOp
-    val name = variable.getVarName
-    val labelVariable = Var.alloc(name + "Label")
-    List(labelVariable)
+    // also see prepareOp
+
+    val optLabelVariable = Option(env.generateLabel)
+      .collect { case true =>
+        val name = variable.getVarName
+        Var.alloc(name + "Label")
+      }
+
+    val optWikipediaTitleVariable = Option(env.generateWikipediaTitle)
+      .collect { case true =>
+        wikipediaTitleVariable
+      }
+
+    List(optLabelVariable, optWikipediaTitleVariable).flatten
   }
 
-  override def prepareOp(op: Op, env: WikidataEnvironment): Op = {
-    // enable labeling service by adding
-    // `SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }`.
-    // see also additionalResultVariables
+  override def prepareOp(op: Op, variable: Var, env: WikidataEnvironment): Op = {
+    // also see additionalResultVariables
 
-    val labelNode = JenaNodeFactory.createURI(WIKIBASE_BASE + "label")
+    val optLabelServiceOp = Option(env.generateLabel)
+      .collect { case true =>
+        (labelServiceOp, OpJoin.create _)
+      }
 
-    val triple = new JenaTriple(JenaNodeFactory.createURI(BIGDATA_BASE + "serviceParam"),
-      JenaNodeFactory.createURI(WIKIBASE_BASE + "language"),
-      JenaNodeFactory.createLiteral("en"))
-    val pattern = new BasicPattern()
-    pattern.add(triple)
-    val subOp = new OpBGP(pattern)
+    val optWikipediaTitleOp = Option((env.generateWikipediaTitle, env.wikipediaTitleIsOptional))
+      .collect { case (true, optional) =>
+        (
+          wikipediaTitleOp(variable),
+          if (optional)
+            (op1: Op, op2: Op) =>
+              OpLeftJoin.create(op1, op2, null.asInstanceOf[Expr])
+          else
+            OpJoin.create _
+        )
+      }
 
-    val serviceOp = new OpService(labelNode, subOp, false)
-    OpJoin.create(op, serviceOp)
+    Seq(optLabelServiceOp, optWikipediaTitleOp).flatten.foldLeft(op) {
+      case (result, (other, f)) =>
+        f(result, other)
+    }
   }
 
   override def expandNode(node: Node, context: NodeCompilationContext,

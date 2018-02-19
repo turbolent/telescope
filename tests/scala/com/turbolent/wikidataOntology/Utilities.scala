@@ -12,11 +12,19 @@ trait Utilities extends Matchers {
 
   val wikidataOntology: WikidataOntology
 
+  def newEnvironment(): WikidataEnvironment =
+    new WikidataEnvironment(
+      generateLabel = false,
+      generateWikipediaTitle = false,
+      wikipediaTitleIsOptional = false
+    )
+
   def compileListQuestion(tokens: Seq[Token]): Seq[WikidataNode] = {
     val result = ListParser.parse(tokens, ListParser.phrase(ListParser.Question))
     assertSuccess(result)
     val question = result.get
-    new QuestionCompiler(wikidataOntology, new WikidataEnvironment())
+
+    new QuestionCompiler(wikidataOntology, newEnvironment())
       .compileQuestion(question)
   }
 
@@ -53,13 +61,10 @@ trait Utilities extends Matchers {
                    |
                  """.stripMargin
 
-  val SELECT_FORMAT = "SELECT DISTINCT ?%s ?%sLabel"
+  val SELECT_FORMAT = "SELECT DISTINCT ?%s"
   val WHERE_FORMAT = """
                        |WHERE {
                        |  %s
-                       |  SERVICE wikibase:label {
-                       |     bd:serviceParam wikibase:language "en" .
-                       |  }
                        |}
                      """.stripMargin
   val ORDER_FORMAT = "ORDER BY %s"

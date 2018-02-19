@@ -39,18 +39,37 @@ class QuestionService(tagger: Tagger, numberParser: NumberParser) extends Servic
   val tokenizeSentence = new TokenizeSentenceStep(tagger)
   val compileQuestionStep = new CompileQuestionStep(numberParser)
 
+  val steps: QuestionStep[Unit, Seq[Query]] =
+    GetSentenceStep
+      .compose(tokenizeSentence)
+      .compose(ParseQuestionStep)
+      .compose(compileQuestionStep)
+      .compose(CompileQueriesStep)
+
+  val resultParameter = "result"
+
+  def specifiesResults(req: Request): Boolean =
+    req.params.contains(resultParameter)
+
+  def getResults(req: Request): Set[String] =
+    req.params.getAll(resultParameter).toSet
+
   def apply(req: Request): Future[Response] = {
-    val steps: QuestionStep[Unit, Seq[Query]] =
-      GetSentenceStep
-        .compose(tokenizeSentence)
-        .compose(ParseQuestionStep)
-        .compose(compileQuestionStep)
-        .compose(CompileQueriesStep)
     val sentence = GetSentenceStep.getSentence(req).getOrElse("")
     steps(req, (), new QuestionResponse).flatMap {
       case (_, response) =>
         log.info("successful: " + sentence)
-        respond(req, Status.Ok, response)
+
+        val filteredResponse = if (specifiesResults(req)) {
+          val results = getResults(req)
+          response.filter {
+            case (name, _) =>
+              results.contains(name)
+          }
+        } else
+          response
+
+        respond(req, Status.Ok, filteredResponse)
     } rescue {
       case QuestionError(status, content) =>
         if (!sentence.isEmpty)

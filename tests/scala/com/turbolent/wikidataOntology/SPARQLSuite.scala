@@ -7,7 +7,7 @@ import org.scalatest.FunSuite
 class SPARQLSuite extends FunSuite with Utilities {
 
   test("discoverers of Pluto and Nix") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
 
     val pluto = env.newNode()
         .out(NameLabel, "Pluto")
@@ -41,7 +41,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("cast members of Alien") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val person = env.newNode()
         .out(P.isA, Q.human)
 
@@ -67,7 +67,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("mountains higher than 1000 meters") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val elevation: WikidataNode = (1000.0, U.meter)
 
     val root = env.newNode()
@@ -89,7 +89,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("filters") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val number: WikidataNode = Node(NumberLabel(23))
 
     val other = env.newNode()
@@ -121,7 +121,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("uncompilable") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val number: WikidataNode = Node(NumberLabel(23))
 
     val root = env.newNode()
@@ -137,7 +137,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("cities larger than New York City") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val city = env.newNode()
         .out(P.isA, Q.city)
 
@@ -172,7 +172,7 @@ class SPARQLSuite extends FunSuite with Utilities {
 
 
   test("multiple filters") {
-    val env = new WikidataEnvironment()
+    val env = newEnvironment()
     val min: WikidataNode = Node(NumberLabel(23))
 
     val max: WikidataNode = Node(NumberLabel(42))
