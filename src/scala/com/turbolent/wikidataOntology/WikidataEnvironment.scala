@@ -6,7 +6,11 @@ import com.turbolent.questionCompiler.Environment
 import com.turbolent.questionCompiler.graph.Node
 
 
-class WikidataEnvironment extends Environment[NodeLabel, EdgeLabel] {
+class WikidataEnvironment(val generateLabel: Boolean,
+                          val generateWikipediaTitle: Boolean,
+                          val wikipediaTitleIsOptional: Boolean)
+  extends Environment[NodeLabel, EdgeLabel] {
+
   override def newNode() = Node(newVar())
 
   private val varCounter = new AtomicInteger()
