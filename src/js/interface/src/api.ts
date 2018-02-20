@@ -11,8 +11,16 @@ export const parse = (question: string):
 
     const source = axios.CancelToken.source()
 
+    const params = {
+        sentence: question,
+        result: 'queries',
+        label: true,
+        wikipediaTitle: true,
+        wikipediaTitleOptional: true
+    }
+
     const promise = axios.get(PARSE_API_PATH, {
-        params: {sentence: question},
+        params,
         cancelToken: source.token
     })
         .then(response => Parse.decode(response.data))
