@@ -33,8 +33,6 @@ export default class Form extends React.Component<Props, {}> {
     render() {
         const {value, requesting, empty} = this.props
         const hidden = empty && !requesting
-        // tslint:disable-next-line
-        console.log(hidden)
         return (
             <form
                 className="Form"
