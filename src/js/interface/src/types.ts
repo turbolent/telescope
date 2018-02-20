@@ -22,19 +22,23 @@ export class Parse {
 export class Result {
     readonly uri: string
     readonly label: string
+    readonly wikipediaTitle?: string
 
-    static decode(binding: {}, variable: string): Result {
+    static decode(binding: {wikipediaTitle?: {value: string}}, variable: string): Result {
         const uri = binding[variable].value
         const label = binding[variable + 'Label'].value
-        return new Result(uri, label)
+        const wikipediaTitle = binding.wikipediaTitle && binding.wikipediaTitle.value
+        return new Result(uri, label, wikipediaTitle)
     }
 
     private constructor(
         uri: string,
-        label: string
+        label: string,
+        wikipediaTitle?: string
     ) {
         this.uri = uri
         this.label = label
+        this.wikipediaTitle = wikipediaTitle
     }
 }
 
