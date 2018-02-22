@@ -70,3 +70,10 @@ jar_library(
     scala_jar(org='io.github.finagle', name='featherbed', rev='0.3.2'),
   ],
 )
+
+jar_library(
+  name='finagle-prometheus',
+  jars=[
+    scala_jar(org='com.samstarling', name='finagle-prometheus', rev='0.0.4'),
+  ],
+)
