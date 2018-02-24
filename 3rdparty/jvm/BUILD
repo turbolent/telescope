@@ -24,14 +24,14 @@ jar_library(
 jar_library(
   name='jena',
   jars=[
-    jar(org='org.apache.jena', name='jena-arq', rev='3.5.0'),
+    jar(org='org.apache.jena', name='jena-arq', rev='3.6.0'),
   ],
 )
 
 jar_library(
   name='json4s-jackson',
   jars=[
-    scala_jar(org='com.fasterxml.jackson.module', name='jackson-module-scala', rev='2.9.0'),
+    scala_jar(org='com.fasterxml.jackson.module', name='jackson-module-scala', rev='2.9.4'),
     scala_jar(org='org.json4s', name='json4s-jackson', rev='3.6.0-M2'),
   ],
 )
@@ -39,28 +39,28 @@ jar_library(
 jar_library(
   name='finagle-http',
   jars=[
-    scala_jar(org='com.twitter', name='finagle-http', rev='17.12.0'),
+    scala_jar(org='com.twitter', name='finagle-http', rev='18.2.0'),
   ],
 )
 
 jar_library(
   name='twitter-server',
   jars=[
-    scala_jar(org='com.twitter', name='twitter-server', rev='17.12.0'),
+    scala_jar(org='com.twitter', name='twitter-server', rev='18.2.0'),
   ],
 )
 
 jar_library(
   name='finagle-thrift',
   jars=[
-    scala_jar(org='com.twitter', name='finagle-thrift', rev='17.12.0'),
+    scala_jar(org='com.twitter', name='finagle-thrift', rev='18.2.0'),
   ],
 )
 
 jar_library(
   name='scrooge-core',
   jars=[
-    scala_jar(org='com.twitter', name='scrooge-core', rev='17.12.0'),
+    scala_jar(org='com.twitter', name='scrooge-core', rev='18.2.0'),
   ],
 )
 
@@ -74,6 +74,6 @@ jar_library(
 jar_library(
   name='finagle-prometheus',
   jars=[
-    scala_jar(org='com.samstarling', name='finagle-prometheus', rev='0.0.4'),
+    scala_jar(org='com.samstarling', name='finagle-prometheus', rev='0.0.5'),
   ],
 )

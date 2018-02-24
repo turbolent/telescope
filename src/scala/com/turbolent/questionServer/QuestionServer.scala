@@ -1,18 +1,27 @@
 package com.turbolent.questionServer
 
+import java.net.InetSocketAddress
+
+import com.samstarling.prometheusfinagle.DefaultMetricPatterns.Pattern
+import com.samstarling.prometheusfinagle.PrometheusStatsReceiver
+import com.samstarling.prometheusfinagle.metrics.MetricsService
+import com.turbolent.spacyThrift.SpacyThriftClient
+import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.app.App
-import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.builder.ServerBuilder
 import com.twitter.finagle.http.filter.{ExceptionFilter, LoggingFilter}
 import com.twitter.finagle.http.path.{/, Root}
 import com.twitter.finagle.http.service.RoutingService
 import com.twitter.finagle.http.{Method, Request, Response}
+import com.twitter.finagle.loadbalancer.perHostStats
+import com.twitter.finagle.{Http, Service}
 import com.twitter.logging.{ConsoleHandler, FileHandler, Logger, Logging}
-import com.twitter.util.Await
-import com.turbolent.spacyThrift.SpacyThriftClient
-import com.turbolent.wikidataOntology.NumberParser
+import io.prometheus.client.CollectorRegistry
 
 
 object QuestionServer extends App with Logging {
+
+  perHostStats.parse("true")
 
   val portFlag =
     flag("port", 8080, "HTTP port")
@@ -51,11 +60,24 @@ object QuestionServer extends App with Logging {
                  parseLog: String = defaultLog,
                  accessLog: String = defaultLog): Service[Request, Response] =
   {
-    val parseService = new QuestionService(tagger, numberParser)
+    val registry = CollectorRegistry.defaultRegistry
+    val statsReceiver = new PrometheusStatsReceiver(registry, "telescope") {
+      override val metricPattern: Pattern = {
+        case metric +: labels =>
+          val labelMap = labels.sliding(2, 2)
+            .map { case Seq(k, v) => (k, v) }
+            .toMap
+          (metric, labelMap)
+      }
+    }
+
+    val parseService = new QuestionService(tagger, numberParser, statsReceiver)
+    val metricsService = new MetricsService(registry)
 
     val routingService =
       RoutingService.byMethodAndPathObject[Request] {
         case (Method.Get, Root / "parse") => parseService
+        case (Method.Get, Root / "metrics") => metricsService
       }
 
     addLogHandler(parseService.log, parseLog)
@@ -71,20 +93,22 @@ object QuestionServer extends App with Logging {
     val spacyThriftPort = spacyThriftPortFlag()
     val ducklingHostname = ducklingHostnameFlag()
     val ducklingPort = ducklingPortFlag()
+    val parseFlag = parseLogFlag()
+    val accessLog = accessLogFlag()
+    val port = portFlag()
 
     val spacyThriftClient = new SpacyThriftClient(spacyThriftHostname, spacyThriftPort)
     val ducklingClient = new DucklingClient(ducklingHostname, ducklingPort)
     val tagger = new SpacyTagger(spacyThriftClient)
     val numberParser = new DucklingNumberParser(ducklingClient)
-
     val service = getService(tagger, numberParser,
-      parseLog = parseLogFlag(),
-      accessLog = accessLogFlag())
-    val server = Http.serve(":" + portFlag(), service)
-    onExit {
-      server.close()
-    }
-    Await.ready(server)
-  }
+      parseLog = parseFlag,
+      accessLog = accessLog)
 
+    ServerBuilder()
+      .stack(Http.server.withHttpStats)
+      .name("question-server")
+      .bindTo(new InetSocketAddress(port))
+      .build(service)
+  }
 }

@@ -4,7 +4,7 @@ import com.twitter.finagle.http.{Status, Request}
 import com.twitter.util.Future
 
 
-case class QuestionError(status: Status, content: AnyRef) extends Throwable
+case class QuestionError(status: Status, response: QuestionResponse) extends Throwable
 
 
 trait QuestionStep[T, R] extends ((Request, T, QuestionResponse) => Future[(R, QuestionResponse)]) {
