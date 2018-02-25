@@ -8,12 +8,14 @@
 
 .ResultImage {
     object-fit: cover;
-    height: 30%;
+    height: 33%;
     object-position: 50% 30%;
 }
 
 .ResultContent {
-    padding: 16px;
+    max-height: 65%;
+    padding: 16px 16px 0;
+    overflow: hidden;
 }
 
 .ResultLabel {
@@ -21,35 +23,44 @@
     line-height: 24px;
     font-weight: 400;
     margin-bottom: 8px;
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
 }
 
 .ResultDescription {
     margin-bottom: 8px;
     font-size: 16px;
+    line-height: 22px;
     color: rgba(0, 0, 0, 0.54)
 }
 
 .ResultExtract {
-    --line-height: 21px;
-    --line-count: 8;
-
     position: relative;
     font-size: 14px;
-    line-height: var(--line-height);
-    max-height: calc(var(--line-count) * var(--line-height));
+    line-height: 21px;
     overflow: hidden;
 }
 
-.ResultExtract:after {
+.ResultContent:after {
     content: ' ';
     position: absolute;
     bottom: 0;
-    width: 20%;
-    height: var(--line-height);
+    width: 30%;
+    height: 28px;
     background-color: transparent;
 }
 
-.ResultExtract:after {
+.ResultContent:after {
     right: 0;
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba( 255, 255, 255, 1) 50%);
+}
+
+.ResultElement {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+
+.ResultElement-hidden {
+    opacity: 0;
 }
