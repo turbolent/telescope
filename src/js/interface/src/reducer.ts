@@ -31,6 +31,7 @@ export function reducer(state: State, action: Action<{}>): State {
                 mutableState.withCancel(undefined)
                     .withError(error.message)
                     .withParse(undefined)
+                    .withResults([])
             })
         }
         // results
@@ -52,6 +53,7 @@ export function reducer(state: State, action: Action<{}>): State {
                 mutableState.withCancel(undefined)
                     .withError(error.message)
                     .withParse(undefined)
+                    .withResults([])
             })
         }
         // question
