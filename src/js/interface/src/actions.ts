@@ -121,6 +121,11 @@ export const requestParse = (question: string): Thunk =>
         dispatch(parseActionCreator.started({cancel}))
         promise
             .then(response => {
+                if (response.error) {
+                    dispatch(parseActionCreator.failed(new Error(response.error)))
+                    return
+                }
+
                 dispatch(parseActionCreator.succeeded(response))
                 if (response.queries && response.queries.length) {
                     dispatch(requestResults(response.queries[0]))
