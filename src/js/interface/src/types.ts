@@ -61,3 +61,27 @@ export function decodeResults(results: SPARQLQueryResults): Result[] {
     }
     return bindings.map(binding => Result.decode(binding, variable))
 }
+
+export class WikipediaPreview {
+    readonly description: string
+    readonly extractHTML: string
+    readonly thumbnailURL?: string
+
+    static decode(json: any): WikipediaPreview {
+        return new WikipediaPreview(
+            json.description,
+            json.extract_html,
+            json.thumbnail && json.thumbnail.source
+        )
+    }
+
+    private constructor(
+        description: string,
+        extractHTML: string,
+        thumbnailURL?: string
+    ) {
+        this.description = description
+        this.extractHTML = extractHTML
+        this.thumbnailURL = thumbnailURL
+    }
+}
