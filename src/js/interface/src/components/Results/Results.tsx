@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { CollectionView, CollectionViewDelegate, GridLayout } from 'collection-view'
 import './Results.css'
-import { Result } from '../../types'
+import { Result, WikipediaPreview } from '../../types'
 import { diff } from '../../diff'
 import ResultComponent from '../Result/Result'
 import * as ReactDOM from 'react-dom'
+import { requestPreview } from '../../api'
 
 export interface Props {
     query: string
@@ -18,6 +19,27 @@ export default class Results
     private view?: CollectionView
     private results: Result[]
     private wrapper: HTMLDivElement | null
+    // TODO: replace by cache
+    // result URI -> wikipedia preview
+    private previews = new Map<string, WikipediaPreview>()
+    // TODO: replace by cache, can be larger than previews
+    private urisWithoutPreviews = new Set<string>()
+    private elementIndices = new WeakMap<Element, number>()
+
+    static renderResult(element: HTMLElement, result: Result, preview?: WikipediaPreview) {
+        const component = (
+            <ResultComponent
+                uri={result.uri}
+                imageURL={preview && preview.thumbnailURL || ''}
+                label={result.label}
+                description={preview && preview.description || ''}
+                extractHTML={preview && preview.extractHTML || ''}
+                wikipediaTitle={result.wikipediaTitle}
+            />
+        )
+
+        ReactDOM.render(component, element)
+    }
 
     constructor(props: Props) {
         super(props)
@@ -32,16 +54,48 @@ export default class Results
     configureElement(element: HTMLElement, index: number) {
         element.classList.add('ResultsItem')
 
+        // keep track that element currently renders given index
+        this.elementIndices.set(element, index)
+
         const result = this.results[index]
-        let component = (
-            <ResultComponent
-                imageURL=""
-                label={result.label}
-                description=""
-                extractHTML=""
-            />
-        )
-        ReactDOM.render(component, element)
+
+        const {uri} = result
+
+        const preview = this.previews.get(uri)
+
+        Results.renderResult(element, result, preview)
+
+        // only fetch preview if it is not available
+        if (preview) {
+            return
+        }
+
+        const {wikipediaTitle} = result
+
+        if (wikipediaTitle
+            && !this.urisWithoutPreviews.has(uri)) {
+
+            const [p] = requestPreview(wikipediaTitle)
+            p.then(newPreview => {
+                this.previews.set(uri, newPreview)
+                // check if element still represents index
+                const currentIndex = this.elementIndices.get(element)
+                if (currentIndex !== index || !this.view) {
+                    return
+                }
+
+                // re-render
+                Results.renderResult(element, result, newPreview)
+
+            }).catch(() => {
+                this.urisWithoutPreviews.add(uri)
+            })
+        }
+    }
+
+    invalidateElement(element: HTMLElement, index: number) {
+        // keep track that element does not render given index anymore
+        this.elementIndices.delete(element)
     }
 
     shouldComponentUpdate() {
@@ -88,8 +142,8 @@ export default class Results
         const inset = 16
         const layout = new GridLayout({
                                           insets: [[inset, inset], [inset, inset]],
-                                          itemSize: [300, 330],
-                                          spacing: [20, 20]
+                                          itemSize: [300, 380],
+                                          spacing: [24, 24]
                                       })
         this.view = new CollectionView(element, layout, this)
     }
