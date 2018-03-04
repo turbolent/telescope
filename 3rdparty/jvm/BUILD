@@ -74,6 +74,6 @@ jar_library(
 jar_library(
   name='finagle-prometheus',
   jars=[
-    scala_jar(org='com.samstarling', name='finagle-prometheus', rev='0.0.5'),
+    scala_jar(org='com.samstarling', name='finagle-prometheus', rev='0.0.6'),
   ],
 )

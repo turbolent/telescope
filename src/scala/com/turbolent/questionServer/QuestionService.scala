@@ -1,5 +1,6 @@
 package com.turbolent.questionServer
 
+import com.samstarling.prometheusfinagle.metrics.Telemetry
 import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -14,17 +15,15 @@ import org.json4s.jackson.Serialization
 
 class QuestionService(tagger: Tagger,
                       numberParser: NumberParser,
-                      statsReceiver: StatsReceiver)
+                      telemetry: Telemetry)
   extends Service[Request, Response] {
 
   val log = Logger(classOf[QuestionService])
   log.setUseParentHandlers(false)
   log.setLevel(INFO)
 
-  private val successCounter =
-    statsReceiver.counter("parses_total", "type", "success")
-  private val failureCounter =
-    statsReceiver.counter("parses_total", "type", "failure")
+  private val parsesCounter =
+    telemetry.counter("parses_total", "Number of parses", Seq("type"))
 
   private implicit val formats: Formats = {
     val typeHints = Serialization.formats(FullTypeHints(List(classOf[AnyRef])))
@@ -77,13 +76,13 @@ class QuestionService(tagger: Tagger,
     val sentence = GetSentenceStep.getSentence(req).getOrElse("")
     steps(req, (), new QuestionResponse).flatMap {
       case (_, response) =>
-        successCounter.incr()
+        parsesCounter.labels("success").inc()
         log.info("successful: " + sentence)
         val filteredResponse = filterResponse(req, response)
         respond(req, Status.Ok, filteredResponse)
     } rescue {
       case QuestionError(status, response) =>
-        failureCounter.incr()
+        parsesCounter.labels("failure").inc()
         if (!sentence.isEmpty)
           log.info("failed: " + sentence)
         val filteredResponse = filterResponse(req, response)
