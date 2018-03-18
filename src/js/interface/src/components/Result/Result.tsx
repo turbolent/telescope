@@ -11,7 +11,11 @@ export interface Props {
     readonly extractHTML: string
 }
 
-export default class Result extends React.Component<Props, {}> {
+interface ComponentState {
+    readonly imageHidden: boolean
+}
+
+export default class Result extends React.Component<Props, ComponentState> {
 
     static capitalizeInitial(text: string): string {
         if (!text.length) {
@@ -21,8 +25,17 @@ export default class Result extends React.Component<Props, {}> {
         return text[0].toUpperCase() + text.substring(1)
     }
 
+    constructor(props: Props) {
+        super(props)
+
+        this.state = {
+            imageHidden: !props.imageURL
+        }
+    }
+
     render() {
         const {uri, imageURL, label, description, extractHTML, wikipediaTitle} = this.props
+        const {imageHidden} = this.state
 
         const link = wikipediaTitle
             ? 'https://en.wikipedia.org/wiki/' + encodeURIComponent(wikipediaTitle)
@@ -37,11 +50,15 @@ export default class Result extends React.Component<Props, {}> {
             'ResultElement-hidden': !extractHTML
         })
         const imageClassName = classNames('ResultElement', 'ResultImage', {
-            'ResultElement-hidden': !imageURL
+            'ResultElement-hidden': imageHidden
         })
         return (
             <div className="Result">
-                <img className={imageClassName} src={imageURL}/>
+                <img
+                    className={imageClassName}
+                    src={imageURL}
+                    onLoad={this.onImageLoaded}
+                />
                 <div className="ResultContent">
                     <a className={labelClassName} href={link} target="_blank">{label}</a>
                     <div className={descriptionClassName}>
@@ -54,5 +71,9 @@ export default class Result extends React.Component<Props, {}> {
                 </div>
             </div>
         )
+    }
+
+    private onImageLoaded = () => {
+        this.setState({imageHidden: false})
     }
 }
