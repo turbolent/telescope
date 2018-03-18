@@ -2008,9 +2008,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-collection-view@^0.2.5:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-0.2.5.tgz#85eaab9ebdc6817910f524ee51da37277b9ba544"
+collection-view@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-0.3.0.tgz#2ddd25ad52629e7a9f4b9e1700f63550268a29e1"
   dependencies:
     "@types/bezier-easing" "2.0.x"
     "@types/lodash-es" "4.17.x"

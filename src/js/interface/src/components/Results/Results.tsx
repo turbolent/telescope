@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { CollectionView, CollectionViewDelegate, GridLayout } from 'collection-view'
+import { CollectionView, CollectionViewDelegate, GridLayout, Insets, Size, Spacing } from 'collection-view'
 import './Results.css'
 import { Result, WikipediaPreview } from '../../types'
 import { diff } from '../../diff'
@@ -141,9 +141,9 @@ export default class Results
     private installView(element: HTMLDivElement) {
         const inset = 16
         const layout = new GridLayout({
-                                          insets: [[inset, inset], [inset, inset]],
-                                          itemSize: [300, 380],
-                                          spacing: [24, 24]
+                                          insets: new Insets(inset, inset, inset, inset),
+                                          itemSize: new Size(300, 380),
+                                          spacing: new Spacing(24, 24)
                                       })
         this.view = new CollectionView(element, layout, this)
     }
