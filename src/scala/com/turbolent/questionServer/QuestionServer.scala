@@ -53,13 +53,14 @@ object QuestionServer extends App with Logging {
     })
   }
 
+  val registry = CollectorRegistry.defaultRegistry
+  val telemetry = new Telemetry(registry, "telescope")
+
   def getService(tagger: Tagger,
                  numberParser: NumberParser,
                  parseLog: String = defaultLog,
                  accessLog: String = defaultLog): Service[Request, Response] =
   {
-    val registry = CollectorRegistry.defaultRegistry
-    val telemetry = new Telemetry(registry, "telescope")
     val parseService = new QuestionService(tagger, numberParser, telemetry)
     val metricsService = new MetricsService(registry)
 

@@ -4,7 +4,6 @@ import com.samstarling.prometheusfinagle.metrics.Telemetry
 import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Level.INFO
 import com.twitter.logging.Logger
 import com.twitter.util.Future
