@@ -1,1 +1,1 @@
-com.turbolent.questionServer.QuestionStatsReceiver
+com.samstarling.prometheusfinagle.PrometheusStatsReceiver

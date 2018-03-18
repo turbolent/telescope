@@ -2,9 +2,7 @@ package com.turbolent.questionServer
 
 import java.net.InetSocketAddress
 
-import com.samstarling.prometheusfinagle.DefaultMetricPatterns.Pattern
-import com.samstarling.prometheusfinagle.PrometheusStatsReceiver
-import com.samstarling.prometheusfinagle.metrics.MetricsService
+import com.samstarling.prometheusfinagle.metrics.{MetricsService, Telemetry}
 import com.turbolent.spacyThrift.SpacyThriftClient
 import com.turbolent.wikidataOntology.NumberParser
 import com.twitter.app.App
@@ -55,23 +53,15 @@ object QuestionServer extends App with Logging {
     })
   }
 
+  val registry = CollectorRegistry.defaultRegistry
+  val telemetry = new Telemetry(registry, "telescope")
+
   def getService(tagger: Tagger,
                  numberParser: NumberParser,
                  parseLog: String = defaultLog,
                  accessLog: String = defaultLog): Service[Request, Response] =
   {
-    val registry = CollectorRegistry.defaultRegistry
-    val statsReceiver = new PrometheusStatsReceiver(registry, "telescope") {
-      override val metricPattern: Pattern = {
-        case metric +: labels =>
-          val labelMap = labels.sliding(2, 2)
-            .map { case Seq(k, v) => (k, v) }
-            .toMap
-          (metric, labelMap)
-      }
-    }
-
-    val parseService = new QuestionService(tagger, numberParser, statsReceiver)
+    val parseService = new QuestionService(tagger, numberParser, telemetry)
     val metricsService = new MetricsService(registry)
 
     val routingService =
