@@ -16,7 +16,8 @@
     color: #3e4551;
     font-size: 18px;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 5px;
+    overflow: hidden;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     pointer-events: auto;
 }
