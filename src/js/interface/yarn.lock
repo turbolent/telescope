@@ -195,7 +195,7 @@
     react-treebeard "^2.1.0"
     redux "^3.7.2"
 
-"@types/bezier-easing@2.0.x":
+"@types/bezier-easing@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/bezier-easing/-/bezier-easing-2.0.0.tgz#addbc86aec544788a7dca64dd136a83c1711af16"
 
@@ -211,7 +211,7 @@
   version "21.1.10"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-21.1.10.tgz#dcacb5217ddf997a090cc822bba219b4b2fd7984"
 
-"@types/lodash-es@4.17.x":
+"@types/lodash-es@4.17.0":
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@types/lodash-es/-/lodash-es-4.17.0.tgz#ed9044d62ee36a93e0650b112701986b1c74c766"
   dependencies:
@@ -1575,7 +1575,7 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-bezier-easing@2.0.x:
+bezier-easing@2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/bezier-easing/-/bezier-easing-2.0.3.tgz#cb493fddb7f8920ecca00973344ce0518885f17e"
 
@@ -2008,14 +2008,14 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-collection-view@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-0.3.0.tgz#2ddd25ad52629e7a9f4b9e1700f63550268a29e1"
+collection-view@^1.0.0-beta3:
+  version "1.0.0-beta3"
+  resolved "https://registry.yarnpkg.com/collection-view/-/collection-view-1.0.0-beta3.tgz#dbdafc030dc5764de280401958db6f9aa490d984"
   dependencies:
-    "@types/bezier-easing" "2.0.x"
-    "@types/lodash-es" "4.17.x"
-    bezier-easing "2.0.x"
-    lodash-es "^4.17.4"
+    "@types/bezier-easing" "2.0.0"
+    "@types/lodash-es" "4.17.0"
+    bezier-easing "2.0.3"
+    lodash-es "4.17.10"
 
 color-convert@^1.3.0, color-convert@^1.9.0:
   version "1.9.1"
@@ -3599,6 +3599,10 @@ he@1.1.x:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
+heckel-diff-items@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/heckel-diff-items/-/heckel-diff-items-0.1.0.tgz#223a94bf92b22adf3799be4a25ee52db67e688b1"
+
 hmac-drbg@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
@@ -4660,7 +4664,11 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
-lodash-es@^4.17.4, lodash-es@^4.2.0, lodash-es@^4.2.1:
+lodash-es@4.17.10:
+  version "4.17.10"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.10.tgz#62cd7104cdf5dd87f235a837f0ede0e8e5117e05"
+
+lodash-es@^4.2.0, lodash-es@^4.2.1:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.4.tgz#dcc1d7552e150a0640073ba9cb31d70f032950e7"
 

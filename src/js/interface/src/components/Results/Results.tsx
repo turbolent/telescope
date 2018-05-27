@@ -1,16 +1,30 @@
 import * as React from 'react'
-import { CollectionView, CollectionViewDelegate, GridLayout, Insets, Size, Spacing } from 'collection-view'
+import {
+    CollectionView,
+    CollectionViewDelegate,
+    GridLayout,
+    Insets,
+    Size,
+    Spacing,
+    CollectionViewAnimationReason,
+    CollectionViewAnimationPhase,
+    Animation
+} from 'collection-view'
 import './Results.css'
 import { Result, WikipediaPreview } from '../../types'
 import { diff } from '../../diff'
 import ResultComponent from '../Result/Result'
 import * as ReactDOM from 'react-dom'
 import { requestPreview } from '../../api'
+import { Style } from 'collection-view/dist/declarations/utils'
+import { Position } from 'collection-view/dist/declarations/types'
 
 export interface Props {
     query: string
     results: Result[]
 }
+
+const animationDuration = 400
 
 export default class Results
     extends React.Component<Props, {}>
@@ -22,11 +36,11 @@ export default class Results
     // TODO: replace by cache
     // result URI -> wikipedia preview
     private previews = new Map<string, WikipediaPreview>()
-    // TODO: replace by cache, can be larger than previews
+    // TODO: replace by cache, can be larger than `previews`
     private urisWithoutPreviews = new Set<string>()
     private elementIndices = new WeakMap<Element, number>()
 
-    static renderResult(element: HTMLElement, result: Result, preview?: WikipediaPreview) {
+    private static renderResult(element: HTMLElement, result: Result, preview?: WikipediaPreview) {
         const component = (
             <ResultComponent
                 uri={result.uri}
@@ -39,6 +53,20 @@ export default class Results
         )
 
         ReactDOM.render(component, element)
+    }
+
+    private static getAnimationTimingFunction(reason: CollectionViewAnimationReason): string | undefined {
+        switch (reason) {
+            case CollectionViewAnimationReason.ELEMENT_ADDITION:
+                return 'cubic-bezier(0.0, 0.0, 0.2, 1)'
+            case CollectionViewAnimationReason.ELEMENT_REMOVAL:
+                return 'cubic-bezier(0.4, 0.0, 1, 1)'
+            case CollectionViewAnimationReason.ELEMENT_MOVE:
+            case CollectionViewAnimationReason.LAYOUT_UPDATE:
+                return 'cubic-bezier(0.4, 0.0, 0.2, 1)'
+            default:
+                return undefined
+        }
     }
 
     constructor(props: Props) {
@@ -93,6 +121,30 @@ export default class Results
         }
     }
 
+    getAnimation(index: number, info: any, property: string, reason: CollectionViewAnimationReason): Animation {
+        const timingFunction = Results.getAnimationTimingFunction(reason)
+        return new Animation(animationDuration, 0, timingFunction)
+    }
+
+    getStyle(index: number, phase: CollectionViewAnimationPhase, info: any, position: Position): Style {
+        const {x, y} = position
+        switch (phase) {
+            case CollectionViewAnimationPhase.ELEMENT_APPEARING:
+                return {'transform': `translate3d(${x}px, ${y}px, -100px)`}
+            case CollectionViewAnimationPhase.ELEMENT_APPEARED:
+                return {'transform': `translate3d(${x}px, ${y}px, 0)`}
+            case CollectionViewAnimationPhase.ELEMENT_DISAPPEARED:
+                return {'transform': `translate3d(${x}px, ${y}px, 50px)`}
+            default:
+                return {}
+        }
+    }
+
+    onScroll(collectionView: CollectionView) {
+        const centerY = collectionView.scrollPosition.y + collectionView.containerSize.height / 2
+        collectionView.content.style.perspectiveOrigin = `50% ${centerY}px`
+    }
+
     invalidateElement(element: HTMLElement, index: number) {
         // keep track that element does not render given index anymore
         this.elementIndices.delete(element)
@@ -118,8 +170,14 @@ export default class Results
 
     render() {
         return (
-            <div className="Results" ref={this.onWrapperRef}>
-                <div ref={this.onScrollRef} />
+            <div
+                className="Results"
+                ref={this.onWrapperRef}
+            >
+                <div
+                    ref={this.onScrollRef}
+                    style={{perspective: 800}}
+                />
             </div>
         )
     }
@@ -142,7 +200,7 @@ export default class Results
         const inset = 16
         const layout = new GridLayout({
                                           insets: new Insets(inset, inset, inset, inset),
-                                          itemSize: new Size(300, 380),
+                                          itemSize: new Size(310, 346),
                                           spacing: new Spacing(24, 24)
                                       })
         this.view = new CollectionView(element, layout, this)

@@ -1,39 +1,25 @@
 
-const identity = (x: any) => x
+import { Deletion, Insertion, Move, Update, diff as heckelDiff } from 'heckel-diff-items'
 
-export function diff<T, U>
-    (original: T[], target: T[], keyFunction: (value: T) => U): [number[], number[], Map<number, number>] {
-
-    keyFunction = keyFunction || identity
+export function diff<T>(oldItems: T[],
+                        newItems: T[],
+                        keyFunction: (value: T) => any): [number[], number[], Map<number, number>] {
+    const ops = heckelDiff(oldItems, newItems, keyFunction)
 
     const removed: number[] = []
     const added: number[] = []
-    const moved: Map<number, number> = new Map()
+    const moved = new Map<number, number>()
 
-    const originalMap: Map<U, number> = new Map()
-    original.forEach((item, index) => {
-        const key = keyFunction(item)
-        originalMap.set(key, index)
-    })
-
-    const targetMap: Map<U, number> = new Map()
-    target.forEach((item, index) => {
-        const key = keyFunction(item)
-        targetMap.set(key, index)
-
-        const originalIndex = originalMap.get(key)
-        if (originalIndex === undefined) {
-            added.push(index)
-        }
-    })
-
-    original.forEach((item, index) => {
-        const key = keyFunction(item)
-        const targetIndex = targetMap.get(key)
-        if (targetIndex === undefined) {
-            removed.push(index)
-        } else if (targetIndex !== index) {
-            moved.set(index, targetIndex)
+    ops.forEach((op) => {
+        if (op instanceof Deletion) {
+            removed.push(op.index)
+        } else if (op instanceof Insertion) {
+            added.push(op.index)
+        }  else if (op instanceof Move) {
+            moved.set(op.fromIndex, op.toIndex)
+        } else if (op instanceof Update) {
+            removed.push(op.index)
+            added.push(op.index)
         }
     })
 
