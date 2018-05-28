@@ -141,8 +141,7 @@ export default class Results
     }
 
     onScroll(collectionView: CollectionView) {
-        const centerY = collectionView.scrollPosition.y + collectionView.containerSize.height / 2
-        collectionView.content.style.perspectiveOrigin = `50% ${centerY}px`
+        this.updatePerspective()
     }
 
     invalidateElement(element: HTMLElement, index: number) {
@@ -227,7 +226,11 @@ export default class Results
         const [removed, added, moved] =
             diff(oldResults, results, result => result.uri)
 
-        this.view.changeIndices(removed, added, moved)
+        this.view.changeIndices(removed, added, moved, {
+            delayScroll: true
+        }).then(() => {
+            this.updatePerspective()
+        })
     }
 
     private updateWrapperClasses() {
@@ -241,4 +244,20 @@ export default class Results
             this.wrapper.classList.add('Results-empty')
         }
     }
+
+  private updatePerspective() {
+    const collectionView = this.view
+    if (!collectionView) {
+        return
+    }
+
+    const containerCenterY = collectionView.containerSize.height / 2
+    const contentCenterY = collectionView.contentSize.height / 2
+    const centerY = collectionView.scrollPosition.y
+      + (this.results.length
+        ? Math.min(containerCenterY, contentCenterY)
+        : containerCenterY)
+
+    collectionView.content.style.perspectiveOrigin = `50% ${centerY}px`
+  }
 }
