@@ -5,7 +5,7 @@ java_thrift_library(
     # default compiler does not gen Scala; Scrooge does
     compiler='scrooge', 
     language='scala',
-    rpc_style='finagle',
+    compiler_args=['--finagle'],
     dependencies=[
         '3rdparty/jvm:scrooge-core',
         '3rdparty/jvm:finagle-thrift',

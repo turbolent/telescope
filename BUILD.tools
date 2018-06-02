@@ -1,4 +1,4 @@
-SCALA_REV='2.12.4'
+SCALA_REV='2.12.6'
 
 # scala-compiler needs explicit dependencies on scala-library and scala-reflect (DPB-4447)
 jar_library(name='scalac',
@@ -40,15 +40,15 @@ jar_library(name='scalap',
 
 jar_library(name='scrooge-gen',
             jars=[
-              jar(org='com.twitter', name='scrooge-generator_2.12', rev='18.2.0'),
+              jar(org='com.twitter', name='scrooge-generator_2.12', rev='18.5.0'),
             ])
 
 jar_library(name='scrooge-linter',
             jars=[
-              jar(org='com.twitter', name='scrooge-linter_2.12', rev='18.2.0'),
+              jar(org='com.twitter', name='scrooge-linter_2.12', rev='18.5.0'),
             ])
 
 jar_library(name='ammonite',
             jars=[
-              jar(org='com.lihaoyi', name='ammonite_{}'.format(SCALA_REV), rev='1.0.3')
+              jar(org='com.lihaoyi', name='ammonite_{}'.format(SCALA_REV), rev='1.1.2')
             ])
