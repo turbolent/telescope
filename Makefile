@@ -1,4 +1,4 @@
-.PHONY: compile \
+.PHONY: prepare compile \
 	run-api run-debugger run-interface \
 	dist dist-api dist-debugger dist-interface \
 	images api-images debugger-images interface \
@@ -13,27 +13,32 @@ DEBUGGER_IMAGE_NAME = turbolent/telescope-debugger
 INTERFACE_IMAGE_NAME = turbolent/telescope-interface
 IMAGE_VERSION = $(shell git log -n 1 --pretty=format:%h -- .)
 
-compile:
+prepare:
+# workaround for pants, doesn't handle pom files, only jars (zip file), so replace with empty zip
+	@mkdir -p .pants.d/ivy/jars/org.apache.jena/apache-jena-libs/poms
+	@echo UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA== | base64 -d > .pants.d/ivy/jars/org.apache.jena/apache-jena-libs/poms/apache-jena-libs-3.7.0.pom
+
+compile: prepare
 	./pants compile src::
 
-run-api:
+run-api: prepare
 	./pants run src/scala/com/turbolent/questionServer:question-service
 
-run-debugger:
+run-debugger: prepare
 	./pants run src/js/debugger:debugger-module
 
-run-interface:
+run-interface: prepare
 	./pants run src/js/interface:interface-module
 
 dist: dist-api dist-debugger
 
-dist-api:
+dist-api: prepare
 	./pants binary src/scala/com/turbolent/questionServer:question-service
 
-dist-debugger:
+dist-debugger: prepare
 	./pants bundle src/js/debugger
 
-dist-interface:
+dist-interface: prepare
 	./pants bundle src/js/interface
 
 images: api-images debugger-images interface-images
@@ -70,16 +75,16 @@ debugger-image-reference:
 interface-image-reference:
 	@echo $(INTERFACE_IMAGE_NAME):$(IMAGE_VERSION)
 
-test:
+test: prepare
 	./pants --tag='-integration' test tests:: src::
 
-integration-test:
+integration-test: prepare
 	./pants --tag='+integration' test tests:: src::
 
-test-changes:
+test-changes: prepare
 	./pants --tag='-integration' --changed-parent=HEAD test
 
-integration-test-changes:
+integration-test-changes: prepare
 	./pants --tag='+integration' --changed-parent=HEAD test
 
 clean:
