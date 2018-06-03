@@ -7,10 +7,7 @@ branches:
     - master
 
 script:
- - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
- - make test
- - make dist
- - .travis/deploy.sh
+ - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" && make test && make dist && .travis/deploy.sh
 
 before_cache:
   - rm -rf $HOME/.cache/pants/stats
