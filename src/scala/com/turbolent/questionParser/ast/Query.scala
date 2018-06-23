@@ -2,7 +2,6 @@ package com.turbolent.questionParser.ast
 
 import com.turbolent.questionParser.Token
 
-
 sealed trait Query extends Product with Serializable
 
 case class AndQuery(queries: Seq[Query]) extends Query

@@ -9,7 +9,6 @@ import org.apache.jena.sparql.core.Var
 import org.apache.jena.sparql.path.Path
 import org.apache.jena.sparql.expr.Expr
 
-
 trait SparqlBackend[N, E, Env <: Environment[N, E]] {
 
   type Node = graph.Node[N, E]
@@ -24,14 +23,16 @@ trait SparqlBackend[N, E, Env <: Environment[N, E]] {
   //// optional hooks
 
   /** Expand the given node into another, possibly more complex node, if needed */
-  def expandNode(node: Node, context: NodeCompilationContext, env: Env): Node = node
+  def expandNode(node: Node, context: NodeCompilationContext, env: Env): Node =
+    node
 
-  def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr = leftExpr
+  def prepareLeftFunctionExpression(leftExpr: Expr, otherNode: Node): Expr =
+    leftExpr
 
   def prepareOp(op: Op, variable: Var, env: Env): Op = op
 
   def additionalResultVariables(variable: Var, env: Env): List[Var] = Nil
 
-  def prepareQuery(query: JenaQuery, env: Env) {}
+  def prepareQuery(query: JenaQuery, env: Env): Unit = {}
 
 }

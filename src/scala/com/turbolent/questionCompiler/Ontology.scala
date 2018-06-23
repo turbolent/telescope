@@ -2,7 +2,6 @@ package com.turbolent.questionCompiler
 
 import com.turbolent.questionParser.Token
 
-
 trait Ontology[N, E, Env <: Environment[N, E]] {
 
   type Node = graph.Node[N, E]
@@ -20,7 +19,6 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     */
   def makePersonEdge(env: Env): Edge
 
-
   /** Return an edge which will identify a node representing the subject
     * to have the property given by 'name'. 'node' is the object.
     *
@@ -32,9 +30,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   in(node, 'hasAuthor)
     */
-  def makeNamedPropertyEdge(name: Seq[Token], node: Node,
-                            subject: Subject, env: Env): Edge
-
+  def makeNamedPropertyEdge(name: Seq[Token],
+                            node: Node,
+                            subject: Subject,
+                            env: Env): Edge
 
   /** Return and edge which will identify a node representing the subject
     * (given in the context) to have a property given by 'name'.
@@ -51,9 +50,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   out('hasAuthor, node)
     */
-  def makeInversePropertyEdge(name: Seq[Token], node: Node,
-                              context: EdgeContext, env: Env): Edge
-
+  def makeInversePropertyEdge(name: Seq[Token],
+                              node: Node,
+                              context: EdgeContext,
+                              env: Env): Edge
 
   /** Return and edge which will identify a node representing the subject
     * to have the property given by 'name', which contains an adjective.
@@ -69,9 +69,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   out('hasAge, node)
     */
-  def makeAdjectivePropertyEdge(name: Seq[Token], node: Node,
-                                context: EdgeContext, env: Env): Edge
-
+  def makeAdjectivePropertyEdge(name: Seq[Token],
+                                node: Node,
+                                context: EdgeContext,
+                                env: Env): Edge
 
   /** Return an edge which will identify the node representing the subject
     * to have the property given by 'name', which compares to 'node',
@@ -92,9 +93,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   filter = GreaterThanFilter(otherAgeNode.in(node, 'hasAge))
     */
-  def makeComparativePropertyEdge(name: Seq[Token], node: Node,
-                                  context: EdgeContext, env: Env): Edge
-
+  def makeComparativePropertyEdge(name: Seq[Token],
+                                  node: Node,
+                                  context: EdgeContext,
+                                  env: Env): Edge
 
   /** Return an edge which will identify the node representing the subject
     * to have the property given by 'name'. 'node' is the object.
@@ -108,9 +110,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   in(node, 'hasAuthor)
     */
-  def makeValuePropertyEdge(name: Seq[Token], node: Node,
-                            context: EdgeContext, env: Env): Edge
-
+  def makeValuePropertyEdge(name: Seq[Token],
+                            node: Node,
+                            context: EdgeContext,
+                            env: Env): Edge
 
   /** Return an edge which will identify a node to have a possessive
     * relationship to 'node'.
@@ -125,7 +128,6 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   in(node, 'hasDaughter)
     */
   def makeRelationshipEdge(name: Seq[Token], node: Node, env: Env): Edge
-
 
   /** Return a node for the given 'name'.
     *
@@ -148,7 +150,6 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     */
   def makeValueNode(name: Seq[Token], filter: Seq[Token], env: Env): Node
 
-
   /** Return a node for the given 'number' and 'unit'.
     *
     * Invoked for ast.Number and ast.NumberWithUnit, i.e., when the question
@@ -165,7 +166,9 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     * [Token("two", "CD", "two"), Token("million", "CD", "million")] and
     * 'unit' would be [Token("inhabitants", "NNS", "inhabitant")].
     */
-  def makeNumberNode(number: Seq[Token], unit: Seq[Token],
-                     filter: Seq[Token], env: Env): Node
+  def makeNumberNode(number: Seq[Token],
+                     unit: Seq[Token],
+                     filter: Seq[Token],
+                     env: Env): Node
 
 }

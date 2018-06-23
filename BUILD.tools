@@ -52,3 +52,23 @@ jar_library(name='ammonite',
             jars=[
               jar(org='com.lihaoyi', name='ammonite_{}'.format(SCALA_REV), rev='1.1.2')
             ])
+
+jar_library(name='scalafmt',
+            jars=[
+              jar(org='com.geirsson', name='scalafmt-cli_2.12', rev='1.5.1')
+            ])
+
+jar_library(name='scalafix',
+            jars=[
+              jar(org='ch.epfl.scala', name='scalafix-cli_{}'.format(SCALA_REV), rev='0.6.0-M9')
+            ])
+
+jar_library(name='scalac-plugin-dep',
+            jars=[
+              jar(org='org.scalameta', name='semanticdb-scalac_{}'.format(SCALA_REV), rev='4.0.0-M4')
+            ])
+
+jar_library(name='scalastyle',
+            jars=[
+              jar(org='org.scalastyle', name='scalastyle_2.12', rev='1.0.0')
+            ])

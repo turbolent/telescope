@@ -1,6 +1,5 @@
 package com.turbolent.questionParser.ast
 
-
 sealed trait Question extends Product with Serializable
 
 case class ListQuestion(query: Query) extends Question

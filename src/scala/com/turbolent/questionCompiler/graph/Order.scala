@@ -1,6 +1,5 @@
 package com.turbolent.questionCompiler.graph
 
-
 sealed trait Order
 
 case object Ascending extends Order

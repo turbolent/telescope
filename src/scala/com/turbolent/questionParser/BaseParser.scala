@@ -3,7 +3,6 @@ package com.turbolent.questionParser
 import scala.util.parsing.combinator.PackratParsers
 import scala.language.implicitConversions
 
-
 trait BaseParser extends PackratParsers {
   override type Elem = Token
 
@@ -14,18 +13,16 @@ trait BaseParser extends PackratParsers {
   }
 
   implicit def word(word: String): Parser[Token] =
-    elem(s"word '${word.toLowerCase}'",
-      _.word equalsIgnoreCase word)
+    elem(s"word '${word.toLowerCase}'", _.word.equalsIgnoreCase(word))
 
   def pos(pos: String, strict: Boolean): Parser[Token] =
     elem(s"POS $pos*",
-      if (strict) _.pennTag.equals(pos)
-      else _.pennTag.startsWith(pos))
+         if (strict) _.pennTag.equals(pos)
+         else _.pennTag.startsWith(pos))
 
   def lemma(lemma: String): Parser[Token] = {
     val lowered = lemma.toLowerCase
-    elem(s"lemma '$lowered'",
-      _.lemma == lowered)
+    elem(s"lemma '$lowered'", _.lemma == lowered)
   }
 
   lazy val Noun: Parser[Token] =
@@ -51,7 +48,7 @@ trait BaseParser extends PackratParsers {
 
   lazy val Preposition: Parser[Token] =
     pos("IN", strict = true) |
-    pos("TO", strict = true)
+      pos("TO", strict = true)
 
   lazy val Determiner: Parser[Token] =
     pos("DT", strict = true)
@@ -88,12 +85,12 @@ trait BaseParser extends PackratParsers {
     val or = word("or")
     val andParser = rep1sep(parser, if (andOptional) opt(and) else and)
     val orParser = rep1sep(andParser, or) ^^ {
-      _ map {
+      _.map {
         case Seq(inner) => inner
-        case inner => andReducer(inner)
+        case inner      => andReducer(inner)
       } match {
         case Seq(outer) => outer
-        case outer => orReducer(outer)
+        case outer      => orReducer(outer)
       }
     }
 

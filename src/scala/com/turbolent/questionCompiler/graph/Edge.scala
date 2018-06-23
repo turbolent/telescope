@@ -2,7 +2,6 @@ package com.turbolent.questionCompiler.graph
 
 import com.turbolent.questionCompiler.graph
 
-
 sealed trait Edge[E, N] {
 
   type Node = graph.Node[N, E]
@@ -28,7 +27,6 @@ sealed trait Edge[E, N] {
 case class InEdge[E, N](source: Node[N, E], label: E) extends Edge[E, N]
 
 case class OutEdge[E, N](label: E, target: Node[N, E]) extends Edge[E, N]
-
 
 case class ConjunctionEdge[E, N](edges: Set[Edge[E, N]]) extends Edge[E, N] {
 
