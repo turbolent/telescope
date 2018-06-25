@@ -2,7 +2,6 @@ package com.turbolent.wikidataOntology
 
 import java.time.temporal.Temporal
 
-
 trait NodeLabel
 
 case class VarLabel(id: Int) extends NodeLabel {

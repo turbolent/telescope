@@ -1,6 +1,5 @@
 package com.turbolent.wikidataOntology
 
-
 case class Item(id: Int, name: String)
 
 package object Q {
@@ -20,7 +19,6 @@ package object Q {
   val album = Item(482994, "album")
   val male = Item(6581097, "male")
   val female = Item(6581072, "female")
-
 
   // occupations
   val politician = Item(82955, "politician")
@@ -629,7 +627,8 @@ package object Q {
   val China = Item(148, "China") // Chinese
   val Colombia = Item(739, "Colombia") // Colombian
   val Comoros = Item(970, "Comoros") // Comorian
-  val DemocraticRepublicOfTheCongo = Item(974, "Democratic Republic of the Congo") // Congolese
+  val DemocraticRepublicOfTheCongo =
+    Item(974, "Democratic Republic of the Congo") // Congolese
   val RepublicOfTheCongo = Item(971, "Republic of the Congo") // Congolese
   val CostaRica = Item(800, "Costa Rica") // Costa Rican, Tico
   val Croatia = Item(224, "Croatia") // Croatian
@@ -737,7 +736,8 @@ package object Q {
   val Rwanda = Item(1037, "Rwanda") // Rwandan, Rwandese
   val SaintKittsAndNevis = Item(763, "Saint Kitts and Nevis") // Kittitian, Nevisian
   val SaintLucia = Item(760, "Saint Lucia") // 	Saint Lucian
-  val SaintVincentAndTheGrenadines = Item(757, "Saint Vincent and the Grenadines") // Vincentian, Vincy
+  val SaintVincentAndTheGrenadines =
+    Item(757, "Saint Vincent and the Grenadines") // Vincentian, Vincy
   val Samoa = Item(683, "Samoa") // Samoan
   val SanMarino = Item(238, "San Marino") // Sammarinese
   val SaoTomeAndPrincipe = Item(1039, "São Tomé and Príncipe") // São Toméan, Santomean
@@ -752,7 +752,7 @@ package object Q {
   val SolomonIslands = Item(685, "Solomon Islands") // Solomon Islander
   val Somalia = Item(1045, "Somalia") // Somali
   val SouthAfrica = Item(258, "South Africa") // South African
-  val SouthKorea = Item(884, "South Korea")  // South Korean
+  val SouthKorea = Item(884, "South Korea") // South Korean
   val SouthSudan = Item(958, "South Sudan") // South Sudanese
   val Spain = Item(29, "Spain") // Spanish
   val SriLanka = Item(854, "Sri Lanka") // Sri Lankan

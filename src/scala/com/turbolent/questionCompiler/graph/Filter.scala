@@ -15,8 +15,7 @@ sealed trait Filter[N, E] {
     }
 }
 
-case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]])
-    extends Filter[N, E] {
+case class ConjunctionFilter[N, E](filters: Seq[Filter[N, E]]) extends Filter[N, E] {
 
   override def and(filter: Filter): ConjunctionFilter[N, E] =
     filter match {

@@ -5,11 +5,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.turbolent.questionCompiler.Environment
 import com.turbolent.questionCompiler.graph.Node
 
-
 class WikidataEnvironment(val generateLabel: Boolean,
                           val generateWikipediaTitle: Boolean,
                           val wikipediaTitleIsOptional: Boolean)
-  extends Environment[NodeLabel, EdgeLabel] {
+    extends Environment[NodeLabel, EdgeLabel] {
 
   override def newNode() = Node(newVar())
 

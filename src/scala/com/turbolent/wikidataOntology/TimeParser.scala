@@ -13,6 +13,6 @@ object TimeParser {
   def parseTemporal(name: String): Option[Temporal] =
     name match {
       case yearPattern(_*) => Some(Year.parse(name))
-      case _ => None
+      case _               => None
     }
 }

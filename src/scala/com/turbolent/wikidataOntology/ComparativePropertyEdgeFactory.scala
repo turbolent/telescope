@@ -1,34 +1,44 @@
 package com.turbolent.wikidataOntology
 
 import com.turbolent.questionCompiler.graph.{LessThanFilter, GreaterThanFilter}
-import com.turbolent.questionCompiler.{PersonSubject, NamedSubject, ThingSubject, EdgeContext}
+import com.turbolent.questionCompiler.{
+  PersonSubject,
+  NamedSubject,
+  ThingSubject,
+  EdgeContext
+}
 import com.turbolent.questionParser.Token
 import HaveEdgeFactory.makeHaveEdge
 import Tokens._
 import scala.collection.mutable
+import com.turbolent.questionCompiler
 
 object ComparativePropertyEdgeFactory {
 
   type FilterFactory = (WikidataNode) => WikidataFilter
 
-  def makeComparisonFactory(property: Property, filterFactory: FilterFactory): ContextfulEdgeFactory =
+  def makeComparisonFactory(property: Property,
+                            filterFactory: FilterFactory): ContextfulEdgeFactory =
     (node, _, env) => {
-      val otherValue = env.newNode()
-          .in(node, property)
+      val otherValue = env
+        .newNode()
+        .in(node, property)
       val filter = filterFactory(otherValue)
-      val value = env.newNode()
-          .filter(filter)
+      val value = env
+        .newNode()
+        .filter(filter)
       out(property, value)
     }
 
   val namedFactories: mutable.Map[(String, String, String), ContextfulEdgeFactory] =
     mutable.Map(
-      ("city", "be", "big than") -> makeComparisonFactory(P.hasArea, GreaterThanFilter(_)),
+      ("city", "be", "big than") -> makeComparisonFactory(P.hasArea,
+                                                          GreaterThanFilter(_)),
       ("city", "be", "small than") -> makeComparisonFactory(P.hasArea, LessThanFilter(_)),
       // NOTE: comparison handled in NumberNodeFactory
       ("city", "live", "more than") -> P.hasPopulation,
-      ("city", "live", "less than") -> P.hasPopulation)
-
+      ("city", "live", "less than") -> P.hasPopulation
+    )
 
   val thingFactories: mutable.Map[(String, String), ContextfulEdgeFactory] =
     mutable.Map()
@@ -40,11 +50,15 @@ object ComparativePropertyEdgeFactory {
 
 }
 
-trait ComparativePropertyEdgeFactory {
+trait ComparativePropertyEdgeFactory
+    extends questionCompiler.ComparativePropertyEdgeFactory[NodeLabel,
+                                                            EdgeLabel,
+                                                            WikidataEnvironment] {
 
-  def makeComparativePropertyEdge(name: Seq[Token], node: WikidataNode, context: EdgeContext,
-                                  env: WikidataEnvironment): WikidataEdge =
-  {
+  def makeComparativePropertyEdge(name: Seq[Token],
+                                  node: WikidataNode,
+                                  context: EdgeContext,
+                                  env: WikidataEnvironment): WikidataEdge = {
     import ComparativePropertyEdgeFactory._
 
     val lemmatizedProperty = mkLemmaString(name)
@@ -67,19 +81,17 @@ trait ComparativePropertyEdgeFactory {
         // TODO: adjectives
         val (_, subjectNameRest) = splitName(subjectName)
         val lemmatizedSubject = mkLemmaString(subjectNameRest)
-        val key = (lemmatizedSubject,
-            lemmatizedProperty,
-            lemmatizedFilter)
+        val key = (lemmatizedSubject, lemmatizedProperty, lemmatizedFilter)
         namedFactories.get(key)
     }
 
-    factory map {
-      _(node, context, env)
-    } getOrElse {
-      val message = s"No comparative property edge factory for '$lemmatizedProperty' " +
-                    s"(${name.mkString(", ")}), context: $context"
-      throw new RuntimeException(message)
-    }
+    factory
+      .map(_(node, context, env))
+      .getOrElse {
+        val message = s"No comparative property edge factory for '$lemmatizedProperty' " +
+          s"(${name.mkString(", ")}), context: $context"
+        throw new RuntimeException(message)
+      }
   }
 
 }

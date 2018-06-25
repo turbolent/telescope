@@ -2,10 +2,7 @@ package com.turbolent.questionCompiler
 
 import com.turbolent.questionParser.Token
 
-trait Ontology[N, E, Env <: Environment[N, E]] {
-
-  type Node = graph.Node[N, E]
-  type Edge = graph.Edge[E, N]
+trait PersonEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return an edge which will identify a node representing the subject
     * to be a person.
@@ -17,7 +14,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   out('instanceOf, 'Person)
     */
-  def makePersonEdge(env: Env): Edge
+  def makePersonEdge(env: Env): graph.Edge[E, N]
+}
+
+trait NamedPropertyEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return an edge which will identify a node representing the subject
     * to have the property given by 'name'. 'node' is the object.
@@ -31,9 +31,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   in(node, 'hasAuthor)
     */
   def makeNamedPropertyEdge(name: Seq[Token],
-                            node: Node,
+                            node: graph.Node[N, E],
                             subject: Subject,
-                            env: Env): Edge
+                            env: Env): graph.Edge[E, N]
+}
+
+trait InversePropertyEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return and edge which will identify a node representing the subject
     * (given in the context) to have a property given by 'name'.
@@ -51,9 +54,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   out('hasAuthor, node)
     */
   def makeInversePropertyEdge(name: Seq[Token],
-                              node: Node,
+                              node: graph.Node[N, E],
                               context: EdgeContext,
-                              env: Env): Edge
+                              env: Env): graph.Edge[E, N]
+}
+
+trait AdjectivePropertyEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return and edge which will identify a node representing the subject
     * to have the property given by 'name', which contains an adjective.
@@ -70,9 +76,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   out('hasAge, node)
     */
   def makeAdjectivePropertyEdge(name: Seq[Token],
-                                node: Node,
+                                node: graph.Node[N, E],
                                 context: EdgeContext,
-                                env: Env): Edge
+                                env: Env): graph.Edge[E, N]
+}
+
+trait ComparativePropertyEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return an edge which will identify the node representing the subject
     * to have the property given by 'name', which compares to 'node',
@@ -94,9 +103,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   filter = GreaterThanFilter(otherAgeNode.in(node, 'hasAge))
     */
   def makeComparativePropertyEdge(name: Seq[Token],
-                                  node: Node,
+                                  node: graph.Node[N, E],
                                   context: EdgeContext,
-                                  env: Env): Edge
+                                  env: Env): graph.Edge[E, N]
+}
+
+trait ValuePropertyEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return an edge which will identify the node representing the subject
     * to have the property given by 'name'. 'node' is the object.
@@ -111,9 +123,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *   in(node, 'hasAuthor)
     */
   def makeValuePropertyEdge(name: Seq[Token],
-                            node: Node,
+                            node: graph.Node[N, E],
                             context: EdgeContext,
-                            env: Env): Edge
+                            env: Env): graph.Edge[E, N]
+}
+
+trait RelationshipEdgeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return an edge which will identify a node to have a possessive
     * relationship to 'node'.
@@ -127,7 +142,12 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   in(node, 'hasDaughter)
     */
-  def makeRelationshipEdge(name: Seq[Token], node: Node, env: Env): Edge
+  def makeRelationshipEdge(name: Seq[Token],
+                           node: graph.Node[N, E],
+                           env: Env): graph.Edge[E, N]
+}
+
+trait ValueNodeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return a node for the given 'name'.
     *
@@ -148,7 +168,10 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
     *
     *   out('hasName, "Berlin")
     */
-  def makeValueNode(name: Seq[Token], filter: Seq[Token], env: Env): Node
+  def makeValueNode(name: Seq[Token], filter: Seq[Token], env: Env): graph.Node[N, E]
+}
+
+trait NumberNodeFactory[N, E, Env <: Environment[N, E]] {
 
   /** Return a node for the given 'number' and 'unit'.
     *
@@ -169,6 +192,16 @@ trait Ontology[N, E, Env <: Environment[N, E]] {
   def makeNumberNode(number: Seq[Token],
                      unit: Seq[Token],
                      filter: Seq[Token],
-                     env: Env): Node
-
+                     env: Env): graph.Node[N, E]
 }
+
+trait Ontology[N, E, Env <: Environment[N, E]]
+    extends PersonEdgeFactory[N, E, Env]
+    with NamedPropertyEdgeFactory[N, E, Env]
+    with InversePropertyEdgeFactory[N, E, Env]
+    with AdjectivePropertyEdgeFactory[N, E, Env]
+    with ComparativePropertyEdgeFactory[N, E, Env]
+    with ValuePropertyEdgeFactory[N, E, Env]
+    with RelationshipEdgeFactory[N, E, Env]
+    with ValueNodeFactory[N, E, Env]
+    with NumberNodeFactory[N, E, Env]

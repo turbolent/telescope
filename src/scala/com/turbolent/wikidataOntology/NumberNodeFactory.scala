@@ -7,7 +7,8 @@ import scala.collection.mutable
 
 class NumberNodeFactory(numberParser: NumberParser) {
 
-  type NumberNodeFactory = (Seq[Token], Option[Unit], WikidataEnvironment) => WikidataNode
+  type NumberNodeFactory =
+    (Seq[Token], Option[Unit], WikidataEnvironment) => WikidataNode
 
   val factories: mutable.Map[String, NumberNodeFactory] =
     mutable.Map(
@@ -17,54 +18,56 @@ class NumberNodeFactory(numberParser: NumberParser) {
       "on" -> { (name, unit, _) =>
         makeTemporalNode(name, unit)
       },
-      "before" -> {
-        (name, unit, env) =>
-          val value = makeTemporalNode(name, unit)
-          env.newNode().filter(LessThanFilter(value))
+      "before" -> { (name, unit, env) =>
+        val value = makeTemporalNode(name, unit)
+        env.newNode().filter(LessThanFilter(value))
       },
-      "after" -> {
-        (name, unit, env) =>
-          val value = makeTemporalNode(name, unit)
-          env.newNode().filter(GreaterThanFilter(value))
+      "after" -> { (name, unit, env) =>
+        val value = makeTemporalNode(name, unit)
+        env.newNode().filter(GreaterThanFilter(value))
       },
-      "less than" -> {
-        (name, unit, env) =>
-          val value = makeNumberUnitNode(name, unit)
-          env.newNode().filter(LessThanFilter(value))
+      "less than" -> { (name, unit, env) =>
+        val value = makeNumberUnitNode(name, unit)
+        env.newNode().filter(LessThanFilter(value))
       },
-      "more than" -> {
-        (name, unit, env) =>
-          val value = makeNumberUnitNode(name, unit)
-          env.newNode().filter(GreaterThanFilter(value))
-      })
+      "more than" -> { (name, unit, env) =>
+        val value = makeNumberUnitNode(name, unit)
+        env.newNode().filter(GreaterThanFilter(value))
+      }
+    )
 
   val units: mutable.Map[String, Unit] =
-    mutable.Map(
-      "meter" -> U.meter,
-      "second" -> U.second)
+    mutable.Map("meter" -> U.meter, "second" -> U.second)
 
   def makeNumberUnitNode(name: Seq[Token], unit: Option[Unit]): WikidataNode = {
     val words = mkWordString(name)
-     val number = numberParser.parse(words)
-     Node(unit map {
-       NumberWithUnitLabel(number, _)
-     } getOrElse {
-       NumberLabel(number)
-     })
+    val number = numberParser.parse(words)
+    Node(
+      unit
+        .map {
+          NumberWithUnitLabel(number, _)
+        }
+        .getOrElse {
+          NumberLabel(number)
+        })
   }
 
   def makeTemporalNode(name: Seq[Token], optionalUnit: Option[Unit]): WikidataNode = {
     val words = mkWordString(name)
-    TimeParser.parseTemporal(words) map { temporal =>
-      temporalAsNode(temporal)
-    } getOrElse {
-      makeNumberUnitNode(name, optionalUnit)
-    }
+    TimeParser
+      .parseTemporal(words)
+      .map { temporal =>
+        temporalAsNode(temporal)
+      }
+      .getOrElse {
+        makeNumberUnitNode(name, optionalUnit)
+      }
   }
 
-  def makeNumberNode(name: Seq[Token], unitName: Seq[Token], filter: Seq[Token],
-                     env: WikidataEnvironment): WikidataNode =
-  {
+  def makeNumberNode(name: Seq[Token],
+                     unitName: Seq[Token],
+                     filter: Seq[Token],
+                     env: WikidataEnvironment): WikidataNode = {
     val unit =
       if (unitName.isEmpty) None
       else units.get(mkLemmaString(unitName))
@@ -72,11 +75,14 @@ class NumberNodeFactory(numberParser: NumberParser) {
       makeNumberUnitNode(name, unit)
     else {
       val filterWords = mkWordString(filter)
-      factories.get(filterWords) map {
-        _(name, unit, env)
-      } getOrElse {
-        makeNumberUnitNode(name, unit)
-      }
+      factories
+        .get(filterWords)
+        .map {
+          _(name, unit, env)
+        }
+        .getOrElse {
+          makeNumberUnitNode(name, unit)
+        }
     }
   }
 }

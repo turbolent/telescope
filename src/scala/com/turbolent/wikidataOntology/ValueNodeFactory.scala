@@ -6,15 +6,15 @@ import com.turbolent.wikidataOntology.AdjectiveEdgeFactory.makeAdjectiveEdge
 import com.turbolent.wikidataOntology.Tokens._
 
 import scala.collection.mutable
-
+import com.turbolent.questionCompiler
 
 object ValueNodeFactory {
 
   def instanceOrOccupation(item: Item): NodeFactory =
     (node, env) =>
-      node.out(P.isA, item)
-          .or(out(P.hasOccupation, item))
-
+      node
+        .out(P.isA, item)
+        .or(out(P.hasOccupation, item))
 
   val factories: mutable.Map[String, NodeFactory] =
     mutable.Map(
@@ -46,10 +46,12 @@ object ValueNodeFactory {
         node.out(P.hasGender, Q.male)
       },
       "university" -> { (node, env) =>
-        val university = env.newNode()
-            .out(P.isA, Q.university)
-        node.out(P.isA, Q.university)
-            .or(out(P.isPartOf, university))
+        val university = env
+          .newNode()
+          .out(P.isA, Q.university)
+        node
+          .out(P.isA, Q.university)
+          .or(out(P.isPartOf, university))
       },
       "politician" -> instanceOrOccupation(Q.politician),
       "actor" -> instanceOrOccupation(Q.actor),
@@ -170,7 +172,8 @@ object ValueNodeFactory {
       "comedian" -> instanceOrOccupation(Q.comedian),
       "biathlete" -> instanceOrOccupation(Q.biathlete),
       "disc jockey" -> instanceOrOccupation(Q.discJockey),
-      "association football manager" -> instanceOrOccupation(Q.associationFootballManager),
+      "association football manager" -> instanceOrOccupation(
+        Q.associationFootballManager),
       "film editor" -> instanceOrOccupation(Q.filmEditor),
       "judoka" -> instanceOrOccupation(Q.judoka),
       "autobiographer" -> instanceOrOccupation(Q.autobiographer),
@@ -619,46 +622,51 @@ object ValueNodeFactory {
     )
 
   val adjectiveFactories: mutable.Map[String, NodeFactory] =
-    mutable.Map("most" -> {
-      (node, env) =>
-        node.aggregate(Count).order(Descending)
+    mutable.Map("most" -> { (node, env) =>
+      node.aggregate(Count).order(Descending)
     })
 
-  def wrapAdjective(adjectives: Seq[Token], node: WikidataNode,
+  def wrapAdjective(adjectives: Seq[Token],
+                    node: WikidataNode,
                     env: WikidataEnvironment): WikidataNode =
     if (adjectives.isEmpty) node
     else {
       val adjectiveWords = mkWordString(adjectives)
-      adjectiveFactories.get(adjectiveWords)
-          .map(_(node, env))
-          .getOrElse(node)
+      adjectiveFactories
+        .get(adjectiveWords)
+        .map(_(node, env))
+        .getOrElse(node)
     }
 
 }
 
+trait ValueNodeFactory
+    extends questionCompiler.ValueNodeFactory[NodeLabel, EdgeLabel, WikidataEnvironment] {
 
-trait ValueNodeFactory {
-
-  def makeValueNode(name: Seq[Token], filter: Seq[Token],
-                    env: WikidataEnvironment): WikidataNode =
-  {
+  def makeValueNode(name: Seq[Token],
+                    filter: Seq[Token],
+                    env: WikidataEnvironment): WikidataNode = {
     import ValueNodeFactory._
 
     val (adjectives, nameRest) = splitName(name)
     val lemmatized = mkLemmaString(nameRest)
 
     val node = env.newNode()
-    factories.get(lemmatized) map { factory =>
-      val result = factory(node, env)
-      makeAdjectiveEdge(adjectives, lemmatized, env) map {
-        result.and
-      } getOrElse {
-        wrapAdjective(adjectives, result, env)
+    factories
+      .get(lemmatized)
+      .map { factory =>
+        val result = factory(node, env)
+        makeAdjectiveEdge(adjectives, lemmatized, env)
+          .map {
+            result.and
+          }
+          .getOrElse {
+            wrapAdjective(adjectives, result, env)
+          }
       }
-    } getOrElse {
-      val words = mkWordString(name)
-      node.out(NameLabel, words)
-    }
+      .getOrElse {
+        val words = mkWordString(name)
+        node.out(NameLabel, words)
+      }
   }
-
 }

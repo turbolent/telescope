@@ -4,10 +4,18 @@ import java.time.Year
 
 import com.turbolent.questionCompiler.graph.EqualsFilter
 import com.turbolent.questionCompiler.graph.Node
-import com.turbolent.questionCompiler.sparql.{NodeCompilationContext, SparqlBackend, TripleNodeCompilationContext}
+import com.turbolent.questionCompiler.sparql.{
+  NodeCompilationContext,
+  SparqlBackend,
+  TripleNodeCompilationContext
+}
 import org.apache.jena.datatypes.RDFDatatype
 import org.apache.jena.datatypes.xsd.XSDDatatype
-import org.apache.jena.graph.{Node => JenaNode, NodeFactory => JenaNodeFactory, Triple => JenaTriple}
+import org.apache.jena.graph.{
+  Node => JenaNode,
+  NodeFactory => JenaNodeFactory,
+  Triple => JenaTriple
+}
 import org.apache.jena.query.Query
 import org.apache.jena.sparql.algebra.Op
 import org.apache.jena.sparql.algebra.op.{OpBGP, OpJoin, OpLeftJoin, OpService}
@@ -17,8 +25,8 @@ import org.apache.jena.sparql.expr.{E_DateTimeYear, Expr}
 
 import collection.mutable
 
-
-class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, WikidataEnvironment] {
+class WikidataSparqlBackend
+    extends SparqlBackend[NodeLabel, EdgeLabel, WikidataEnvironment] {
 
   val ENTITY_BASE = "http://www.wikidata.org/entity/"
   val PROPERTY_BASE = "http://www.wikidata.org/prop/direct/"
@@ -30,7 +38,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
   val VALUE_BASE = "http://www.wikidata.org/prop/statement/"
   val SCHEMA_BASE = "http://schema.org/"
 
-  override def prepareQuery(query: Query, env: WikidataEnvironment) {
+  override def prepareQuery(query: Query, env: WikidataEnvironment): scala.Unit = {
     query.setPrefix("wd", ENTITY_BASE)
     query.setPrefix("wdt", PROPERTY_BASE)
     query.setPrefix("rdfs", RDFS_BASE)
@@ -43,7 +51,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
   }
 
   def compileUnit(unit: Unit): RDFDatatype =
-  // TODO:
+    // TODO:
     XSDDatatype.XSDinteger
 
   override def compileNodeLabel(label: NodeLabel, env: WikidataEnvironment): JenaNode =
@@ -81,10 +89,9 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
   def compilePropertyValueNode(property: Property): JenaNode =
     JenaNodeFactory.createURI(VALUE_BASE + "P" + property.id)
 
-
   def locatedInPath(property: Property) =
     new P_Seq(new P_Link(compilePropertyNode(property)),
-      new P_ZeroOrMore1(new P_Link(compilePropertyNode(P.isLocatedIn))))
+              new P_ZeroOrMore1(new P_Link(compilePropertyNode(P.isLocatedIn))))
 
   def instanceOfSubclassPath(property: Property): Path = {
     // use `p:P<ID>/v:P<ID>/wdt:P279*` instead of plain wdt:P<ID> (P279 = isSubclassOf):
@@ -96,8 +103,7 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     val instanceOfValuePath = new P_Link(compilePropertyValueNode(property))
     val subclassOfPath = new P_Link(compilePropertyNode(P.isSubclassOf))
     new P_Seq(instanceOfStatementPath,
-      new P_Seq(instanceOfValuePath,
-        new P_ZeroOrMore1(subclassOfPath)))
+              new P_Seq(instanceOfValuePath, new P_ZeroOrMore1(subclassOfPath)))
   }
 
   def containmentPath(property: Property) =
@@ -113,10 +119,11 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
       P.hasPlaceOfBirth -> locatedInPath(P.hasPlaceOfBirth),
       P.hasPlaceOfDeath -> locatedInPath(P.hasPlaceOfDeath),
       P.hasFilmingLocation -> locatedInPath(P.hasFilmingLocation),
-      P.hasHeadquartersLocation -> locatedInPath(P.hasHeadquartersLocation))
+      P.hasHeadquartersLocation -> locatedInPath(P.hasHeadquartersLocation)
+    )
 
   def compileProperty(property: Property): Either[JenaNode, Path] =
-    paths.get(property) map { Right(_) } getOrElse {
+    paths.get(property).map { Right(_) }.getOrElse {
       val node = compilePropertyNode(property)
       Left(node)
     }
@@ -150,21 +157,24 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
   private def wikipediaTitleOp(target: Var): Op = {
     val site = Var.alloc("site")
     val pattern = new BasicPattern()
-    pattern.add(new JenaTriple(
-      site,
-      JenaNodeFactory.createURI(SCHEMA_BASE + "about"),
-      target
-    ))
-    pattern.add(new JenaTriple(
-      site,
-      JenaNodeFactory.createURI(SCHEMA_BASE + "isPartOf"),
-      JenaNodeFactory.createURI("https://en.wikipedia.org/")
-    ))
-    pattern.add(new JenaTriple(
-      site,
-      JenaNodeFactory.createURI(SCHEMA_BASE + "name"),
-      wikipediaTitleVariable
-    ))
+    pattern.add(
+      new JenaTriple(
+        site,
+        JenaNodeFactory.createURI(SCHEMA_BASE + "about"),
+        target
+      ))
+    pattern.add(
+      new JenaTriple(
+        site,
+        JenaNodeFactory.createURI(SCHEMA_BASE + "isPartOf"),
+        JenaNodeFactory.createURI("https://en.wikipedia.org/")
+      ))
+    pattern.add(
+      new JenaTriple(
+        site,
+        JenaNodeFactory.createURI(SCHEMA_BASE + "name"),
+        wikipediaTitleVariable
+      ))
     new OpBGP(pattern)
   }
 
@@ -179,19 +189,22 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     }
   }
 
-  override def additionalResultVariables(variable: Var, env: WikidataEnvironment): List[Var] = {
+  override def additionalResultVariables(variable: Var,
+                                         env: WikidataEnvironment): List[Var] = {
     // add additional label variable, resolved by labeling service.
     // also see prepareOp
 
     val optLabelVariable = Option(env.generateLabel)
-      .collect { case true =>
-        val name = variable.getVarName
-        Var.alloc(name + "Label")
+      .collect {
+        case true =>
+          val name = variable.getVarName
+          Var.alloc(name + "Label")
       }
 
     val optWikipediaTitleVariable = Option(env.generateWikipediaTitle)
-      .collect { case true =>
-        wikipediaTitleVariable
+      .collect {
+        case true =>
+          wikipediaTitleVariable
       }
 
     List(optLabelVariable, optWikipediaTitleVariable).flatten
@@ -201,21 +214,23 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     // also see additionalResultVariables
 
     val optLabelServiceOp = Option(env.generateLabel)
-      .collect { case true =>
-        (labelServiceOp, OpJoin.create _)
+      .collect {
+        case true =>
+          (labelServiceOp, OpJoin.create _)
       }
 
-    val optWikipediaTitleOp = Option((env.generateWikipediaTitle, env.wikipediaTitleIsOptional))
-      .collect { case (true, optional) =>
-        (
-          wikipediaTitleOp(variable),
-          if (optional)
-            (op1: Op, op2: Op) =>
-              OpLeftJoin.create(op1, op2, null.asInstanceOf[Expr])
-          else
-            OpJoin.create _
-        )
-      }
+    val optWikipediaTitleOp =
+      Option((env.generateWikipediaTitle, env.wikipediaTitleIsOptional))
+        .collect {
+          case (true, optional) =>
+            (
+              wikipediaTitleOp(variable),
+              if (optional)(op1: Op, op2: Op) =>
+                OpLeftJoin.create(op1, op2, null.asInstanceOf[Expr])
+              else
+                OpJoin.create _
+            )
+        }
 
     Seq(optLabelServiceOp, optWikipediaTitleOp).flatten.foldLeft(op) {
       case (result, (other, f)) =>
@@ -223,9 +238,9 @@ class WikidataSparqlBackend extends SparqlBackend[NodeLabel, EdgeLabel, Wikidata
     }
   }
 
-  override def expandNode(node: Node, context: NodeCompilationContext,
-                          env: WikidataEnvironment): Node =
-  {
+  override def expandNode(node: Node,
+                          context: NodeCompilationContext,
+                          env: WikidataEnvironment): Node = {
     (context, node.label) match {
       case (TripleNodeCompilationContext, label: TemporalLabel) =>
         // temporal only allowed in filter, introduce intermediate node

@@ -44,4 +44,3 @@ package object P {
   val hasElevation = Property(2044, "has elevation above sea level")
   val hasArea = Property(2046, "has area")
 }
-

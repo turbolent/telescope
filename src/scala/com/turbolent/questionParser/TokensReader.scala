@@ -2,8 +2,7 @@ package com.turbolent.questionParser
 
 import scala.util.parsing.input.Reader
 
-class TokensReader(val elements: Seq[Token], val index: Int)
-    extends Reader[Token] {
+class TokensReader(val elements: Seq[Token], val index: Int) extends Reader[Token] {
 
   def this(elements: Seq[Token]) =
     this(elements, 0)

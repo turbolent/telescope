@@ -1,28 +1,39 @@
 package com.turbolent.wikidataOntology
 
-import com.turbolent.questionCompiler.graph.{GreaterThanFilter, LessThanFilter, Node}
+import com.turbolent.questionCompiler.graph.{
+  GreaterThanFilter,
+  LessThanFilter,
+  Node
+}
 import org.scalatest.FunSuite
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class SPARQLSuite extends FunSuite with Utilities {
 
   test("discoverers of Pluto and Nix") {
     val env = newEnvironment()
 
-    val pluto = env.newNode()
-        .out(NameLabel, "Pluto")
+    val pluto = env
+      .newNode()
+      .out(NameLabel, "Pluto")
 
-    val nix = env.newNode()
-        .out(NameLabel, "Nix")
+    val nix = env
+      .newNode()
+      .out(NameLabel, "Nix")
 
-    val root = env.newNode()
-        .out(P.isA, Q.human)
-        .and(in(pluto, P.hasDiscovererOrInventor)
-             or in(nix, P.hasDiscovererOrInventor))
+    val root = env
+      .newNode()
+      .out(P.isA, Q.human)
+      .and(in(pluto, P.hasDiscovererOrInventor)
+        .or(in(nix, P.hasDiscovererOrInventor)))
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("3",
+    val expectedQuery = parseSparqlQuery(
+      "3",
       """
         |{ ?3 p:P31/(v:P31/(wdt:P279)*) wd:Q5
         |    { ?1  wdt:P61     ?3 ;
@@ -34,25 +45,28 @@ class SPARQLSuite extends FunSuite with Utilities {
         |    }
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }
 
-
   test("cast members of Alien") {
     val env = newEnvironment()
-    val person = env.newNode()
-        .out(P.isA, Q.human)
+    val person = env
+      .newNode()
+      .out(P.isA, Q.human)
 
-    val movie = env.newNode()
-        .out(NameLabel, "Alien")
+    val movie = env
+      .newNode()
+      .out(NameLabel, "Alien")
 
     val root = person.in(movie, P.hasCastMember)
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("1",
+    val expectedQuery = parseSparqlQuery(
+      "1",
       """
         |{ ?1 p:P31/(v:P31/(wdt:P279)*) wd:Q5
         |  { ?2  wdt:P161    ?1 ;
@@ -60,33 +74,35 @@ class SPARQLSuite extends FunSuite with Utilities {
         |  }
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }
-
 
   test("mountains higher than 1000 meters") {
     val env = newEnvironment()
     val elevation: WikidataNode = (1000.0, U.meter)
 
-    val root = env.newNode()
-        .out(P.isA, Q.mountain)
-        .out(P.hasElevation, elevation)
+    val root = env
+      .newNode()
+      .out(P.isA, Q.mountain)
+      .out(P.hasElevation, elevation)
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("1",
+    val expectedQuery = parseSparqlQuery(
+      "1",
       """
         |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q8502
         |  { ?1  wdt:P2044   "1000.0"^^<http://www.w3.org/2001/XMLSchema#integer> }
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }
-
 
   test("filters") {
     val env = newEnvironment()
@@ -94,19 +110,23 @@ class SPARQLSuite extends FunSuite with Utilities {
 
     val other = env.newNode()
 
-    val otherArea = env.newNode()
-        .filter(GreaterThanFilter(number))
-        .in(other, P.hasArea)
+    val otherArea = env
+      .newNode()
+      .filter(GreaterThanFilter(number))
+      .in(other, P.hasArea)
 
-    val area = env.newNode()
-        .filter(LessThanFilter(otherArea))
+    val area = env
+      .newNode()
+      .filter(LessThanFilter(otherArea))
 
-    val root = env.newNode()
-        .out(P.hasArea, area)
+    val root = env
+      .newNode()
+      .out(P.hasArea, area)
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("4",
+    val expectedQuery = parseSparqlQuery(
+      "4",
       """
         |{ ?4  wdt:P2046  ?3 .
         |  ?1  wdt:P2046  ?2
@@ -114,18 +134,19 @@ class SPARQLSuite extends FunSuite with Utilities {
         |  FILTER ( ?3 < ?2 )
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }
-
 
   test("uncompilable") {
     val env = newEnvironment()
     val number: WikidataNode = Node(NumberLabel(23))
 
-    val root = env.newNode()
-        .filter(LessThanFilter(number))
+    val root = env
+      .newNode()
+      .filter(LessThanFilter(number))
 
     try {
       val actualQuery = compileSparqlQuery(root, env)
@@ -135,26 +156,30 @@ class SPARQLSuite extends FunSuite with Utilities {
     }
   }
 
-
   test("cities larger than New York City") {
     val env = newEnvironment()
-    val city = env.newNode()
-        .out(P.isA, Q.city)
+    val city = env
+      .newNode()
+      .out(P.isA, Q.city)
 
-    val newYorkCity = env.newNode()
-        .out(NameLabel, "New York City")
+    val newYorkCity = env
+      .newNode()
+      .out(NameLabel, "New York City")
 
-    val otherArea = env.newNode()
-        .in(newYorkCity, P.hasArea)
+    val otherArea = env
+      .newNode()
+      .in(newYorkCity, P.hasArea)
 
-    val area = env.newNode()
-        .filter(GreaterThanFilter(otherArea))
+    val area = env
+      .newNode()
+      .filter(GreaterThanFilter(otherArea))
 
     val root = city.out(P.hasArea, area)
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("1",
+    val expectedQuery = parseSparqlQuery(
+      "1",
       """
         |{ ?1  p:P31/(v:P31/(wdt:P279)*)  wd:Q515
         |  { { ?1  wdt:P2046  ?4 .
@@ -165,11 +190,11 @@ class SPARQLSuite extends FunSuite with Utilities {
         |  }
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }
-
 
   test("multiple filters") {
     val env = newEnvironment()
@@ -177,23 +202,27 @@ class SPARQLSuite extends FunSuite with Utilities {
 
     val max: WikidataNode = Node(NumberLabel(42))
 
-    val area = env.newNode()
-        .filter(GreaterThanFilter(min)
-                and LessThanFilter(max))
+    val area = env
+      .newNode()
+      .filter(GreaterThanFilter(min)
+        .and(LessThanFilter(max)))
 
-    val root = env.newNode()
-        .out(P.hasArea, area)
+    val root = env
+      .newNode()
+      .out(P.hasArea, area)
 
     val actualQuery = compileSparqlQuery(root, env)
 
-    val expectedQuery = parseSparqlQuery("2",
+    val expectedQuery = parseSparqlQuery(
+      "2",
       """
         |{ ?2  wdt:P2046  ?1 .
         |  FILTER ( ?1 > "23.0"^^xsd:double )
         |  FILTER ( ?1 < "42.0"^^xsd:double )
         |}
       """.stripMargin,
-      None)
+      None
+    )
 
     assertEquivalent(expectedQuery, actualQuery)
   }

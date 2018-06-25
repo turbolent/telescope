@@ -7,6 +7,7 @@ case class Node[N, E](label: N,
                       filter: Option[Filter[N, E]] = None,
                       aggregates: Seq[AggregateFunction] = Nil,
                       order: Option[Order] = None) {
+
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
   type Filter = graph.Filter[N, E]

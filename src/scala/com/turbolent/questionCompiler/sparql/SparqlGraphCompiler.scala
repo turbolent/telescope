@@ -20,8 +20,8 @@ case object Forward extends EdgeDirection
 case object Backward extends EdgeDirection
 
 class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
-    backend: SparqlBackend[N, E, Env],
-    env: Env) {
+  backend: SparqlBackend[N, E, Env],
+  env: Env) {
 
   type Node = graph.Node[N, E]
   type Edge = graph.Edge[E, N]
@@ -32,9 +32,9 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
   type OpResult = (Op, Seq[SortCondition])
 
   def compileNodeJoining(
-      node: Node,
-      opResult: OpResult,
-      context: NodeCompilationContext): (JenaNode, (Op, Seq[SortCondition])) = {
+    node: Node,
+    opResult: OpResult,
+    context: NodeCompilationContext): (JenaNode, (Op, Seq[SortCondition])) = {
 
     val (op, sortings) = opResult
     def join(opResult: OpResult): OpResult = {
@@ -55,8 +55,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
       compileNodeJoining(otherNode, opResult, FilterNodeCompilationContext)
 
     val leftExpr =
-      backend.prepareLeftFunctionExpression(new ExprVar(compiledNode),
-                                            otherNode)
+      backend.prepareLeftFunctionExpression(new ExprVar(compiledNode), otherNode)
 
     val rightExpr =
       if (compiledOtherNode.isVariable)
@@ -69,8 +68,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
     (filterOp, sortings)
   }
 
-  def compileFilter(node: JenaNode, opResult: OpResult)(
-      filter: Filter): OpResult = {
+  def compileFilter(node: JenaNode, opResult: OpResult)(filter: Filter): OpResult = {
     def compileComparison(otherNode: Node, exprFactory: Function2ExprFactory) =
       compileFunction2Filter(node, otherNode, opResult, exprFactory)
 
@@ -115,9 +113,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
     (compiledNode, (op, filterSortings ++ sorting))
   }
 
-  def compileEdges(edges: Set[Edge],
-                   node: JenaNode,
-                   merge: OpResultMerger): OpResult =
+  def compileEdges(edges: Set[Edge], node: JenaNode, merge: OpResultMerger): OpResult =
     edges
       .map(compileEdge(node))
       .reduce(merge)
@@ -163,9 +159,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
         val pattern = new BasicPattern()
         val patternOp = new OpBGP(pattern)
         val (compiledOtherNode, (op, sortings)) =
-          compileNodeJoining(otherNode,
-                             (patternOp, Seq()),
-                             TripleNodeCompilationContext)
+          compileNodeJoining(otherNode, (patternOp, Seq()), TripleNodeCompilationContext)
         val triple = direction match {
           case Forward =>
             new JenaTriple(compiledNode, property, compiledOtherNode)
@@ -180,9 +174,7 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
         // reference to op needed, so temp. initialize with null and fix up afterwards
         val pathOp = new OpPath(null)
         val (compiledOtherNode, (op, sortings)) =
-          compileNodeJoining(otherNode,
-                             (pathOp, Seq()),
-                             TripleNodeCompilationContext)
+          compileNodeJoining(otherNode, (pathOp, Seq()), TripleNodeCompilationContext)
         val triplePath = direction match {
           case Forward =>
             new TriplePath(compiledNode, path, compiledOtherNode)
@@ -206,16 +198,14 @@ class SparqlGraphCompiler[N, E, Env <: Environment[N, E]](
     List(new TransformMergeBGPs)
 
   def optimize(op: Op): Op =
-    transformations.foldLeft(op)((op, transform) =>
-      Transformer.transform(transform, op))
+    transformations.foldLeft(op)((op, transform) => Transformer.transform(transform, op))
 
   def compileQuery(node: Node): JenaQuery = {
     require(node.edge.isDefined, "root node needs to have edges")
 
     val (compiledNode, (op, sortings)) =
       compileNode(node, _.get, TripleNodeCompilationContext)
-    assert(compiledNode.isInstanceOf[Var],
-           "root node needs to be compiled to a variable")
+    assert(compiledNode.isInstanceOf[Var], "root node needs to be compiled to a variable")
 
     val variable = compiledNode.asInstanceOf[Var]
     val preparedOp = backend.prepareOp(op, variable, env)

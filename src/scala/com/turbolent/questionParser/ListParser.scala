@@ -138,8 +138,7 @@ object ListParser extends BaseParser {
             case None ~ preposition =>
               ast.FilterWithModifier(Seq(preposition), values)
             case Some(comparative) ~ preposition =>
-              ast.FilterWithComparativeModifier(Seq(comparative, preposition),
-                                                values)
+              ast.FilterWithComparativeModifier(Seq(comparative, preposition), values)
           }
           .getOrElse(ast.PlainFilter(values))
     }
@@ -166,8 +165,7 @@ object ListParser extends BaseParser {
       suffix => (verbs: List[Token], filter: ast.Filter) =>
         suffix match {
           case moreVerbs ~ Some(particle) =>
-            ast.InversePropertyWithFilter(verbs ++ moreVerbs :+ particle,
-                                          filter)
+            ast.InversePropertyWithFilter(verbs ++ moreVerbs :+ particle, filter)
           case moreVerbs ~ None =>
             ast.InversePropertyWithFilter(verbs ++ moreVerbs, filter)
         }
@@ -175,9 +173,8 @@ object ListParser extends BaseParser {
 
   lazy val PropertyAdjectiveSuffix
     : PackratParser[(List[Token], Filter) => AdjectivePropertyWithFilter] =
-    StrictAdjective ^^ {
-      adjective => (verbs: List[Token], filter: ast.Filter) =>
-        ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
+    StrictAdjective ^^ { adjective => (verbs: List[Token], filter: ast.Filter) =>
+      ast.AdjectivePropertyWithFilter(verbs :+ adjective, filter)
     }
 
   val auxiliaryVerbLemmas =
@@ -220,10 +217,7 @@ object ListParser extends BaseParser {
   //            valid when starting with "which books")
 
   lazy val Properties: PackratParser[Property] =
-    commaOrAndList(Property,
-                   ast.AndProperty,
-                   ast.OrProperty,
-                   andOptional = true)
+    commaOrAndList(Property, ast.AndProperty, ast.OrProperty, andOptional = true)
 
   // Examples:
   //   - "of the USA"
@@ -324,8 +318,7 @@ object ListParser extends BaseParser {
   // NOTE: ||| to match as much as possible
 
   lazy val ListQuestionStart: PackratParser[Unit] =
-    ignore(opt(
-      whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny))))
+    ignore(opt(whichWhat ||| ignore((whoWhatBe ||| findListGiveShow) ~ opt(someAllAny))))
 
   // Examples:
   //   - "which presidents were born before 1900"

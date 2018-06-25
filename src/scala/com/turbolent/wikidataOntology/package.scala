@@ -7,7 +7,6 @@ import java.time.temporal.Temporal
 import com.turbolent.questionCompiler.EdgeContext
 import com.turbolent.questionCompiler.graph._
 
-
 object `package` {
 
   type WikidataNode = Node[NodeLabel, EdgeLabel]
@@ -42,7 +41,9 @@ object `package` {
 
   type NodeFactory = (WikidataNode, WikidataEnvironment) => WikidataNode
   type EdgeFactory = (WikidataNode, WikidataEnvironment) => WikidataEdge
-  type ContextfulEdgeFactory = (WikidataNode, EdgeContext, WikidataEnvironment) => WikidataEdge
+
+  type ContextfulEdgeFactory =
+    (WikidataNode, EdgeContext, WikidataEnvironment) => WikidataEdge
 
   implicit def asNodeFactory(item: Item): NodeFactory =
     (node, _) => node.out(P.isA, item)

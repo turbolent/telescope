@@ -1,6 +1,5 @@
 package com.turbolent.wikidataOntology
 
-
 trait EdgeLabel
 
 case class PropertyLabel(property: Property) extends EdgeLabel {

@@ -4,7 +4,7 @@ import com.turbolent.questionCompiler.{NamedSubject, EdgeContext}
 import com.turbolent.questionParser.{ListParser, Token}
 import Tokens._
 import scala.collection.mutable
-
+import com.turbolent.questionCompiler
 
 object InversePropertyEdgeFactory {
 
@@ -22,43 +22,51 @@ object InversePropertyEdgeFactory {
               mkLemmaString(stripInitialAuxiliaryVerb(subject))
             lemmatizedSubject match {
               case "country" =>
-                val place = env.newNode()
-                    .in(node, P.hasPlaceOfBirth)
+                val place = env
+                  .newNode()
+                  .in(node, P.hasPlaceOfBirth)
                 in(place, P.country)
               case "year" =>
-                val date = env.newNode()
-                    .in(node, P.hasDateOfBirth)
+                val date = env
+                  .newNode()
+                  .in(node, P.hasDateOfBirth)
                 in(date, YearLabel)
             }
           case _ => ???
         }
       },
       "attend" -> contextfulReverse(P.wasEducatedAt),
-      "study" -> contextfulReverse(P.wasEducatedAt))
+      "study" -> contextfulReverse(P.wasEducatedAt)
+    )
 
   def stripInitialAuxiliaryVerb(name: Seq[Token]): Seq[Token] =
     name match {
-      case initial :: rest
-        if ListParser.isAuxiliaryVerb(initial) => rest
-      case _ => name
+      case initial :: rest if ListParser.isAuxiliaryVerb(initial) => rest
+      case _                                                      => name
     }
 
 }
 
-trait InversePropertyEdgeFactory {
+trait InversePropertyEdgeFactory
+    extends questionCompiler.InversePropertyEdgeFactory[NodeLabel,
+                                                        EdgeLabel,
+                                                        WikidataEnvironment] {
 
-  def makeInversePropertyEdge(name: Seq[Token], node: WikidataNode, context: EdgeContext,
-                              env: WikidataEnvironment): WikidataEdge =
-  {
+  def makeInversePropertyEdge(name: Seq[Token],
+                              node: WikidataNode,
+                              context: EdgeContext,
+                              env: WikidataEnvironment): WikidataEdge = {
     import InversePropertyEdgeFactory._
 
     val lemmatized = mkLemmaString(stripInitialAuxiliaryVerb(name))
-    factories.get(lemmatized) map {
-      _(node, context, env)
-    } getOrElse {
-      throw new RuntimeException(s"No inverse property edge factory for '$lemmatized' " +
-                                 s"(${name.mkString(", ")}), context: $context")
-    }
+    factories
+      .get(lemmatized)
+      .map(_(node, context, env))
+      .getOrElse {
+        throw new RuntimeException(
+          s"No inverse property edge factory for '$lemmatized' " +
+            s"(${name.mkString(", ")}), context: $context")
+      }
   }
 
 }
